@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// Content discovered by the bot - pending approval
+model search_results {
+  id                      Int       @id @default(autoincrement())
+  title                   String    @db.VarChar(500)
+  url                     String    @unique(map: "ix_search_results_url")
+  snippet                 String?
+  position                Int?
+  date                    String?   @db.VarChar(50)
+  search_query            String?   @db.VarChar(200)
+  title_embedding         Json?     @db.Json
+  raw_data                Json?     @db.Json
+  created_at              DateTime  @default(now()) @db.Timestamp(6)
+  updated_at              DateTime  @default(now()) @db.Timestamp(6)
+  
+  // Content extraction
+  html_content            String?
+  content_extraction_date DateTime? @db.Timestamp(6)
+  content_processed       Boolean?  @default(false)
+  
+  // AI-generated content
+  ai_caption              String?
+  ai_hashtags             Json?     @db.Json
+  ai_summary              String?
+  main_image_url          String?
+  additional_images       Json?     @db.Json
+  
+  // Approval workflow
+  approval_status         String?   @default("pending") @db.VarChar(50) // pending, approved, rejected
+  approved_at             DateTime? @db.Timestamp(6)
+  approved_by             String?   @db.VarChar(100)
+  rejection_reason        String?
+  is_edited               Boolean?  @default(false)
+  
+  // Late.dev integration
+  late_post_id            String?   @unique @db.VarChar(100) // Late.dev post ID after scheduling
+  late_status             String?   @db.VarChar(50) // draft, scheduled, published, failed
+  late_scheduled_for      DateTime? @db.Timestamp(6) // When scheduled via Late.dev
+  late_published_at       DateTime? @db.Timestamp(6) // When published via Late.dev
+  late_platforms          Json?     @db.Json // Array of platforms scheduled on Late.dev
+  late_error_message      String?
+  
+  // Legacy fields (deprecated - use Late.dev instead)
+  posted_on_instagram     Boolean   @default(false)
+  posted_on_facebook      Boolean   @default(false)
+  instagram_posted_at     DateTime? @db.Timestamp(6)
+  facebook_posted_at      DateTime? @db.Timestamp(6)
+
+  @@index([created_at], map: "idx_created_at")
+  @@index([search_query], map: "ix_search_results_search_query")
+  @@index([title], map: "ix_search_results_title")
+  @@index([approval_status], map: "idx_approval_status")
+  @@index([late_post_id], map: "idx_late_post_id")
+  @@index([late_status], map: "idx_late_status")
+  @@index([late_scheduled_for], map: "idx_late_scheduled_for")
+}
+
+// Late.dev profile and account configuration
+model late_config {
+  id                Int      @id @default(autoincrement())
+  profile_id        String   @unique @db.VarChar(100) // Late.dev profile ID
+  profile_name      String   @db.VarChar(200)
+  
+  // Connected accounts
+  instagram_account_id String? @db.VarChar(100)
+  facebook_account_id  String? @db.VarChar(100)
+  
+  // Queue configuration
+  queue_enabled     Boolean  @default(false)
+  queue_timezone    String?  @db.VarChar(50)
+  queue_slots       Json?    @db.Json // Array of {dayOfWeek, time}
+  
+  created_at        DateTime @default(now()) @db.Timestamp(6)
+  updated_at        DateTime @default(now()) @db.Timestamp(6)
+  
+  @@index([profile_id], map: "idx_profile_id")
+}

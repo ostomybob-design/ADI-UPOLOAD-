@@ -1,0 +1,266 @@
+"use client";
+
+import {
+  ColumnDef,
+  SortingState,
+  ColumnOrderState,
+  ColumnSizingState,
+  flexRender,
+  getCoreRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import { GripVertical } from "lucide-react";
+
+interface DataTableProps<TData, TValue> {
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
+  onRowSelectionChange?: (selectedRows: Record<string, boolean>) => void;
+}
+
+export function DataTable<TData, TValue>({
+  columns,
+  data,
+  onRowSelectionChange,
+}: DataTableProps<TData, TValue>) {
+  const STORAGE_KEY_ORDER = 'dataTable_columnOrder';
+  const STORAGE_KEY_SIZING = 'dataTable_columnSizing';
+
+  // Load saved state from localStorage
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [rowSelection, setRowSelection] = useState({});
+  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEY_ORDER);
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          return [];
+        }
+      }
+    }
+    return [];
+  });
+  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEY_SIZING);
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          return {};
+        }
+      }
+    }
+    return {};
+  });
+
+  // Save to localStorage whenever column order or sizing changes
+  useEffect(() => {
+    if (typeof window !== 'undefined' && columnOrder.length > 0) {
+      localStorage.setItem(STORAGE_KEY_ORDER, JSON.stringify(columnOrder));
+    }
+  }, [columnOrder]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && Object.keys(columnSizing).length > 0) {
+      localStorage.setItem(STORAGE_KEY_SIZING, JSON.stringify(columnSizing));
+    }
+  }, [columnSizing]);
+
+  const table = useReactTable({
+    data,
+    columns,
+    state: {
+      sorting,
+      columnOrder,
+      columnSizing,
+      rowSelection,
+    },
+    onSortingChange: setSorting,
+    onColumnOrderChange: setColumnOrder,
+    onColumnSizingChange: setColumnSizing,
+    onRowSelectionChange: setRowSelection,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    columnResizeMode: "onChange",
+    enableColumnResizing: true,
+    enableRowSelection: true,
+  });
+
+  // Notify parent of selection changes
+  useEffect(() => {
+    if (onRowSelectionChange) {
+      onRowSelectionChange(rowSelection);
+    }
+  }, [rowSelection, onRowSelectionChange]);
+
+  const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
+
+  const handleDragStart = (columnId: string) => {
+    setDraggedColumn(columnId);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (targetColumnId: string) => {
+    if (!draggedColumn || draggedColumn === targetColumnId) {
+      setDraggedColumn(null);
+      return;
+    }
+
+    const currentOrder = table.getState().columnOrder;
+    const allColumns = table.getAllLeafColumns().map(col => col.id);
+    const orderToUse = currentOrder.length > 0 ? currentOrder : allColumns;
+
+    const draggedIndex = orderToUse.indexOf(draggedColumn);
+    const targetIndex = orderToUse.indexOf(targetColumnId);
+
+    const newOrder = [...orderToUse];
+    newOrder.splice(draggedIndex, 1);
+    newOrder.splice(targetIndex, 0, draggedColumn);
+
+    setColumnOrder(newOrder);
+    setDraggedColumn(null);
+  };
+
+  return (
+    <div>
+      <div className="rounded-md border overflow-x-auto">
+        <Table style={{ width: table.getTotalSize() }}>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead
+                      key={header.id}
+                      style={{
+                        width: header.getSize(),
+                        position: 'relative',
+                      }}
+                      draggable={!header.isPlaceholder}
+                      onDragStart={() => handleDragStart(header.id)}
+                      onDragOver={handleDragOver}
+                      onDrop={() => handleDrop(header.id)}
+                      className="cursor-move select-none"
+                    >
+                      <div className="flex items-center gap-2">
+                        {!header.isPlaceholder && (
+                          <GripVertical className="h-4 w-4 text-gray-400" />
+                        )}
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                      </div>
+                      {/* Resize handle */}
+                      {header.column.getCanResize() && (
+                        <div
+                          onMouseDown={header.getResizeHandler()}
+                          onTouchStart={header.getResizeHandler()}
+                          className={`absolute right-0 top-0 h-full w-1 cursor-col-resize select-none touch-none bg-gray-300 opacity-0 hover:opacity-100 ${header.column.getIsResizing() ? 'opacity-100 bg-blue-500' : ''
+                            }`}
+                          style={{
+                            transform: header.column.getIsResizing()
+                              ? `translateX(${table.getState().columnSizingInfo.deltaOffset}px)`
+                              : '',
+                          }}
+                        />
+                      )}
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell
+                      key={cell.id}
+                      style={{
+                        width: cell.column.getSize(),
+                      }}
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 py-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            setColumnOrder([]);
+            setColumnSizing({});
+            localStorage.removeItem(STORAGE_KEY_ORDER);
+            localStorage.removeItem(STORAGE_KEY_SIZING);
+          }}
+          className="border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900 text-xs sm:text-sm w-full sm:w-auto"
+        >
+          Reset Columns
+        </Button>
+        <div className="flex items-center space-x-2 w-full sm:w-auto justify-center">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            className="border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900 disabled:bg-gray-50 disabled:text-gray-400 text-xs sm:text-sm flex-1 sm:flex-none"
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            className="border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900 disabled:bg-gray-50 disabled:text-gray-400 text-xs sm:text-sm flex-1 sm:flex-none"
+          >
+            Next
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
