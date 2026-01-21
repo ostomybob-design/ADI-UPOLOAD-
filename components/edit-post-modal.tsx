@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+console.log('🔵 EditPostModal v2.0 - Module Loaded');
 import { ResizableDialog as Dialog, ResizableDialogContent as DialogContent, ResizableDialogDescription as DialogDescription, ResizableDialogHeader as DialogHeader, ResizableDialogTitle as DialogTitle } from "@/components/ui/resizable-dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
