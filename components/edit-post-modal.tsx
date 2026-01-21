@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { ResizableDialog as Dialog, ResizableDialogContent as DialogContent, ResizableDialogDescription as DialogDescription, ResizableDialogHeader as DialogHeader, ResizableDialogTitle as DialogTitle } from "@/components/ui/resizable-dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -144,7 +144,7 @@ export function EditPostModal({ post, open, onOpenChange, onEditComplete }: Edit
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent defaultWidth={800} minWidth={600} minHeight={400}>
         <DialogHeader>
           <DialogTitle>Edit Post</DialogTitle>
           <DialogDescription>
