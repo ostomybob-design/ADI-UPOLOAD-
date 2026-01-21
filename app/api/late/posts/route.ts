@@ -9,11 +9,14 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     
+    console.log("📤 Creating Late.dev post with data:", JSON.stringify(body, null, 2));
+    
     const result = await lateAPI.createPost(body);
     
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
-    console.error("Error creating post via Late API:", error);
+    console.error("❌ Error creating post via Late API:", error);
+    console.error("❌ Error details:", (error as Error).message);
     return NextResponse.json(
       { 
         message: "Failed to create post via Late API", 
