@@ -119,67 +119,67 @@ const ResizableDialogContent = React.forwardRef<
         }}
         {...props}
       >
+        <div className="p-6 overflow-y-auto h-full relative" style={{ zIndex: 1 }}>
+          {children}
+        </div>
+
         {/* Resize handles - highly visible and easy to grab */}
         {/* Top */}
         <div
-          className="absolute top-0 left-0 right-0 h-2 cursor-n-resize bg-blue-500/20 hover:bg-blue-500/70 active:bg-blue-500 transition-colors"
-          style={{ zIndex: 100 }}
+          className="absolute top-0 left-0 right-0 h-1 cursor-n-resize bg-red-500 hover:bg-red-600 active:bg-red-700 transition-colors"
+          style={{ zIndex: 9999, pointerEvents: 'auto' }}
           onMouseDown={(e) => handleMouseDown(e, "n")}
           title="Drag to resize vertically"
         />
         {/* Right */}
         <div
-          className="absolute top-0 right-0 bottom-0 w-2 cursor-e-resize bg-blue-500/20 hover:bg-blue-500/70 active:bg-blue-500 transition-colors"
-          style={{ zIndex: 100 }}
+          className="absolute top-0 right-0 bottom-0 w-1 cursor-e-resize bg-red-500 hover:bg-red-600 active:bg-red-700 transition-colors"
+          style={{ zIndex: 9999, pointerEvents: 'auto' }}
           onMouseDown={(e) => handleMouseDown(e, "e")}
           title="Drag to resize horizontally"
         />
         {/* Bottom */}
         <div
-          className="absolute bottom-0 left-0 right-0 h-2 cursor-s-resize bg-blue-500/20 hover:bg-blue-500/70 active:bg-blue-500 transition-colors"
-          style={{ zIndex: 100 }}
+          className="absolute bottom-0 left-0 right-0 h-1 cursor-s-resize bg-red-500 hover:bg-red-600 active:bg-red-700 transition-colors"
+          style={{ zIndex: 9999, pointerEvents: 'auto' }}
           onMouseDown={(e) => handleMouseDown(e, "s")}
           title="Drag to resize vertically"
         />
         {/* Left */}
         <div
-          className="absolute top-0 left-0 bottom-0 w-2 cursor-w-resize bg-blue-500/20 hover:bg-blue-500/70 active:bg-blue-500 transition-colors"
-          style={{ zIndex: 100 }}
+          className="absolute top-0 left-0 bottom-0 w-1 cursor-w-resize bg-red-500 hover:bg-red-600 active:bg-red-700 transition-colors"
+          style={{ zIndex: 9999, pointerEvents: 'auto' }}
           onMouseDown={(e) => handleMouseDown(e, "w")}
           title="Drag to resize horizontally"
         />
         {/* Top-left corner */}
         <div
-          className="absolute top-0 left-0 w-6 h-6 cursor-nw-resize bg-blue-500/20 hover:bg-blue-500/70 active:bg-blue-500 transition-colors rounded-tl-lg"
-          style={{ zIndex: 101 }}
+          className="absolute top-0 left-0 w-3 h-3 cursor-nw-resize bg-red-500 hover:bg-red-600 active:bg-red-700 transition-colors"
+          style={{ zIndex: 10000, pointerEvents: 'auto' }}
           onMouseDown={(e) => handleMouseDown(e, "nw")}
           title="Drag to resize diagonally"
         />
         {/* Top-right corner */}
         <div
-          className="absolute top-0 right-0 w-6 h-6 cursor-ne-resize bg-blue-500/20 hover:bg-blue-500/70 active:bg-blue-500 transition-colors rounded-tr-lg"
-          style={{ zIndex: 101 }}
+          className="absolute top-0 right-0 w-3 h-3 cursor-ne-resize bg-red-500 hover:bg-red-600 active:bg-red-700 transition-colors"
+          style={{ zIndex: 10000, pointerEvents: 'auto' }}
           onMouseDown={(e) => handleMouseDown(e, "ne")}
           title="Drag to resize diagonally"
         />
         {/* Bottom-left corner */}
         <div
-          className="absolute bottom-0 left-0 w-6 h-6 cursor-sw-resize bg-blue-500/20 hover:bg-blue-500/70 active:bg-blue-500 transition-colors rounded-bl-lg"
-          style={{ zIndex: 101 }}
+          className="absolute bottom-0 left-0 w-3 h-3 cursor-sw-resize bg-red-500 hover:bg-red-600 active:bg-red-700 transition-colors"
+          style={{ zIndex: 10000, pointerEvents: 'auto' }}
           onMouseDown={(e) => handleMouseDown(e, "sw")}
           title="Drag to resize diagonally"
         />
         {/* Bottom-right corner */}
         <div
-          className="absolute bottom-0 right-0 w-6 h-6 cursor-se-resize bg-blue-500/20 hover:bg-blue-500/70 active:bg-blue-500 transition-colors rounded-br-lg"
-          style={{ zIndex: 101 }}
+          className="absolute bottom-0 right-0 w-3 h-3 cursor-se-resize bg-red-500 hover:bg-red-600 active:bg-red-700 transition-colors"
+          style={{ zIndex: 10000, pointerEvents: 'auto' }}
           onMouseDown={(e) => handleMouseDown(e, "se")}
           title="Drag to resize diagonally"
         />
-
-        <div className="p-6 overflow-y-auto h-full">
-          {children}
-        </div>
         
         <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground" style={{ zIndex: 102 }}>
           <X className="h-4 w-4" />
