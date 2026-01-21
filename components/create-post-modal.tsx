@@ -1321,17 +1321,19 @@ export function CreatePostModal({
 
                 {/* Post Media */}
                 {imagePreview && (
-                  <div className="aspect-square bg-gray-100">
+                  <div className="w-full bg-gray-100 flex items-center justify-center" style={{ minHeight: '300px', maxHeight: '500px' }}>
                     {imageVideo?.type.startsWith('video/') ? (
                       <video
                         src={imagePreview}
-                        className="w-full h-full object-cover"
+                        className="w-full h-auto object-contain"
+                        style={{ maxHeight: '500px' }}
                       />
                     ) : (
                       <img
                         src={imagePreview}
                         alt="Post preview"
-                        className="w-full h-full object-cover"
+                        className="w-full h-auto object-contain"
+                        style={{ maxHeight: '500px' }}
                       />
                     )}
                   </div>
