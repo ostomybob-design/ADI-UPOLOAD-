@@ -270,6 +270,7 @@ export function CreatePostModal({
     return new Promise((resolve) => {
       const img = new Image();
       img.crossOrigin = "anonymous";
+      
       img.onload = () => {
         const canvas = document.createElement('canvas');
         canvas.width = img.width;
@@ -277,6 +278,7 @@ export function CreatePostModal({
         const ctx = canvas.getContext('2d');
         
         if (!ctx) {
+          console.warn("❌ Failed to get canvas context");
           resolve(imagePreview);
           return;
         }
@@ -305,11 +307,23 @@ export function CreatePostModal({
 
         // Convert canvas to data URL
         const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+        console.log("✅ Canvas created data URL, length:", dataUrl.length);
         resolve(dataUrl);
       };
       
-      img.onerror = () => resolve(imagePreview);
-      img.src = imagePreview;
+      img.onerror = (error) => {
+        console.error("❌ Image failed to load:", error);
+        resolve(imagePreview);
+      };
+      
+      // Use proxy for external URLs to avoid CORS issues
+      const isExternalUrl = imagePreview.startsWith('http://') || imagePreview.startsWith('https://');
+      if (isExternalUrl) {
+        console.log("🔄 Using proxy for external image:", imagePreview);
+        img.src = `/api/proxy-image?url=${encodeURIComponent(imagePreview)}`;
+      } else {
+        img.src = imagePreview;
+      }
     });
   };
 
