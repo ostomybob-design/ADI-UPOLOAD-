@@ -400,6 +400,13 @@ export function CreatePostModal({
   React.useEffect(() => {
     const fetchPost = async () => {
       if (open && postId) {
+        // Handle Late.dev-only posts (id: -1)
+        if (postId === -1) {
+          alert("This post exists only in Late.dev and cannot be edited from the dashboard. Please edit it directly in Late.dev.");
+          onOpenChange(false);
+          return;
+        }
+        
         try {
           console.log("📥 Fetching post data for ID:", postId);
           const response = await fetch(`/api/posts/${postId}`);
