@@ -13,6 +13,7 @@ export async function POST(req: Request) {
       postOnFacebook,
       latePostId,
       lateStatus,
+      rawData,
     } = await req.json();
 
     // imageVideo should be a Supabase storage URL (uploaded via /api/upload before calling this endpoint)
@@ -42,6 +43,7 @@ export async function POST(req: Request) {
       posted_on_instagram: postOnInstagram,
       posted_on_facebook: postOnFacebook,
       content_processed: true, // Assuming content is processed upon creation
+      raw_data: rawData || {},
     };
 
     // Add Late API tracking fields if provided

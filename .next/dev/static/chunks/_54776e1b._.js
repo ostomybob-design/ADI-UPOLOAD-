@@ -4249,6 +4249,10 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
     const [aiEditorOpen, setAiEditorOpen] = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"](false);
     const [latePostId, setLatePostId] = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"](null);
     const [lateScheduledFor, setLateScheduledFor] = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"](null);
+    // Resizable columns state
+    const [leftPanelWidth, setLeftPanelWidth] = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"](60); // percentage
+    const [isResizingColumns, setIsResizingColumns] = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"](false);
+    const containerRef = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"](null);
     // Fetch connected accounts and profiles on mount
     __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"]({
         "CreatePostModal.useEffect": ()=>{
@@ -4308,6 +4312,41 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
     }["CreatePostModal.useEffect"], [
         open
     ]);
+    // Column resize handlers
+    const handleColumnResizeStart = (e)=>{
+        e.preventDefault();
+        setIsResizingColumns(true);
+    };
+    __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"]({
+        "CreatePostModal.useEffect": ()=>{
+            if (!isResizingColumns) return;
+            const handleMouseMove = {
+                "CreatePostModal.useEffect.handleMouseMove": (e)=>{
+                    if (!containerRef.current) return;
+                    const containerRect = containerRef.current.getBoundingClientRect();
+                    const newLeftWidth = (e.clientX - containerRect.left) / containerRect.width * 100;
+                    // Constrain between 30% and 70%
+                    const constrainedWidth = Math.min(Math.max(newLeftWidth, 30), 70);
+                    setLeftPanelWidth(constrainedWidth);
+                }
+            }["CreatePostModal.useEffect.handleMouseMove"];
+            const handleMouseUp = {
+                "CreatePostModal.useEffect.handleMouseUp": ()=>{
+                    setIsResizingColumns(false);
+                }
+            }["CreatePostModal.useEffect.handleMouseUp"];
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+            return ({
+                "CreatePostModal.useEffect": ()=>{
+                    document.removeEventListener('mousemove', handleMouseMove);
+                    document.removeEventListener('mouseup', handleMouseUp);
+                }
+            })["CreatePostModal.useEffect"];
+        }
+    }["CreatePostModal.useEffect"], [
+        isResizingColumns
+    ]);
     const handleFileChange = (e)=>{
         const file = e.target.files?.[0];
         if (file) {
@@ -4335,7 +4374,8 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
         return text.match(/#[\w\u00C0-\u017F]+/g) || [];
     };
     const formatCaption = (text)=>{
-        return text.replace(/#([\w\u00C0-\u017F]+)/g, '<span class="text-blue-500 font-medium">#$1</span>');
+        // First, convert newlines to <br> tags, then format hashtags
+        return text.replace(/\n/g, '<br>').replace(/#([\w\u00C0-\u017F]+)/g, '<span class="text-blue-500 font-medium">#$1</span>');
     };
     const getCharacterCount = ()=>{
         return caption.length + hashtags.length;
@@ -4923,10 +4963,14 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                 minHeight: 500,
                 className: "p-0",
                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                    ref: containerRef,
                     className: "flex h-full overflow-hidden",
                     children: [
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "flex-1 flex flex-col overflow-hidden",
+                            className: "flex flex-col overflow-hidden",
+                            style: {
+                                width: `${leftPanelWidth}%`
+                            },
                             children: [
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                     className: "p-6 pb-0 flex-shrink-0",
@@ -4940,14 +4984,14 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                         className: "h-6 w-6 text-blue-500"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                        lineNumber: 856,
+                                                        lineNumber: 900,
                                                         columnNumber: 19
                                                     }, this),
                                                     postId ? "Edit Post" : "Create New Post"
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                lineNumber: 855,
+                                                lineNumber: 899,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$resizable$2d$dialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["ResizableDialogDescription"], {
@@ -4955,18 +4999,18 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                 children: postId ? "Update your post" : "Share your moment with the world"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                lineNumber: 859,
+                                                lineNumber: 903,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/create-post-modal.tsx",
-                                        lineNumber: 854,
+                                        lineNumber: 898,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/components/create-post-modal.tsx",
-                                    lineNumber: 853,
+                                    lineNumber: 897,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4984,14 +5028,14 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                 className: "h-4 w-4"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                lineNumber: 871,
+                                                                lineNumber: 915,
                                                                 columnNumber: 21
                                                             }, this),
                                                             "Media"
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                        lineNumber: 870,
+                                                        lineNumber: 914,
                                                         columnNumber: 19
                                                     }, this),
                                                     !imagePreview ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5005,7 +5049,7 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                 id: "media-upload"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                lineNumber: 877,
+                                                                lineNumber: 921,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -5016,7 +5060,7 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                         className: "h-12 w-12 text-gray-400 mx-auto mb-3 group-hover:text-blue-500 transition-colors"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                                        lineNumber: 885,
+                                                                        lineNumber: 929,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -5024,7 +5068,7 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                         children: "Click to upload media"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                                        lineNumber: 886,
+                                                                        lineNumber: 930,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -5032,19 +5076,19 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                         children: "PNG, JPG, MP4 up to 10MB"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                                        lineNumber: 887,
+                                                                        lineNumber: 931,
                                                                         columnNumber: 25
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                lineNumber: 884,
+                                                                lineNumber: 928,
                                                                 columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                        lineNumber: 876,
+                                                        lineNumber: 920,
                                                         columnNumber: 21
                                                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                         className: "space-y-3",
@@ -5059,12 +5103,12 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                             children: "Main Photo"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/components/create-post-modal.tsx",
-                                                                            lineNumber: 895,
+                                                                            lineNumber: 939,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                                        lineNumber: 894,
+                                                                        lineNumber: 938,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     imageVideo?.type.startsWith('video/') ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("video", {
@@ -5073,7 +5117,7 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                         controls: true
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                                        lineNumber: 898,
+                                                                        lineNumber: 942,
                                                                         columnNumber: 27
                                                                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("img", {
                                                                         src: (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$image$2d$proxy$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getProxiedImageUrl"])(imagePreview) || imagePreview,
@@ -5081,7 +5125,7 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                         className: "w-full h-48 object-cover"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                                        lineNumber: 904,
+                                                                        lineNumber: 948,
                                                                         columnNumber: 27
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -5093,18 +5137,18 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                             className: "h-4 w-4"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/components/create-post-modal.tsx",
-                                                                            lineNumber: 916,
+                                                                            lineNumber: 960,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                                        lineNumber: 910,
+                                                                        lineNumber: 954,
                                                                         columnNumber: 25
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                lineNumber: 893,
+                                                                lineNumber: 937,
                                                                 columnNumber: 23
                                                             }, this),
                                                             additionalImages.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5114,7 +5158,7 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                         children: "Additional Images (click to set as main)"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                                        lineNumber: 923,
+                                                                        lineNumber: 967,
                                                                         columnNumber: 27
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5125,30 +5169,30 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                                 onSetAsMain: setAsMainImage
                                                                             }, index, false, {
                                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                                lineNumber: 928,
+                                                                                lineNumber: 972,
                                                                                 columnNumber: 31
                                                                             }, this))
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                                        lineNumber: 926,
+                                                                        lineNumber: 970,
                                                                         columnNumber: 27
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                lineNumber: 922,
+                                                                lineNumber: 966,
                                                                 columnNumber: 25
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                        lineNumber: 891,
+                                                        lineNumber: 935,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                lineNumber: 869,
+                                                lineNumber: 913,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5164,14 +5208,14 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                         className: "h-4 w-4"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                                        lineNumber: 946,
+                                                                        lineNumber: 990,
                                                                         columnNumber: 23
                                                                     }, this),
                                                                     "Caption"
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                lineNumber: 945,
+                                                                lineNumber: 989,
                                                                 columnNumber: 21
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -5187,20 +5231,20 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                         className: "h-4 w-4 mr-2"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                                        lineNumber: 958,
+                                                                        lineNumber: 1002,
                                                                         columnNumber: 23
                                                                     }, this),
                                                                     "Edit with AI"
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                lineNumber: 949,
+                                                                lineNumber: 993,
                                                                 columnNumber: 21
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                        lineNumber: 944,
+                                                        lineNumber: 988,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$textarea$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Textarea"], {
@@ -5210,7 +5254,7 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                         className: "min-h-[120px] resize-none border-gray-300 focus:border-blue-500 rounded-xl"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                        lineNumber: 962,
+                                                        lineNumber: 1006,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5221,13 +5265,13 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                        lineNumber: 968,
+                                                        lineNumber: 1012,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                lineNumber: 943,
+                                                lineNumber: 987,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5240,14 +5284,14 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                 className: "h-4 w-4"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                lineNumber: 979,
+                                                                lineNumber: 1023,
                                                                 columnNumber: 21
                                                             }, this),
                                                             "Hashtags"
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                        lineNumber: 978,
+                                                        lineNumber: 1022,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -5257,7 +5301,7 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                         className: "border-gray-300 focus:border-blue-500 rounded-xl"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                        lineNumber: 982,
+                                                        lineNumber: 1026,
                                                         columnNumber: 19
                                                     }, this),
                                                     hashtags && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5268,18 +5312,18 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                 children: tag
                                                             }, index, false, {
                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                lineNumber: 991,
+                                                                lineNumber: 1035,
                                                                 columnNumber: 25
                                                             }, this))
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                        lineNumber: 989,
+                                                        lineNumber: 1033,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                lineNumber: 977,
+                                                lineNumber: 1021,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5299,7 +5343,7 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                 className: "w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                lineNumber: 1002,
+                                                                lineNumber: 1046,
                                                                 columnNumber: 21
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$label$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Label"], {
@@ -5310,20 +5354,20 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                         className: "h-4 w-4"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                                        lineNumber: 1013,
+                                                                        lineNumber: 1057,
                                                                         columnNumber: 23
                                                                     }, this),
                                                                     "Schedule for specific time"
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                lineNumber: 1012,
+                                                                lineNumber: 1056,
                                                                 columnNumber: 21
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                        lineNumber: 1001,
+                                                        lineNumber: 1045,
                                                         columnNumber: 19
                                                     }, this),
                                                     schedulePost && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5335,12 +5379,12 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                             className: "border-gray-300 focus:border-blue-500 rounded-xl"
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/create-post-modal.tsx",
-                                                            lineNumber: 1020,
+                                                            lineNumber: 1064,
                                                             columnNumber: 23
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                        lineNumber: 1019,
+                                                        lineNumber: 1063,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5357,7 +5401,7 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                 className: "w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                lineNumber: 1030,
+                                                                lineNumber: 1074,
                                                                 columnNumber: 21
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$label$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Label"], {
@@ -5368,20 +5412,20 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                         className: "h-4 w-4"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                                        lineNumber: 1041,
+                                                                        lineNumber: 1085,
                                                                         columnNumber: 23
                                                                     }, this),
                                                                     "Add to queue (auto-schedule)"
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                lineNumber: 1040,
+                                                                lineNumber: 1084,
                                                                 columnNumber: 21
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                        lineNumber: 1029,
+                                                        lineNumber: 1073,
                                                         columnNumber: 19
                                                     }, this),
                                                     addToQueue && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5391,18 +5435,18 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                             children: "Post will be automatically scheduled to the next available time slot in your queue."
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/create-post-modal.tsx",
-                                                            lineNumber: 1048,
+                                                            lineNumber: 1092,
                                                             columnNumber: 23
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                        lineNumber: 1047,
+                                                        lineNumber: 1091,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                lineNumber: 1000,
+                                                lineNumber: 1044,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5413,7 +5457,7 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                         children: "Publish to:"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                        lineNumber: 1057,
+                                                        lineNumber: 1101,
                                                         columnNumber: 19
                                                     }, this),
                                                     isLoadingAccounts ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5423,14 +5467,14 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                 className: "w-6 h-6 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin mx-auto mb-2"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                lineNumber: 1061,
+                                                                lineNumber: 1105,
                                                                 columnNumber: 23
                                                             }, this),
                                                             "Loading accounts..."
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                        lineNumber: 1060,
+                                                        lineNumber: 1104,
                                                         columnNumber: 21
                                                     }, this) : connectedAccounts.length === 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                         className: "p-4 bg-amber-50 border border-amber-200 rounded-xl",
@@ -5439,12 +5483,12 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                             children: "No social media accounts connected. Please connect your accounts in Late.dev first."
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/create-post-modal.tsx",
-                                                            lineNumber: 1066,
+                                                            lineNumber: 1110,
                                                             columnNumber: 23
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                        lineNumber: 1065,
+                                                        lineNumber: 1109,
                                                         columnNumber: 21
                                                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                         className: "space-y-3",
@@ -5463,14 +5507,14 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                                 className: "w-4 h-4 text-pink-600 rounded focus:ring-pink-500"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                                lineNumber: 1084,
+                                                                                lineNumber: 1128,
                                                                                 columnNumber: 29
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$instagram$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Instagram$3e$__["Instagram"], {
                                                                                 className: "h-5 w-5 text-pink-600"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                                lineNumber: 1090,
+                                                                                lineNumber: 1134,
                                                                                 columnNumber: 29
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -5478,13 +5522,13 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                                 children: "Instagram"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                                lineNumber: 1091,
+                                                                                lineNumber: 1135,
                                                                                 columnNumber: 29
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                                        lineNumber: 1075,
+                                                                        lineNumber: 1119,
                                                                         columnNumber: 27
                                                                     }, this),
                                                                     postOnInstagram && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
@@ -5497,7 +5541,7 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                                 children: "Select Instagram account"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                                lineNumber: 1100,
+                                                                                lineNumber: 1144,
                                                                                 columnNumber: 31
                                                                             }, this),
                                                                             connectedAccounts.filter((acc)=>acc.platform === "instagram").map((acc)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -5508,19 +5552,19 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                                     ]
                                                                                 }, acc.id || acc._id, true, {
                                                                                     fileName: "[project]/components/create-post-modal.tsx",
-                                                                                    lineNumber: 1104,
+                                                                                    lineNumber: 1148,
                                                                                     columnNumber: 35
                                                                                 }, this))
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                                        lineNumber: 1095,
+                                                                        lineNumber: 1139,
                                                                         columnNumber: 29
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                lineNumber: 1074,
+                                                                lineNumber: 1118,
                                                                 columnNumber: 25
                                                             }, this),
                                                             connectedAccounts.some((acc)=>acc.platform === "facebook") && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5537,14 +5581,14 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                                 className: "w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                                lineNumber: 1125,
+                                                                                lineNumber: 1169,
                                                                                 columnNumber: 29
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$facebook$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Facebook$3e$__["Facebook"], {
                                                                                 className: "h-5 w-5 text-blue-600"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                                lineNumber: 1131,
+                                                                                lineNumber: 1175,
                                                                                 columnNumber: 29
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -5552,13 +5596,13 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                                 children: "Facebook"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                                lineNumber: 1132,
+                                                                                lineNumber: 1176,
                                                                                 columnNumber: 29
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                                        lineNumber: 1116,
+                                                                        lineNumber: 1160,
                                                                         columnNumber: 27
                                                                     }, this),
                                                                     postOnFacebook && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
@@ -5571,7 +5615,7 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                                 children: "Select Facebook account"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                                lineNumber: 1141,
+                                                                                lineNumber: 1185,
                                                                                 columnNumber: 31
                                                                             }, this),
                                                                             connectedAccounts.filter((acc)=>acc.platform === "facebook").map((acc)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -5579,42 +5623,42 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                                     children: acc.username || acc.displayName || acc.id
                                                                                 }, acc.id || acc._id, false, {
                                                                                     fileName: "[project]/components/create-post-modal.tsx",
-                                                                                    lineNumber: 1145,
+                                                                                    lineNumber: 1189,
                                                                                     columnNumber: 35
                                                                                 }, this))
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                                        lineNumber: 1136,
+                                                                        lineNumber: 1180,
                                                                         columnNumber: 29
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                lineNumber: 1115,
+                                                                lineNumber: 1159,
                                                                 columnNumber: 25
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                        lineNumber: 1071,
+                                                        lineNumber: 1115,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                lineNumber: 1056,
+                                                lineNumber: 1100,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/create-post-modal.tsx",
-                                        lineNumber: 867,
+                                        lineNumber: 911,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/components/create-post-modal.tsx",
-                                    lineNumber: 866,
+                                    lineNumber: 910,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5627,12 +5671,12 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                 children: "Please select at least one platform to publish to."
                                             }, void 0, false, {
                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                lineNumber: 1164,
+                                                lineNumber: 1208,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/components/create-post-modal.tsx",
-                                            lineNumber: 1163,
+                                            lineNumber: 1207,
                                             columnNumber: 17
                                         }, this),
                                         postOnInstagram && !selectedInstagramAccount && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5642,12 +5686,12 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                 children: "Please select an Instagram account."
                                             }, void 0, false, {
                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                lineNumber: 1170,
+                                                lineNumber: 1214,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/components/create-post-modal.tsx",
-                                            lineNumber: 1169,
+                                            lineNumber: 1213,
                                             columnNumber: 17
                                         }, this),
                                         postOnFacebook && !selectedFacebookAccount && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5657,12 +5701,12 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                 children: "Please select a Facebook account."
                                             }, void 0, false, {
                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                lineNumber: 1176,
+                                                lineNumber: 1220,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/components/create-post-modal.tsx",
-                                            lineNumber: 1175,
+                                            lineNumber: 1219,
                                             columnNumber: 17
                                         }, this),
                                         isOverLimit() && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5672,12 +5716,12 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                 children: "Your post exceeds the character limit. Please shorten your content."
                                             }, void 0, false, {
                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                lineNumber: 1182,
+                                                lineNumber: 1226,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/components/create-post-modal.tsx",
-                                            lineNumber: 1181,
+                                            lineNumber: 1225,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$resizable$2d$dialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["ResizableDialogFooter"], {
@@ -5690,7 +5734,7 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                     children: "Cancel"
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/create-post-modal.tsx",
-                                                    lineNumber: 1188,
+                                                    lineNumber: 1232,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -5705,14 +5749,14 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                 className: "w-4 h-4 border-2 border-orange-600 border-t-transparent rounded-full animate-spin"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                lineNumber: 1203,
+                                                                lineNumber: 1247,
                                                                 columnNumber: 23
                                                             }, this),
                                                             "Saving..."
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                        lineNumber: 1202,
+                                                        lineNumber: 1246,
                                                         columnNumber: 21
                                                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
                                                         children: [
@@ -5720,7 +5764,7 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                 className: "h-4 w-4 mr-2"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                lineNumber: 1208,
+                                                                lineNumber: 1252,
                                                                 columnNumber: 23
                                                             }, this),
                                                             "Save as Draft"
@@ -5728,7 +5772,7 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                     }, void 0, true)
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/create-post-modal.tsx",
-                                                    lineNumber: 1195,
+                                                    lineNumber: 1239,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -5742,14 +5786,14 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                 className: "w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                lineNumber: 1227,
+                                                                lineNumber: 1271,
                                                                 columnNumber: 23
                                                             }, this),
                                                             postId ? "Updating..." : "Posting..."
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                        lineNumber: 1226,
+                                                        lineNumber: 1270,
                                                         columnNumber: 21
                                                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
                                                         children: [
@@ -5757,7 +5801,7 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                 className: "h-4 w-4 mr-2"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                lineNumber: 1232,
+                                                                lineNumber: 1276,
                                                                 columnNumber: 23
                                                             }, this),
                                                             postId ? "Update Post" : schedulePost ? "Schedule Post" : "Post Now"
@@ -5765,29 +5809,60 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                     }, void 0, true)
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/create-post-modal.tsx",
-                                                    lineNumber: 1213,
+                                                    lineNumber: 1257,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/components/create-post-modal.tsx",
-                                            lineNumber: 1187,
+                                            lineNumber: 1231,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/create-post-modal.tsx",
-                                    lineNumber: 1160,
+                                    lineNumber: 1204,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/create-post-modal.tsx",
-                            lineNumber: 852,
+                            lineNumber: 893,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "w-80 bg-gray-50 border-l overflow-y-auto hidden md:block",
+                            className: "relative w-1 bg-gray-200 hover:bg-blue-400 active:bg-blue-500 cursor-col-resize transition-colors hidden md:block group",
+                            onMouseDown: handleColumnResizeStart,
+                            style: {
+                                flexShrink: 0
+                            },
+                            children: [
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                    className: "absolute inset-y-0 -left-1 -right-1",
+                                    title: "Drag to resize columns"
+                                }, void 0, false, {
+                                    fileName: "[project]/components/create-post-modal.tsx",
+                                    lineNumber: 1291,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                    className: "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-12 bg-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                }, void 0, false, {
+                                    fileName: "[project]/components/create-post-modal.tsx",
+                                    lineNumber: 1293,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "[project]/components/create-post-modal.tsx",
+                            lineNumber: 1286,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "bg-gray-50 border-l overflow-y-auto hidden md:block",
+                            style: {
+                                width: `${100 - leftPanelWidth}%`
+                            },
                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "p-6",
                                 children: [
@@ -5798,7 +5873,7 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                 className: "h-5 w-5 text-gray-600"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                lineNumber: 1245,
+                                                lineNumber: 1303,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
@@ -5806,13 +5881,13 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                 children: "Preview"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                lineNumber: 1246,
+                                                lineNumber: 1304,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/create-post-modal.tsx",
-                                        lineNumber: 1244,
+                                        lineNumber: 1302,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5826,7 +5901,7 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                         children: "U"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                        lineNumber: 1253,
+                                                        lineNumber: 1311,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5836,7 +5911,7 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                 children: "Your Account"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                lineNumber: 1257,
+                                                                lineNumber: 1315,
                                                                 columnNumber: 21
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -5844,42 +5919,52 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                 children: schedulePost && scheduledDate ? `Scheduled for ${new Date(scheduledDate).toLocaleDateString()}` : "Just now"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                lineNumber: 1258,
+                                                                lineNumber: 1316,
                                                                 columnNumber: 21
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                        lineNumber: 1256,
+                                                        lineNumber: 1314,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                lineNumber: 1252,
+                                                lineNumber: 1310,
                                                 columnNumber: 17
                                             }, this),
                                             imagePreview && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                className: "aspect-square bg-gray-100",
+                                                className: "w-full bg-gray-100 flex items-center justify-center",
+                                                style: {
+                                                    minHeight: '300px',
+                                                    maxHeight: '500px'
+                                                },
                                                 children: imageVideo?.type.startsWith('video/') ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("video", {
                                                     src: imagePreview,
-                                                    className: "w-full h-full object-cover"
+                                                    className: "w-full h-auto object-contain",
+                                                    style: {
+                                                        maxHeight: '500px'
+                                                    }
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/create-post-modal.tsx",
-                                                    lineNumber: 1271,
+                                                    lineNumber: 1329,
                                                     columnNumber: 23
                                                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("img", {
                                                     src: imagePreview,
                                                     alt: "Post preview",
-                                                    className: "w-full h-full object-cover"
+                                                    className: "w-full h-auto object-contain",
+                                                    style: {
+                                                        maxHeight: '500px'
+                                                    }
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/create-post-modal.tsx",
-                                                    lineNumber: 1276,
+                                                    lineNumber: 1335,
                                                     columnNumber: 23
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                lineNumber: 1269,
+                                                lineNumber: 1327,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5892,7 +5977,7 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                         }
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                        lineNumber: 1288,
+                                                        lineNumber: 1348,
                                                         columnNumber: 21
                                                     }, this),
                                                     hashtags && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5902,12 +5987,12 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                 children: tag
                                                             }, index, false, {
                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                lineNumber: 1299,
+                                                                lineNumber: 1359,
                                                                 columnNumber: 25
                                                             }, this))
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                        lineNumber: 1297,
+                                                        lineNumber: 1357,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5921,14 +6006,14 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                         className: "h-3 w-3 mr-1"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                                        lineNumber: 1310,
+                                                                        lineNumber: 1370,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     "Instagram"
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                lineNumber: 1309,
+                                                                lineNumber: 1369,
                                                                 columnNumber: 23
                                                             }, this),
                                                             postOnFacebook && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Badge"], {
@@ -5939,32 +6024,32 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                                         className: "h-3 w-3 mr-1"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                                        lineNumber: 1316,
+                                                                        lineNumber: 1376,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     "Facebook"
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                                lineNumber: 1315,
+                                                                lineNumber: 1375,
                                                                 columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/components/create-post-modal.tsx",
-                                                        lineNumber: 1307,
+                                                        lineNumber: 1367,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                lineNumber: 1286,
+                                                lineNumber: 1346,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/create-post-modal.tsx",
-                                        lineNumber: 1250,
+                                        lineNumber: 1308,
                                         columnNumber: 15
                                     }, this),
                                     !caption && !imagePreview && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5974,7 +6059,7 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                 className: "h-12 w-12 mx-auto mb-3 opacity-50"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                lineNumber: 1327,
+                                                lineNumber: 1387,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -5982,35 +6067,35 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                                                 children: "Your post preview will appear here"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/create-post-modal.tsx",
-                                                lineNumber: 1328,
+                                                lineNumber: 1388,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/create-post-modal.tsx",
-                                        lineNumber: 1326,
+                                        lineNumber: 1386,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/create-post-modal.tsx",
-                                lineNumber: 1243,
+                                lineNumber: 1301,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/components/create-post-modal.tsx",
-                            lineNumber: 1242,
+                            lineNumber: 1297,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/components/create-post-modal.tsx",
-                    lineNumber: 850,
+                    lineNumber: 891,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/components/create-post-modal.tsx",
-                lineNumber: 843,
+                lineNumber: 884,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ai$2d$editor$2d$sheet$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AIEditorSheet"], {
@@ -6038,17 +6123,17 @@ function CreatePostModal({ open, onOpenChange, onPostCreated, draftId, postId })
                 isScheduled: !!lateScheduledFor && !latePostId?.includes('published')
             }, void 0, false, {
                 fileName: "[project]/components/create-post-modal.tsx",
-                lineNumber: 1336,
+                lineNumber: 1396,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/components/create-post-modal.tsx",
-        lineNumber: 842,
+        lineNumber: 883,
         columnNumber: 5
     }, this);
 }
-_s1(CreatePostModal, "3TbN6G8HaXdrSZDDXf6JnDQskDA=");
+_s1(CreatePostModal, "t50vC9p28VUlgG/I7ZC4+Q4VksQ=");
 _c1 = CreatePostModal;
 var _c, _c1;
 __turbopack_context__.k.register(_c, "AdditionalImageThumbnail");

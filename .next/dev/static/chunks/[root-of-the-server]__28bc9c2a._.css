@@ -731,6 +731,10 @@
     top: 50%;
   }
 
+  .-right-1 {
+    right: calc(var(--spacing) * -1);
+  }
+
   .right-0 {
     right: calc(var(--spacing) * 0);
   }
@@ -747,8 +751,16 @@
     bottom: calc(var(--spacing) * 0);
   }
 
+  .-left-1 {
+    left: calc(var(--spacing) * -1);
+  }
+
   .left-0 {
     left: calc(var(--spacing) * 0);
+  }
+
+  .left-1\/2 {
+    left: 50%;
   }
 
   .left-2 {
@@ -957,14 +969,6 @@
 
   .table {
     display: table;
-  }
-
-  .aspect-square {
-    aspect-ratio: 1;
-  }
-
-  .h-1 {
-    height: calc(var(--spacing) * 1);
   }
 
   .h-2 {
@@ -1179,10 +1183,6 @@
     width: calc(var(--spacing) * 32);
   }
 
-  .w-80 {
-    width: calc(var(--spacing) * 80);
-  }
-
   .w-\[1px\] {
     width: 1px;
   }
@@ -1261,6 +1261,11 @@
 
   .origin-\[--radix-dropdown-menu-content-transform-origin\] {
     transform-origin: --radix-dropdown-menu-content-transform-origin;
+  }
+
+  .-translate-x-1\/2 {
+    --tw-translate-x: calc(calc(1 / 2 * 100%) * -1);
+    translate: var(--tw-translate-x) var(--tw-translate-y);
   }
 
   .translate-x-\[-50\%\] {
@@ -1929,10 +1934,6 @@
     background-color: var(--color-red-100);
   }
 
-  .bg-red-500 {
-    background-color: var(--color-red-500);
-  }
-
   .bg-secondary {
     background-color: var(--secondary);
   }
@@ -2270,6 +2271,10 @@
 
   .fill-current {
     fill: currentColor;
+  }
+
+  .object-contain {
+    object-fit: contain;
   }
 
   .object-cover {
@@ -3032,6 +3037,12 @@
   }
 
   @media (hover: hover) {
+    .hover\:bg-blue-400:hover {
+      background-color: var(--color-blue-400);
+    }
+  }
+
+  @media (hover: hover) {
     .hover\:bg-blue-500\/20:hover {
       background-color: #3080ff33;
     }
@@ -3184,12 +3195,6 @@
   @media (hover: hover) {
     .hover\:bg-red-200:hover {
       background-color: var(--color-red-200);
-    }
-  }
-
-  @media (hover: hover) {
-    .hover\:bg-red-600:hover {
-      background-color: var(--color-red-600);
     }
   }
 
@@ -3586,8 +3591,8 @@
     outline-style: none;
   }
 
-  .active\:bg-red-700:active {
-    background-color: var(--color-red-700);
+  .active\:bg-blue-500:active {
+    background-color: var(--color-blue-500);
   }
 
   .disabled\:pointer-events-none:disabled {

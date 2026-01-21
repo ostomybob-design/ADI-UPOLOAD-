@@ -404,6 +404,17 @@ export function CreatePostModal({
           console.log('Setting additional images:', parsedAdditionalImages);
           setAdditionalImages(parsedAdditionalImages);
 
+          // Load text overlay settings from raw_data if present
+          if (post.raw_data && typeof post.raw_data === 'object') {
+            const rawData = post.raw_data as any;
+            if (rawData.textOverlay) {
+              setOverlayText(rawData.textOverlay.text || "");
+              setTextPosition(rawData.textOverlay.position || { x: 50, y: 50 });
+              setFontSize(rawData.textOverlay.fontSize || 32);
+              setTextColor(rawData.textOverlay.color || "#FFFFFF");
+            }
+          }
+
           // Handle scheduled dates
           if (post.instagram_posted_at || post.facebook_posted_at) {
             const date = post.instagram_posted_at || post.facebook_posted_at;
@@ -587,6 +598,17 @@ export function CreatePostModal({
           .filter(tag => tag.startsWith("#"))
           .map(tag => tag.replace("#", "").trim());
 
+        // Prepare raw_data with text overlay settings
+        const rawData: any = {};
+        if (overlayText) {
+          rawData.textOverlay = {
+            text: overlayText,
+            position: textPosition,
+            fontSize: fontSize,
+            color: textColor
+          };
+        }
+
         // Prepare updates object
         const updates: any = {
           ai_caption: caption,
@@ -595,6 +617,7 @@ export function CreatePostModal({
           additional_images: additionalImages,
           posted_on_instagram: postOnInstagram,
           posted_on_facebook: postOnFacebook,
+          raw_data: rawData,
         };
 
         // Handle Late.dev post updates
@@ -923,6 +946,18 @@ export function CreatePostModal({
       // Also save to local database for tracking
       try {
         console.log("💾 Saving post to database with image URL:", mediaUrl);
+        
+        // Prepare raw_data with text overlay settings
+        const rawData: any = {};
+        if (overlayText) {
+          rawData.textOverlay = {
+            text: overlayText,
+            position: textPosition,
+            fontSize: fontSize,
+            color: textColor
+          };
+        }
+        
         const dbResponse = await fetch("/api/posts", {
           method: "POST",
           headers: {
@@ -938,6 +973,7 @@ export function CreatePostModal({
             postOnFacebook,
             latePostId: result.id,
             lateStatus: result.status,
+            rawData: rawData,
           }),
         });
 
