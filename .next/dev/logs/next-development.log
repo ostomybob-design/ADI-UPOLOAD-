@@ -38,3 +38,5 @@ Import traces:
 [00:02:48.796] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
 [00:02:49.841] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
 [00:02:51.337] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
+[00:03:22.932] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
+[00:03:26.048] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
