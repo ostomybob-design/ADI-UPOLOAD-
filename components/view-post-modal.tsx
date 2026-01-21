@@ -19,6 +19,10 @@ interface ViewPostModalProps {
 export function ViewPostModal({ open, onOpenChange, post }: ViewPostModalProps) {
   if (!post) return null;
 
+  // Extract text overlay settings from raw_data
+  const rawData = (post as any).raw_data;
+  const textOverlay = rawData && typeof rawData === 'object' ? rawData.textOverlay : null;
+
   const formatHashtags = (hashtags: string | string[] | null) => {
     if (!hashtags) return "";
 
@@ -96,6 +100,24 @@ export function ViewPostModal({ open, onOpenChange, post }: ViewPostModalProps) 
                     target.style.display = 'none';
                   }}
                 />
+                {/* Text Overlay Preview (if saved) */}
+                {textOverlay && textOverlay.text && (
+                  <div
+                    className="absolute select-none pointer-events-none"
+                    style={{
+                      left: `${textOverlay.position?.x || 50}%`,
+                      top: `${textOverlay.position?.y || 50}%`,
+                      transform: 'translate(-50%, -50%)',
+                      fontSize: `${textOverlay.fontSize || 32}px`,
+                      color: textOverlay.color || '#FFFFFF',
+                      fontWeight: 'bold',
+                      textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
+                      zIndex: 20,
+                    }}
+                  >
+                    {textOverlay.text}
+                  </div>
+                )}
               </div>
 
               {/* Additional Images */}

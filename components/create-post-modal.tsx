@@ -598,9 +598,14 @@ export function CreatePostModal({
             setIsLoading(false);
             return;
           }
-        } else if (imagePreview) {
-          // If imagePreview exists but is not a data URL, it's an existing URL
-          mediaUrl = imagePreview;
+        } else if (finalImagePreview) {
+          // If we have finalImagePreview but didn't upload (e.g., existing URL or text overlay already applied)
+          // Use finalImagePreview if it's a valid URL, otherwise use imagePreview
+          if (finalImagePreview.startsWith('http://') || finalImagePreview.startsWith('https://')) {
+            mediaUrl = finalImagePreview;
+          } else {
+            mediaUrl = imagePreview;
+          }
         }
 
         // Convert hashtags string to array
