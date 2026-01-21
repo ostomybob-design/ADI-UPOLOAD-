@@ -36,7 +36,8 @@ interface ResizableDialogContentProps
 const ResizableDialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   ResizableDialogContentProps
-)(({ className, children, minWidth = 400, minHeight = 300, defaultWidth = 672, defaultHeight, ...props }, ref) => {
+>((props, ref) => {
+  const { className, children, minWidth = 400, minHeight = 300, defaultWidth = 672, defaultHeight, ...otherProps } = props
   const contentRef = React.useRef<HTMLDivElement>(null)
   
   // Constrain initial size to viewport
@@ -125,7 +126,7 @@ const ResizableDialogContent = React.forwardRef<
           height: size.height > 0 ? Math.min(size.height, window.innerHeight * 0.9) + 'px' : "auto",
           overflow: "hidden"
         }}
-        {...props}
+        {...otherProps}
       >
         <div className="relative w-full h-full" style={{ zIndex: 1 }}>
           {children}
