@@ -230,7 +230,10 @@ export function CreatePostModal({
   };
 
   const formatCaption = (text: string) => {
-    return text.replace(/#([\w\u00C0-\u017F]+)/g, '<span class="text-blue-500 font-medium">#$1</span>');
+    // First, convert newlines to <br> tags, then format hashtags
+    return text
+      .replace(/\n/g, '<br>')
+      .replace(/#([\w\u00C0-\u017F]+)/g, '<span class="text-blue-500 font-medium">#$1</span>');
   };
 
   const getCharacterCount = () => {
