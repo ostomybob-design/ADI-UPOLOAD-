@@ -206,6 +206,13 @@ export default function DashboardPage() {
           // Find the corresponding database record by late_post_id
           const dbPost = posts.find(p => p.late_post_id === latePostId);
 
+          // Debug logging
+          console.log(`🔍 Looking for database post with late_post_id: ${latePostId}`);
+          console.log(`📊 Found dbPost:`, dbPost ? `ID ${dbPost.id}` : 'NOT FOUND');
+          if (!dbPost) {
+            console.log(`📋 Database posts with late_post_id:`, posts.filter(p => p.late_post_id).map(p => ({ id: p.id, late_post_id: p.late_post_id })));
+          }
+
           // Show all Late.dev posts, even without database records
           if (!dbPost) {
             console.log(`ℹ️ Showing Late.dev post without database record: ${latePostId}`);
