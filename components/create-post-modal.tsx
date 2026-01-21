@@ -544,11 +544,17 @@ export function CreatePostModal({
       let finalImagePreview = imagePreview;
       
       if (overlayText && imagePreview && !imageVideo?.type.startsWith('video/')) {
-        console.log("Applying text overlay to image...");
+        console.log("🎨 Applying text overlay to image...");
+        console.log("Overlay text:", overlayText);
+        console.log("Original image preview length:", imagePreview?.length);
         const imageWithText = await applyTextOverlayToImage();
         if (imageWithText) {
           finalImagePreview = imageWithText;
+          console.log("✅ Text applied! New image preview length:", finalImagePreview?.length);
+          console.log("Final image preview starts with:", finalImagePreview?.substring(0, 50));
         }
+      } else {
+        console.log("⏭️ Skipping text overlay - no text or is video");
       }
 
       // If editing an existing post, just update the database
