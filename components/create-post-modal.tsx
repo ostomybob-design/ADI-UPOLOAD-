@@ -273,8 +273,6 @@ export function CreatePostModal({
       
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
         const ctx = canvas.getContext('2d');
         
         if (!ctx) {
@@ -283,8 +281,32 @@ export function CreatePostModal({
           return;
         }
 
-        // Draw image
-        ctx.drawImage(img, 0, 0);
+        // Instagram's max landscape aspect ratio is 1.91:1
+        // If image is wider than this, crop it to fit
+        const maxAspectRatio = 1.91;
+        const currentAspectRatio = img.width / img.height;
+        
+        let finalWidth = img.width;
+        let finalHeight = img.height;
+        let cropX = 0;
+        let cropY = 0;
+        
+        if (currentAspectRatio > maxAspectRatio) {
+          // Image is too wide, crop the width
+          finalWidth = Math.floor(img.height * maxAspectRatio);
+          cropX = Math.floor((img.width - finalWidth) / 2); // Center crop
+          console.log(`📐 Cropping image for Instagram: ${img.width}×${img.height} (${currentAspectRatio.toFixed(2)}:1) → ${finalWidth}×${finalHeight} (${maxAspectRatio}:1)`);
+        }
+        
+        canvas.width = finalWidth;
+        canvas.height = finalHeight;
+
+        // Draw cropped image
+        ctx.drawImage(
+          img,
+          cropX, cropY, finalWidth, finalHeight, // Source crop area
+          0, 0, finalWidth, finalHeight           // Destination
+        );
 
         // Draw text overlay
         const x = (textPosition.x / 100) * canvas.width;
@@ -307,7 +329,7 @@ export function CreatePostModal({
 
         // Convert canvas to data URL
         const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
-        console.log("✅ Canvas created data URL, length:", dataUrl.length);
+        console.log(`✅ Canvas created data URL, size: ${finalWidth}×${finalHeight}, length: ${dataUrl.length}`);
         resolve(dataUrl);
       };
       
