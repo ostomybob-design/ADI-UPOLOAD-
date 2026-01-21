@@ -36,7 +36,7 @@ interface ResizableDialogContentProps
 const ResizableDialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   ResizableDialogContentProps
-)(({ className, children, minWidth = 400, minHeight = 300, defaultWidth = 672, defaultHeight, ...props }, ref) => {
+>(({ className, children, minWidth = 400, minHeight = 300, defaultWidth = 672, defaultHeight, ...props }, ref) => {
   const contentRef = React.useRef<HTMLDivElement>(null)
   const [size, setSize] = React.useState({ width: defaultWidth, height: defaultHeight || 0 })
   const [isResizing, setIsResizing] = React.useState(false)
