@@ -118,53 +118,53 @@ const ResizableDialogContent = React.forwardRef<
         }}
         {...props}
       >
+        <div className="overflow-y-auto max-h-full relative z-0">
+          {children}
+        </div>
+
         {/* Resize handles - larger hit areas for better usability */}
         {/* Top */}
         <div
-          className="absolute top-0 left-0 right-0 h-2 cursor-n-resize hover:bg-blue-500/30 transition-colors z-20"
+          className="absolute top-0 left-0 right-0 h-3 cursor-n-resize hover:bg-blue-500/30 transition-colors z-[60] pointer-events-auto"
           onMouseDown={(e) => handleMouseDown(e, "n")}
         />
         {/* Right */}
         <div
-          className="absolute top-0 right-0 bottom-0 w-2 cursor-e-resize hover:bg-blue-500/30 transition-colors z-20"
+          className="absolute top-0 right-0 bottom-0 w-3 cursor-e-resize hover:bg-blue-500/30 transition-colors z-[60] pointer-events-auto"
           onMouseDown={(e) => handleMouseDown(e, "e")}
         />
         {/* Bottom */}
         <div
-          className="absolute bottom-0 left-0 right-0 h-2 cursor-s-resize hover:bg-blue-500/30 transition-colors z-20"
+          className="absolute bottom-0 left-0 right-0 h-3 cursor-s-resize hover:bg-blue-500/30 transition-colors z-[60] pointer-events-auto"
           onMouseDown={(e) => handleMouseDown(e, "s")}
         />
         {/* Left */}
         <div
-          className="absolute top-0 left-0 bottom-0 w-2 cursor-w-resize hover:bg-blue-500/30 transition-colors z-20"
+          className="absolute top-0 left-0 bottom-0 w-3 cursor-w-resize hover:bg-blue-500/30 transition-colors z-[60] pointer-events-auto"
           onMouseDown={(e) => handleMouseDown(e, "w")}
         />
         {/* Top-left corner */}
         <div
-          className="absolute top-0 left-0 w-4 h-4 cursor-nw-resize hover:bg-blue-500/30 transition-colors z-30"
+          className="absolute top-0 left-0 w-5 h-5 cursor-nw-resize hover:bg-blue-500/30 transition-colors z-[70] pointer-events-auto"
           onMouseDown={(e) => handleMouseDown(e, "nw")}
         />
         {/* Top-right corner */}
         <div
-          className="absolute top-0 right-0 w-4 h-4 cursor-ne-resize hover:bg-blue-500/30 transition-colors z-30"
+          className="absolute top-0 right-0 w-5 h-5 cursor-ne-resize hover:bg-blue-500/30 transition-colors z-[70] pointer-events-auto"
           onMouseDown={(e) => handleMouseDown(e, "ne")}
         />
         {/* Bottom-left corner */}
         <div
-          className="absolute bottom-0 left-0 w-4 h-4 cursor-sw-resize hover:bg-blue-500/30 transition-colors z-30"
+          className="absolute bottom-0 left-0 w-5 h-5 cursor-sw-resize hover:bg-blue-500/30 transition-colors z-[70] pointer-events-auto"
           onMouseDown={(e) => handleMouseDown(e, "sw")}
         />
         {/* Bottom-right corner */}
         <div
-          className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize hover:bg-blue-500/30 transition-colors z-30"
+          className="absolute bottom-0 right-0 w-5 h-5 cursor-se-resize hover:bg-blue-500/30 transition-colors z-[70] pointer-events-auto"
           onMouseDown={(e) => handleMouseDown(e, "se")}
         />
-
-        <div className="overflow-y-auto max-h-full">
-          {children}
-        </div>
         
-        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground z-10">
+        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground z-[80]">
           <X className="h-4 w-4" />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
