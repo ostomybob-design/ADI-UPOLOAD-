@@ -562,13 +562,18 @@ export function CreatePostModal({
         console.log("🔧 Editing post:", postId);
         console.log("📅 Schedule settings:", { schedulePost, scheduledDate });
 
-        // Upload media to Supabase if there's a new image
+        // Upload media to Supabase if there's a new image OR if text overlay was applied
         let mediaUrl: string | null = null;
 
-        // Only upload if imagePreview is a data URL (new upload)
-        if (finalImagePreview && finalImagePreview.startsWith('data:')) {
+        // Upload if it's a data URL (new upload) OR if we applied text overlay to an existing image
+        const shouldUpload = finalImagePreview && (
+          finalImagePreview.startsWith('data:') || 
+          (overlayText && finalImagePreview !== imagePreview) // Text overlay was applied
+        );
+        
+        if (shouldUpload) {
           try {
-            console.log("Uploading media to Supabase...");
+            console.log("📤 Uploading media to Supabase (with text overlay)...");
             const uploadResponse = await fetch("/api/upload", {
               method: "POST",
               headers: {
@@ -638,6 +643,12 @@ export function CreatePostModal({
             const updateData: any = {
               content: fullContent,
             };
+
+            // Update media if we have a new URL (with text overlay)
+            if (mediaUrl) {
+              updateData.media = [mediaUrl];
+              console.log("📸 Updating media with new image (with text overlay):", mediaUrl);
+            }
 
             // Only update schedule if it's being changed
             if (schedulePost && scheduledDate && scheduledDate !== lateScheduledFor) {
