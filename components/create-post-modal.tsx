@@ -111,6 +111,11 @@ export function CreatePostModal({
   const [aiEditorOpen, setAiEditorOpen] = React.useState(false);
   const [latePostId, setLatePostId] = React.useState<string | null>(null);
   const [lateScheduledFor, setLateScheduledFor] = React.useState<string | null>(null);
+  
+  // Resizable columns state
+  const [leftPanelWidth, setLeftPanelWidth] = React.useState(60); // percentage
+  const [isResizingColumns, setIsResizingColumns] = React.useState(false);
+  const containerRef = React.useRef<HTMLDivElement>(null);
 
   // Fetch connected accounts and profiles on mount
   React.useEffect(() => {
@@ -158,6 +163,39 @@ export function CreatePostModal({
       fetchData();
     }
   }, [open]);
+
+  // Column resize handlers
+  const handleColumnResizeStart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizingColumns(true);
+  };
+
+  React.useEffect(() => {
+    if (!isResizingColumns) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!containerRef.current) return;
+      
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const newLeftWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+      
+      // Constrain between 30% and 70%
+      const constrainedWidth = Math.min(Math.max(newLeftWidth, 30), 70);
+      setLeftPanelWidth(constrainedWidth);
+    };
+
+    const handleMouseUp = () => {
+      setIsResizingColumns(false);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizingColumns]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -847,9 +885,12 @@ export function CreatePostModal({
         minHeight={500}
         className="p-0"
       >
-        <div className="flex h-full overflow-hidden">
+        <div ref={containerRef} className="flex h-full overflow-hidden">
           {/* Left Panel - Form */}
-          <div className="flex-1 flex flex-col overflow-hidden">
+          <div 
+            className="flex flex-col overflow-hidden"
+            style={{ width: `${leftPanelWidth}%` }}
+          >
             <div className="p-6 pb-0 flex-shrink-0">
               <DialogHeader className="mb-6">
                 <DialogTitle className="text-2xl font-bold flex items-center gap-2">
@@ -1238,8 +1279,22 @@ export function CreatePostModal({
             </div>
           </div>
 
+          {/* Resize Handle */}
+          <div 
+            className="relative w-1 bg-gray-200 hover:bg-blue-400 active:bg-blue-500 cursor-col-resize transition-colors hidden md:block group"
+            onMouseDown={handleColumnResizeStart}
+            style={{ flexShrink: 0 }}
+          >
+            <div className="absolute inset-y-0 -left-1 -right-1" title="Drag to resize columns" />
+            {/* Visual indicator on hover */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-12 bg-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+          </div>
+
           {/* Right Panel - Preview */}
-          <div className="w-80 bg-gray-50 border-l overflow-y-auto hidden md:block">
+          <div 
+            className="bg-gray-50 border-l overflow-y-auto hidden md:block"
+            style={{ width: `${100 - leftPanelWidth}%` }}
+          >
             <div className="p-6">
               <div className="flex items-center gap-2 mb-4">
                 <Eye className="h-5 w-5 text-gray-600" />
