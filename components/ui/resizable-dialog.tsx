@@ -36,11 +36,13 @@ interface ResizableDialogContentProps
 const ResizableDialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   ResizableDialogContentProps
->(({ className, children, minWidth = 400, minHeight = 300, defaultWidth = 672, defaultHeight, ...props }, ref) => {
+)(({ className, children, minWidth = 400, minHeight = 300, defaultWidth = 672, defaultHeight, ...props }, ref) => {
   const contentRef = React.useRef<HTMLDivElement>(null)
   const [size, setSize] = React.useState({ width: defaultWidth, height: defaultHeight || 0 })
   const [isResizing, setIsResizing] = React.useState(false)
   const [resizeDirection, setResizeDirection] = React.useState<string>("")
+
+  console.log('🔵 ResizableDialog size:', size, 'defaultWidth:', defaultWidth, 'defaultHeight:', defaultHeight)
 
   const handleMouseDown = (e: React.MouseEvent, direction: string) => {
     console.log('🔵 Resize handle clicked:', direction)
@@ -108,7 +110,7 @@ const ResizableDialogContent = React.forwardRef<
         ref={contentRef}
         className={cn(
           "fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%] border bg-background shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
-          "relative overflow-hidden",
+          "relative",
           className
         )}
         style={{
@@ -116,10 +118,11 @@ const ResizableDialogContent = React.forwardRef<
           maxWidth: "90vw",
           maxHeight: "90vh",
           height: size.height > 0 ? `${size.height}px` : "auto",
+          overflow: "hidden"
         }}
         {...props}
       >
-        <div className="p-6 overflow-y-auto h-full relative" style={{ zIndex: 1 }}>
+        <div className="relative w-full h-full" style={{ zIndex: 1 }}>
           {children}
         </div>
 

@@ -842,11 +842,12 @@ export function CreatePostModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
         defaultWidth={896} 
+        defaultHeight={700}
         minWidth={600} 
-        minHeight={400}
-        className="p-0 flex flex-col"
+        minHeight={500}
+        className="p-0"
       >
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex h-full overflow-hidden">
           {/* Left Panel - Form */}
           <div className="flex-1 flex flex-col overflow-hidden">
             <div className="p-6 pb-0 flex-shrink-0">
