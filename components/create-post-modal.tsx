@@ -1,5 +1,4 @@
 "use client";
-import { ResizableDialog as Dialog, ResizableDialogContent as DialogContent, ResizableDialogDescription as DialogDescription, ResizableDialogHeader as DialogHeader, ResizableDialogTitle as DialogTitle } from "@/components/ui/resizable-dialog"
 
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
