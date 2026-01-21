@@ -565,15 +565,11 @@ export function CreatePostModal({
         // Upload media to Supabase if there's a new image OR if text overlay was applied
         let mediaUrl: string | null = null;
 
-        // Upload if it's a data URL (new upload) OR if we applied text overlay to an existing image
-        const shouldUpload = finalImagePreview && (
-          finalImagePreview.startsWith('data:') || 
-          (overlayText && finalImagePreview !== imagePreview) // Text overlay was applied
-        );
-        
-        if (shouldUpload) {
+        // Always upload if we have a data URL (new upload or text overlay applied)
+        if (finalImagePreview && finalImagePreview.startsWith('data:')) {
           try {
-            console.log("📤 Uploading media to Supabase (with text overlay)...");
+            console.log("📤 Uploading media to Supabase...");
+            console.log("Has text overlay:", !!overlayText);
             const uploadResponse = await fetch("/api/upload", {
               method: "POST",
               headers: {
@@ -591,7 +587,7 @@ export function CreatePostModal({
 
             const uploadResult = await uploadResponse.json();
             mediaUrl = uploadResult.publicUrl;
-            console.log("Media uploaded successfully:", mediaUrl);
+            console.log("✅ Media uploaded successfully:", mediaUrl);
           } catch (uploadError) {
             console.error("Error uploading media:", uploadError);
             alert("Failed to upload media. Please try again.");
@@ -599,13 +595,9 @@ export function CreatePostModal({
             return;
           }
         } else if (finalImagePreview) {
-          // If we have finalImagePreview but didn't upload (e.g., existing URL or text overlay already applied)
-          // Use finalImagePreview if it's a valid URL, otherwise use imagePreview
-          if (finalImagePreview.startsWith('http://') || finalImagePreview.startsWith('https://')) {
-            mediaUrl = finalImagePreview;
-          } else {
-            mediaUrl = imagePreview;
-          }
+          // Use existing URL
+          mediaUrl = finalImagePreview;
+          console.log("Using existing media URL:", mediaUrl);
         }
 
         // Convert hashtags string to array
