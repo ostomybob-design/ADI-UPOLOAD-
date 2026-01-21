@@ -170,6 +170,10 @@ export function CreatePostModal({
 
     if (open) {
       fetchData();
+    } else {
+      // Reset overlay text when modal closes
+      setOverlayText("");
+      setTextPosition({ x: 50, y: 50 });
     }
   }, [open]);
 
@@ -246,6 +250,9 @@ export function CreatePostModal({
         setImagePreview(e.target?.result as string);
       };
       reader.readAsDataURL(file);
+      // Reset text overlay when new image is uploaded
+      setOverlayText("");
+      setTextPosition({ x: 50, y: 50 });
     }
   };
 
@@ -253,11 +260,12 @@ export function CreatePostModal({
     setImageVideo(null);
     setImagePreview(null);
     setOverlayText("");
+    setTextPosition({ x: 50, y: 50 });
   };
 
-  // Function to apply text overlay to image and return new File
-  const applyTextOverlayToImage = async (): Promise<File | null> => {
-    if (!imagePreview || !overlayText || !imageVideo) return imageVideo;
+  // Function to apply text overlay to image and return data URL
+  const applyTextOverlayToImage = async (): Promise<string | null> => {
+    if (!imagePreview || !overlayText) return imagePreview;
     
     return new Promise((resolve) => {
       const img = new Image();
@@ -269,7 +277,7 @@ export function CreatePostModal({
         const ctx = canvas.getContext('2d');
         
         if (!ctx) {
-          resolve(imageVideo);
+          resolve(imagePreview);
           return;
         }
 
@@ -295,19 +303,12 @@ export function CreatePostModal({
         
         ctx.fillText(overlayText, x, y);
 
-        // Convert canvas to blob then to File
-        canvas.toBlob((blob) => {
-          if (blob) {
-            const fileName = imageVideo.name || 'image-with-text.jpg';
-            const file = new File([blob], fileName, { type: 'image/jpeg' });
-            resolve(file);
-          } else {
-            resolve(imageVideo);
-          }
-        }, 'image/jpeg', 0.95);
+        // Convert canvas to data URL
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+        resolve(dataUrl);
       };
       
-      img.onerror = () => resolve(imageVideo);
+      img.onerror = () => resolve(imagePreview);
       img.src = imagePreview;
     });
   };
@@ -529,23 +530,13 @@ export function CreatePostModal({
     setIsLoading(true);
     try {
       // Apply text overlay to image if needed
-      let finalImageFile = imageVideo;
       let finalImagePreview = imagePreview;
       
       if (overlayText && imagePreview && !imageVideo?.type.startsWith('video/')) {
         console.log("Applying text overlay to image...");
         const imageWithText = await applyTextOverlayToImage();
         if (imageWithText) {
-          finalImageFile = imageWithText;
-          // Convert the new file to data URL for upload
-          const reader = new FileReader();
-          await new Promise<void>((resolve) => {
-            reader.onload = (e) => {
-              finalImagePreview = e.target?.result as string;
-              resolve();
-            };
-            reader.readAsDataURL(imageWithText);
-          });
+          finalImagePreview = imageWithText;
         }
       }
 
