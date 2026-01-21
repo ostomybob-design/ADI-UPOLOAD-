@@ -142,8 +142,8 @@ const ResizableDialogContent = React.forwardRef<
         )}
         style={{
           left: position.x !== 0 ? `${position.x}px` : '50%',
-          top: position.y !== 0 ? `${position.y}px` : '50%',
-          transform: position.x === 0 && position.y === 0 ? 'translate(-50%, -50%)' : 'none',
+          top: position.y !== 0 ? `${position.y}px` : '5vh',
+          transform: position.x === 0 && position.y === 0 ? 'translateX(-50%)' : 'none',
           width: Math.min(size.width, viewportWidth * 0.9) + 'px',
           maxWidth: "90vw",
           maxHeight: "85vh",
