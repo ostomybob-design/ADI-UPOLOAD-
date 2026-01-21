@@ -40,15 +40,21 @@ const ResizableDialogContent = React.forwardRef<
   const { className, children, minWidth = 400, minHeight = 300, defaultWidth = 672, defaultHeight, ...otherProps } = props
   const contentRef = React.useRef<HTMLDivElement>(null)
   
-  // Constrain initial size to viewport
-  const constrainedWidth = Math.min(defaultWidth, typeof window !== 'undefined' ? window.innerWidth * 0.9 : defaultWidth)
-  const constrainedHeight = defaultHeight ? Math.min(defaultHeight, typeof window !== 'undefined' ? window.innerHeight * 0.9 : defaultHeight) : 0
+  // Constrain initial size to viewport - ensure it ALWAYS fits on screen
+  const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1024
+  const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 768
+  
+  const constrainedWidth = Math.min(defaultWidth, viewportWidth * 0.9)
+  const constrainedHeight = defaultHeight ? Math.min(defaultHeight, viewportHeight * 0.85) : 0
   
   const [size, setSize] = React.useState({ width: constrainedWidth, height: constrainedHeight })
+  const [position, setPosition] = React.useState({ x: 0, y: 0 })
   const [isResizing, setIsResizing] = React.useState(false)
+  const [isDragging, setIsDragging] = React.useState(false)
+  const [dragStart, setDragStart] = React.useState({ x: 0, y: 0 })
   const [resizeDirection, setResizeDirection] = React.useState<string>("")
 
-  console.log('🔵 ResizableDialog size:', size, 'defaultWidth:', defaultWidth, 'defaultHeight:', defaultHeight, 'constrained:', constrainedWidth, constrainedHeight)
+  console.log('🔵 ResizableDialog - viewport:', viewportWidth, 'x', viewportHeight, 'requested:', defaultWidth, 'x', defaultHeight, 'constrained to:', constrainedWidth, 'x', constrainedHeight)
 
   const handleMouseDown = (e: React.MouseEvent, direction: string) => {
     console.log('🔵 Resize handle clicked:', direction)
@@ -58,10 +64,24 @@ const ResizableDialogContent = React.forwardRef<
     setResizeDirection(direction)
   }
 
+  const handleDragStart = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('.resize-handle')) return
+    e.preventDefault()
+    setIsDragging(true)
+    setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y })
+  }
+
   React.useEffect(() => {
-    if (!isResizing) return
+    if (!isResizing && !isDragging) return
 
     const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging) {
+        const newX = e.clientX - dragStart.x
+        const newY = e.clientY - dragStart.y
+        setPosition({ x: newX, y: newY })
+        return
+      }
+
       if (!contentRef.current) return
 
       const rect = contentRef.current.getBoundingClientRect()
@@ -97,6 +117,7 @@ const ResizableDialogContent = React.forwardRef<
 
     const handleMouseUp = () => {
       setIsResizing(false)
+      setIsDragging(false)
       setResizeDirection("")
     }
 
@@ -107,7 +128,7 @@ const ResizableDialogContent = React.forwardRef<
       document.removeEventListener("mousemove", handleMouseMove)
       document.removeEventListener("mouseup", handleMouseUp)
     }
-  }, [isResizing, resizeDirection, minWidth, minHeight])
+  }, [isResizing, isDragging, dragStart, position, resizeDirection, minWidth, minHeight])
 
   return (
     <ResizableDialogPortal>
@@ -115,19 +136,30 @@ const ResizableDialogContent = React.forwardRef<
       <DialogPrimitive.Content
         ref={contentRef}
         className={cn(
-          "fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%] border bg-background shadow-lg sm:rounded-lg",
+          "fixed z-50 border bg-background shadow-lg sm:rounded-lg",
           "relative",
           className
         )}
         style={{
-          width: Math.min(size.width, window.innerWidth * 0.9) + 'px',
+          left: position.x !== 0 ? `${position.x}px` : '50%',
+          top: position.y !== 0 ? `${position.y}px` : '50%',
+          transform: position.x === 0 && position.y === 0 ? 'translate(-50%, -50%)' : 'none',
+          width: Math.min(size.width, viewportWidth * 0.9) + 'px',
           maxWidth: "90vw",
-          maxHeight: "90vh",
-          height: size.height > 0 ? Math.min(size.height, window.innerHeight * 0.9) + 'px' : "auto",
-          overflow: "hidden"
+          maxHeight: "85vh",
+          height: size.height > 0 ? Math.min(size.height, viewportHeight * 0.85) + 'px' : "auto",
+          overflow: "hidden",
+          cursor: isDragging ? 'move' : 'default'
         }}
         {...otherProps}
       >
+        {/* Draggable header area */}
+        <div 
+          className="absolute top-0 left-0 right-0 h-12 cursor-move z-[60]" 
+          onMouseDown={handleDragStart}
+          title="Drag to move"
+        />
+        
         <div className="relative w-full h-full" style={{ zIndex: 1 }}>
           {children}
         </div>
