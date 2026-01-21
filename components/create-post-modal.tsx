@@ -401,10 +401,19 @@ export function CreatePostModal({
     const fetchPost = async () => {
       if (open && postId) {
         try {
+          console.log("📥 Fetching post data for ID:", postId);
           const response = await fetch(`/api/posts/${postId}`);
-          if (!response.ok) throw new Error("Failed to fetch post");
+          
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error("❌ Failed to fetch post. Status:", response.status);
+            console.error("❌ Error response:", errorText);
+            throw new Error(`Failed to fetch post: ${response.status}`);
+          }
 
           const post = await response.json();
+          console.log("✅ Post loaded successfully:", post);
+          
           setCaption(post.ai_caption || "");
 
           // Convert hashtags array to string
