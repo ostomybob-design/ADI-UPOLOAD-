@@ -543,6 +543,13 @@ export function CreatePostModal({
       // Apply text overlay to image if needed
       let finalImagePreview = imagePreview;
       
+      console.log("🔍 Text overlay check:");
+      console.log("  - overlayText:", overlayText);
+      console.log("  - imagePreview exists:", !!imagePreview);
+      console.log("  - imagePreview type:", imagePreview?.substring(0, 50));
+      console.log("  - imageVideo:", imageVideo);
+      console.log("  - imageVideo type:", imageVideo?.type);
+      
       if (overlayText && imagePreview && !imageVideo?.type.startsWith('video/')) {
         console.log("🎨 Applying text overlay to image...");
         console.log("Overlay text:", overlayText);
@@ -552,9 +559,14 @@ export function CreatePostModal({
           finalImagePreview = imageWithText;
           console.log("✅ Text applied! New image preview length:", finalImagePreview?.length);
           console.log("Final image preview starts with:", finalImagePreview?.substring(0, 50));
+        } else {
+          console.warn("⚠️ applyTextOverlayToImage returned null/undefined");
         }
       } else {
-        console.log("⏭️ Skipping text overlay - no text or is video");
+        console.log("⏭️ Skipping text overlay - Reasons:");
+        console.log("  - No overlay text:", !overlayText);
+        console.log("  - No image preview:", !imagePreview);
+        console.log("  - Is video:", imageVideo?.type?.startsWith('video/'));
       }
 
       // If editing an existing post, just update the database
@@ -582,15 +594,18 @@ export function CreatePostModal({
             });
 
             if (!uploadResponse.ok) {
-              throw new Error("Failed to upload media to Supabase");
+              const errorText = await uploadResponse.text();
+              console.error("❌ Upload failed. Status:", uploadResponse.status);
+              console.error("❌ Error response:", errorText);
+              throw new Error(`Failed to upload media to Supabase: ${uploadResponse.status} - ${errorText}`);
             }
 
             const uploadResult = await uploadResponse.json();
             mediaUrl = uploadResult.publicUrl;
             console.log("✅ Media uploaded successfully:", mediaUrl);
           } catch (uploadError) {
-            console.error("Error uploading media:", uploadError);
-            alert("Failed to upload media. Please try again.");
+            console.error("❌ Error uploading media:", uploadError);
+            alert(`Failed to upload media: ${(uploadError as Error).message}. Please try again.`);
             setIsLoading(false);
             return;
           }
@@ -675,6 +690,8 @@ export function CreatePostModal({
         } else if (schedulePost && scheduledDate) {
           // If scheduling a new post to Late.dev
           console.log("📅 Scheduling post to Late.dev...");
+          console.log("📸 mediaUrl value before scheduling:", mediaUrl);
+          console.log("📸 finalImagePreview type:", finalImagePreview ? finalImagePreview.substring(0, 50) : 'null');
           try {
             // Get connected accounts
             console.log("🔍 Fetching Late.dev accounts...");
@@ -710,13 +727,20 @@ export function CreatePostModal({
             // Prepare media items
             const mediaItems: any[] = [];
             if (mediaUrl) {
+              console.log("📸 Checking mediaUrl for scheduling:", mediaUrl);
               const isValidUrl = mediaUrl.startsWith('http://') || mediaUrl.startsWith('https://');
+              console.log("Is valid URL:", isValidUrl);
               if (isValidUrl) {
                 mediaItems.push({
                   type: "image",
                   url: mediaUrl,
                 });
+                console.log("✅ Added media item to Late.dev post");
+              } else {
+                console.warn("⚠️ Media URL is not valid HTTP/HTTPS:", mediaUrl);
               }
+            } else {
+              console.warn("⚠️ No mediaUrl available for scheduling");
             }
 
             // Create Late.dev post
