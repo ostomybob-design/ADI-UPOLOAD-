@@ -43,6 +43,7 @@ const ResizableDialogContent = React.forwardRef<
   const [resizeDirection, setResizeDirection] = React.useState<string>("")
 
   const handleMouseDown = (e: React.MouseEvent, direction: string) => {
+    console.log('🔵 Resize handle clicked:', direction)
     e.preventDefault()
     e.stopPropagation()
     setIsResizing(true)
@@ -106,7 +107,7 @@ const ResizableDialogContent = React.forwardRef<
       <DialogPrimitive.Content
         ref={contentRef}
         className={cn(
-          "fixed left-[50%] top-[50%] z-50 grid translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
+          "fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%] border bg-background shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
           "relative overflow-hidden",
           className
         )}
@@ -118,53 +119,69 @@ const ResizableDialogContent = React.forwardRef<
         }}
         {...props}
       >
-        <div className="overflow-y-auto max-h-full relative z-0">
-          {children}
-        </div>
-
-        {/* Resize handles - larger hit areas for better usability */}
+        {/* Resize handles - highly visible and easy to grab */}
         {/* Top */}
         <div
-          className="absolute top-0 left-0 right-0 h-3 cursor-n-resize hover:bg-blue-500/30 transition-colors z-[60] pointer-events-auto"
+          className="absolute top-0 left-0 right-0 h-2 cursor-n-resize bg-blue-500/20 hover:bg-blue-500/70 active:bg-blue-500 transition-colors"
+          style={{ zIndex: 100 }}
           onMouseDown={(e) => handleMouseDown(e, "n")}
+          title="Drag to resize vertically"
         />
         {/* Right */}
         <div
-          className="absolute top-0 right-0 bottom-0 w-3 cursor-e-resize hover:bg-blue-500/30 transition-colors z-[60] pointer-events-auto"
+          className="absolute top-0 right-0 bottom-0 w-2 cursor-e-resize bg-blue-500/20 hover:bg-blue-500/70 active:bg-blue-500 transition-colors"
+          style={{ zIndex: 100 }}
           onMouseDown={(e) => handleMouseDown(e, "e")}
+          title="Drag to resize horizontally"
         />
         {/* Bottom */}
         <div
-          className="absolute bottom-0 left-0 right-0 h-3 cursor-s-resize hover:bg-blue-500/30 transition-colors z-[60] pointer-events-auto"
+          className="absolute bottom-0 left-0 right-0 h-2 cursor-s-resize bg-blue-500/20 hover:bg-blue-500/70 active:bg-blue-500 transition-colors"
+          style={{ zIndex: 100 }}
           onMouseDown={(e) => handleMouseDown(e, "s")}
+          title="Drag to resize vertically"
         />
         {/* Left */}
         <div
-          className="absolute top-0 left-0 bottom-0 w-3 cursor-w-resize hover:bg-blue-500/30 transition-colors z-[60] pointer-events-auto"
+          className="absolute top-0 left-0 bottom-0 w-2 cursor-w-resize bg-blue-500/20 hover:bg-blue-500/70 active:bg-blue-500 transition-colors"
+          style={{ zIndex: 100 }}
           onMouseDown={(e) => handleMouseDown(e, "w")}
+          title="Drag to resize horizontally"
         />
         {/* Top-left corner */}
         <div
-          className="absolute top-0 left-0 w-5 h-5 cursor-nw-resize hover:bg-blue-500/30 transition-colors z-[70] pointer-events-auto"
+          className="absolute top-0 left-0 w-6 h-6 cursor-nw-resize bg-blue-500/20 hover:bg-blue-500/70 active:bg-blue-500 transition-colors rounded-tl-lg"
+          style={{ zIndex: 101 }}
           onMouseDown={(e) => handleMouseDown(e, "nw")}
+          title="Drag to resize diagonally"
         />
         {/* Top-right corner */}
         <div
-          className="absolute top-0 right-0 w-5 h-5 cursor-ne-resize hover:bg-blue-500/30 transition-colors z-[70] pointer-events-auto"
+          className="absolute top-0 right-0 w-6 h-6 cursor-ne-resize bg-blue-500/20 hover:bg-blue-500/70 active:bg-blue-500 transition-colors rounded-tr-lg"
+          style={{ zIndex: 101 }}
           onMouseDown={(e) => handleMouseDown(e, "ne")}
+          title="Drag to resize diagonally"
         />
         {/* Bottom-left corner */}
         <div
-          className="absolute bottom-0 left-0 w-5 h-5 cursor-sw-resize hover:bg-blue-500/30 transition-colors z-[70] pointer-events-auto"
+          className="absolute bottom-0 left-0 w-6 h-6 cursor-sw-resize bg-blue-500/20 hover:bg-blue-500/70 active:bg-blue-500 transition-colors rounded-bl-lg"
+          style={{ zIndex: 101 }}
           onMouseDown={(e) => handleMouseDown(e, "sw")}
+          title="Drag to resize diagonally"
         />
         {/* Bottom-right corner */}
         <div
-          className="absolute bottom-0 right-0 w-5 h-5 cursor-se-resize hover:bg-blue-500/30 transition-colors z-[70] pointer-events-auto"
+          className="absolute bottom-0 right-0 w-6 h-6 cursor-se-resize bg-blue-500/20 hover:bg-blue-500/70 active:bg-blue-500 transition-colors rounded-br-lg"
+          style={{ zIndex: 101 }}
           onMouseDown={(e) => handleMouseDown(e, "se")}
+          title="Drag to resize diagonally"
         />
+
+        <div className="p-6 overflow-y-auto h-full">
+          {children}
+        </div>
         
-        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground z-[80]">
+        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground" style={{ zIndex: 102 }}>
           <X className="h-4 w-4" />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
