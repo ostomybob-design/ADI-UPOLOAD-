@@ -1,0 +1,19 @@
+[00:00:02.828] Server  LOG     ✓ Ready in 2.6s
+[00:00:06.290] Server  LOG     ○ Compiling / ...
+[00:00:07.510] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
+[00:00:08.812] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
+[00:00:15.902] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
+[00:00:17.958] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
+[00:01:10.707] Server  LOG     ✓ Compiled in 33ms
+[00:01:19.840] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
+[00:01:33.097] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
+[00:01:34.232] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
+[00:01:35.337] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
+[00:01:36.303] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
+[00:01:37.186] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
+[00:01:38.072] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
+[00:01:39.062] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
+[00:01:39.956] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
+[00:02:48.527] Server  LOG     ✓ Compiled in 45ms
+[00:02:57.737] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
+[00:02:58.622] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.

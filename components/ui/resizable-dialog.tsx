@@ -40,21 +40,26 @@ const ResizableDialogContent = React.forwardRef<
   const { className, children, minWidth = 400, minHeight = 300, defaultWidth = 672, defaultHeight, ...otherProps } = props
   const contentRef = React.useRef<HTMLDivElement>(null)
   
-  // Constrain initial size to viewport - ensure it ALWAYS fits on screen
-  const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1024
-  const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 768
+  // Initialize size state - simple default, will adjust in useEffect if needed
+  const [size, setSize] = React.useState({ 
+    width: defaultWidth, 
+    height: defaultHeight || 0 
+  })
   
-  const constrainedWidth = Math.min(defaultWidth, viewportWidth * 0.9)
-  const constrainedHeight = defaultHeight ? Math.min(defaultHeight, viewportHeight * 0.85) : 0
-  
-  const [size, setSize] = React.useState({ width: constrainedWidth, height: constrainedHeight })
   const [position, setPosition] = React.useState({ x: 0, y: 0 })
   const [isResizing, setIsResizing] = React.useState(false)
   const [isDragging, setIsDragging] = React.useState(false)
   const [dragStart, setDragStart] = React.useState({ x: 0, y: 0 })
   const [resizeDirection, setResizeDirection] = React.useState<string>("")
-
-  console.log('🔵 ResizableDialog - viewport:', viewportWidth, 'x', viewportHeight, 'requested:', defaultWidth, 'x', defaultHeight, 'constrained to:', constrainedWidth, 'x', constrainedHeight)
+  
+  // Adjust size to viewport on mount
+  React.useEffect(() => {
+    const viewportWidth = window.innerWidth
+    const viewportHeight = window.innerHeight
+    const constrainedWidth = Math.min(defaultWidth, viewportWidth * 0.9)
+    const constrainedHeight = defaultHeight ? Math.min(defaultHeight, viewportHeight * 0.85) : 0
+    setSize({ width: constrainedWidth, height: constrainedHeight })
+  }, [defaultWidth, defaultHeight])
 
   const handleMouseDown = (e: React.MouseEvent, direction: string) => {
     console.log('🔵 Resize handle clicked:', direction)
@@ -144,10 +149,10 @@ const ResizableDialogContent = React.forwardRef<
           left: position.x !== 0 ? `${position.x}px` : '50%',
           top: position.y !== 0 ? `${position.y}px` : '5vh',
           transform: position.x === 0 && position.y === 0 ? 'translateX(-50%)' : 'none',
-          width: Math.min(size.width, viewportWidth * 0.9) + 'px',
+          width: size.width + 'px',
           maxWidth: "90vw",
           maxHeight: "85vh",
-          height: size.height > 0 ? Math.min(size.height, viewportHeight * 0.85) + 'px' : "auto",
+          height: size.height > 0 ? size.height + 'px' : "auto",
           overflow: "hidden",
           cursor: isDragging ? 'move' : 'default'
         }}
