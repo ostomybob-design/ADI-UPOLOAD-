@@ -116,6 +116,15 @@ export function CreatePostModal({
   const [leftPanelWidth, setLeftPanelWidth] = React.useState(60); // percentage
   const [isResizingColumns, setIsResizingColumns] = React.useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
+  
+  // Text overlay state
+  const [overlayText, setOverlayText] = React.useState("");
+  const [textPosition, setTextPosition] = React.useState({ x: 50, y: 50 }); // percentage-based
+  const [fontSize, setFontSize] = React.useState(32);
+  const [textColor, setTextColor] = React.useState("#FFFFFF");
+  const [isDraggingText, setIsDraggingText] = React.useState(false);
+  const [dragOffset, setDragOffset] = React.useState({ x: 0, y: 0 });
+  const imagePreviewRef = React.useRef<HTMLDivElement>(null);
 
   // Fetch connected accounts and profiles on mount
   React.useEffect(() => {
@@ -197,6 +206,37 @@ export function CreatePostModal({
     };
   }, [isResizingColumns]);
 
+  // Text dragging handler
+  React.useEffect(() => {
+    if (!isDraggingText) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!imagePreviewRef.current) return;
+      
+      const rect = imagePreviewRef.current.getBoundingClientRect();
+      const newX = ((e.clientX - rect.left) / rect.width) * 100 - dragOffset.x;
+      const newY = ((e.clientY - rect.top) / rect.height) * 100 - dragOffset.y;
+      
+      // Constrain to image boundaries
+      const constrainedX = Math.min(Math.max(newX, 5), 95);
+      const constrainedY = Math.min(Math.max(newY, 5), 95);
+      
+      setTextPosition({ x: constrainedX, y: constrainedY });
+    };
+
+    const handleMouseUp = () => {
+      setIsDraggingText(false);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDraggingText, dragOffset]);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -212,6 +252,64 @@ export function CreatePostModal({
   const removeMedia = () => {
     setImageVideo(null);
     setImagePreview(null);
+    setOverlayText("");
+  };
+
+  // Function to apply text overlay to image and return new File
+  const applyTextOverlayToImage = async (): Promise<File | null> => {
+    if (!imagePreview || !overlayText || !imageVideo) return imageVideo;
+    
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        
+        if (!ctx) {
+          resolve(imageVideo);
+          return;
+        }
+
+        // Draw image
+        ctx.drawImage(img, 0, 0);
+
+        // Draw text overlay
+        const x = (textPosition.x / 100) * canvas.width;
+        const y = (textPosition.y / 100) * canvas.height;
+        
+        // Scale font size based on image size
+        const scaledFontSize = (fontSize / 500) * Math.min(canvas.width, canvas.height);
+        ctx.font = `bold ${scaledFontSize}px Arial, sans-serif`;
+        ctx.fillStyle = textColor;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        // Add text shadow
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+        ctx.shadowBlur = 4;
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = 2;
+        
+        ctx.fillText(overlayText, x, y);
+
+        // Convert canvas to blob then to File
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const fileName = imageVideo.name || 'image-with-text.jpg';
+            const file = new File([blob], fileName, { type: 'image/jpeg' });
+            resolve(file);
+          } else {
+            resolve(imageVideo);
+          }
+        }, 'image/jpeg', 0.95);
+      };
+      
+      img.onerror = () => resolve(imageVideo);
+      img.src = imagePreview;
+    });
   };
 
   const setAsMainImage = (imageUrl: string) => {
@@ -430,6 +528,27 @@ export function CreatePostModal({
   const handlePost = async () => {
     setIsLoading(true);
     try {
+      // Apply text overlay to image if needed
+      let finalImageFile = imageVideo;
+      let finalImagePreview = imagePreview;
+      
+      if (overlayText && imagePreview && !imageVideo?.type.startsWith('video/')) {
+        console.log("Applying text overlay to image...");
+        const imageWithText = await applyTextOverlayToImage();
+        if (imageWithText) {
+          finalImageFile = imageWithText;
+          // Convert the new file to data URL for upload
+          const reader = new FileReader();
+          await new Promise<void>((resolve) => {
+            reader.onload = (e) => {
+              finalImagePreview = e.target?.result as string;
+              resolve();
+            };
+            reader.readAsDataURL(imageWithText);
+          });
+        }
+      }
+
       // If editing an existing post, just update the database
       if (postId) {
         console.log("🔧 Editing post:", postId);
@@ -439,7 +558,7 @@ export function CreatePostModal({
         let mediaUrl: string | null = null;
 
         // Only upload if imagePreview is a data URL (new upload)
-        if (imagePreview && imagePreview.startsWith('data:')) {
+        if (finalImagePreview && finalImagePreview.startsWith('data:')) {
           try {
             console.log("Uploading media to Supabase...");
             const uploadResponse = await fetch("/api/upload", {
@@ -448,7 +567,7 @@ export function CreatePostModal({
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                file: imagePreview,
+                file: finalImagePreview,
                 folder: "posts"
               }),
             });
@@ -703,9 +822,9 @@ export function CreatePostModal({
 
       // Upload media to Supabase first if present
       let mediaUrl: string | null = null;
-      if (imagePreview) {
+      if (finalImagePreview) {
         // Only upload if it's a data URL (new upload), not an existing URL
-        if (imagePreview.startsWith('data:')) {
+        if (finalImagePreview.startsWith('data:')) {
           try {
             console.log("📤 Uploading media to Supabase...");
             const uploadResponse = await fetch("/api/upload", {
@@ -714,7 +833,7 @@ export function CreatePostModal({
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                file: imagePreview,
+                file: finalImagePreview,
                 folder: "posts"
               }),
             });
@@ -738,9 +857,9 @@ export function CreatePostModal({
             setIsLoading(false);
             return;
           }
-        } else if (imagePreview.startsWith('http://') || imagePreview.startsWith('https://')) {
+        } else if (finalImagePreview.startsWith('http://') || finalImagePreview.startsWith('https://')) {
           // It's already a URL, use it directly
-          mediaUrl = imagePreview;
+          mediaUrl = finalImagePreview;
           console.log("✅ Using existing image URL:", mediaUrl);
         } else {
           // Invalid image format
@@ -934,7 +1053,10 @@ export function CreatePostModal({
                   ) : (
                     <div className="space-y-3">
                       {/* Main Image */}
-                      <div className="relative rounded-xl overflow-hidden bg-gray-100">
+                      <div 
+                        ref={imagePreviewRef}
+                        className="relative rounded-xl overflow-hidden bg-gray-100"
+                      >
                         <div className="absolute top-2 left-2 z-10">
                           <Badge className="bg-blue-600 text-white">Main Photo</Badge>
                         </div>
@@ -945,17 +1067,48 @@ export function CreatePostModal({
                             controls
                           />
                         ) : (
-                          <img
-                            src={getProxiedImageUrl(imagePreview) || imagePreview}
-                            alt="Main preview"
-                            className="w-full h-48 object-cover"
-                          />
+                          <>
+                            <img
+                              src={getProxiedImageUrl(imagePreview) || imagePreview}
+                              alt="Main preview"
+                              className="w-full h-48 object-cover"
+                            />
+                            {/* Draggable Text Overlay */}
+                            {overlayText && (
+                              <div
+                                className="absolute cursor-move select-none"
+                                style={{
+                                  left: `${textPosition.x}%`,
+                                  top: `${textPosition.y}%`,
+                                  transform: 'translate(-50%, -50%)',
+                                  fontSize: `${fontSize}px`,
+                                  color: textColor,
+                                  fontWeight: 'bold',
+                                  textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
+                                  pointerEvents: 'auto',
+                                  zIndex: 20,
+                                }}
+                                onMouseDown={(e) => {
+                                  e.preventDefault();
+                                  setIsDraggingText(true);
+                                  if (imagePreviewRef.current) {
+                                    const rect = imagePreviewRef.current.getBoundingClientRect();
+                                    const offsetX = ((e.clientX - rect.left) / rect.width) * 100 - textPosition.x;
+                                    const offsetY = ((e.clientY - rect.top) / rect.height) * 100 - textPosition.y;
+                                    setDragOffset({ x: offsetX, y: offsetY });
+                                  }
+                                }}
+                              >
+                                {overlayText}
+                              </div>
+                            )}
+                          </>
                         )}
                         <Button
                           variant="destructive"
                           size="sm"
                           onClick={removeMedia}
-                          className="absolute top-2 right-2"
+                          className="absolute top-2 right-2 z-10"
                         >
                           <X className="h-4 w-4" />
                         </Button>
@@ -982,6 +1135,66 @@ export function CreatePostModal({
                     </div>
                   )}
                 </div>
+
+                {/* Text Overlay Controls */}
+                {imagePreview && !imageVideo?.type.startsWith('video/') && (
+                  <div className="space-y-3 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                    <Label className="text-sm font-semibold flex items-center gap-2">
+                      <Type className="h-4 w-4" />
+                      Text Overlay (Drag text on image to position)
+                    </Label>
+                    
+                    <div className="space-y-3">
+                      <div>
+                        <Label className="text-xs text-gray-600 mb-1 block">Text</Label>
+                        <Input
+                          value={overlayText}
+                          onChange={(e) => setOverlayText(e.target.value)}
+                          placeholder="Enter text to overlay on image..."
+                          className="bg-white"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label className="text-xs text-gray-600 mb-1 block">Font Size: {fontSize}px</Label>
+                          <input
+                            type="range"
+                            min="16"
+                            max="72"
+                            value={fontSize}
+                            onChange={(e) => setFontSize(Number(e.target.value))}
+                            className="w-full"
+                          />
+                        </div>
+
+                        <div>
+                          <Label className="text-xs text-gray-600 mb-1 block">Text Color</Label>
+                          <div className="flex gap-2">
+                            <input
+                              type="color"
+                              value={textColor}
+                              onChange={(e) => setTextColor(e.target.value)}
+                              className="w-12 h-9 rounded cursor-pointer"
+                            />
+                            <Input
+                              value={textColor}
+                              onChange={(e) => setTextColor(e.target.value)}
+                              className="flex-1 bg-white text-xs"
+                              placeholder="#FFFFFF"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {overlayText && (
+                        <p className="text-xs text-blue-600">
+                          💡 Tip: Click and drag the text on the image above to reposition it
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* Caption */}
                 <div className="space-y-3">
@@ -1324,7 +1537,7 @@ export function CreatePostModal({
 
                 {/* Post Media */}
                 {imagePreview && (
-                  <div className="w-full bg-gray-100 flex items-center justify-center" style={{ minHeight: '300px', maxHeight: '500px' }}>
+                  <div className="w-full bg-gray-100 flex items-center justify-center relative" style={{ minHeight: '300px', maxHeight: '500px' }}>
                     {imageVideo?.type.startsWith('video/') ? (
                       <video
                         src={imagePreview}
@@ -1332,12 +1545,31 @@ export function CreatePostModal({
                         style={{ maxHeight: '500px' }}
                       />
                     ) : (
-                      <img
-                        src={imagePreview}
-                        alt="Post preview"
-                        className="w-full h-auto object-contain"
-                        style={{ maxHeight: '500px' }}
-                      />
+                      <>
+                        <img
+                          src={imagePreview}
+                          alt="Post preview"
+                          className="w-full h-auto object-contain"
+                          style={{ maxHeight: '500px' }}
+                        />
+                        {/* Text Overlay in Preview */}
+                        {overlayText && (
+                          <div
+                            className="absolute select-none pointer-events-none"
+                            style={{
+                              left: `${textPosition.x}%`,
+                              top: `${textPosition.y}%`,
+                              transform: 'translate(-50%, -50%)',
+                              fontSize: `${fontSize}px`,
+                              color: textColor,
+                              fontWeight: 'bold',
+                              textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
+                            }}
+                          >
+                            {overlayText}
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 )}
