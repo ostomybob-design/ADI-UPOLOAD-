@@ -1,19 +1,40 @@
-[00:00:02.828] Server  LOG     ✓ Ready in 2.6s
-[00:00:06.290] Server  LOG     ○ Compiling / ...
-[00:00:07.510] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
-[00:00:08.812] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
-[00:00:15.902] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
-[00:00:17.958] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
-[00:01:10.707] Server  LOG     ✓ Compiled in 33ms
-[00:01:19.840] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
-[00:01:33.097] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
-[00:01:34.232] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
-[00:01:35.337] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
-[00:01:36.303] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
-[00:01:37.186] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
-[00:01:38.072] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
-[00:01:39.062] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
-[00:01:39.956] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
-[00:02:48.527] Server  LOG     ✓ Compiled in 45ms
-[00:02:57.737] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
-[00:02:58.622] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
+[00:00:00.893] Server  LOG     ✓ Ready in 689ms
+[00:00:05.394] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
+[00:01:00.834] Server  LOG     ✓ Compiled in 301ms
+[00:01:18.472] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
+[00:01:19.647] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
+[00:01:20.523] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
+[00:01:20.777] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
+[00:01:21.629] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
+[00:01:54.479] Server  LOG     ✓ Compiled in 30ms
+[00:02:24.600] Server  LOG     ✓ Compiled in 67ms
+[00:02:24.705] Browser ERROR   ./components/ui/resizable-dialog.tsx:201:10
+Parsing ecmascript source code failed
+  199 |           onMouseDown={(e) => handleMouseDown(e, "sw")}
+  200 |           title="Drag to resize diagonally"
+> 201 |         />
+      |          ^
+  202 |         {/* Bottom-right corner */}
+  203 |         <div
+  204 |           className="absolute bottom-0 right-0 w-3 h-3 cursor-se-resize bg-red-500 hover:bg-red-600 active:bg-red-700 transition-colors"
+
+Unexpected token. Did you mean `{'>'}` or `&gt;`?
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/resizable-dialog.tsx [Client Component Browser]
+    ./components/create-post-modal.tsx [Client Component Browser]
+    ./app/dashboard/page.tsx [Client Component Browser]
+    ./app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/ui/resizable-dialog.tsx [Client Component SSR]
+    ./components/create-post-modal.tsx [Client Component SSR]
+    ./app/dashboard/page.tsx [Client Component SSR]
+    ./app/dashboard/page.tsx [Server Component]
+[00:02:40.593] Server  LOG     ✓ Compiled in 31ms
+[00:02:40.844] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
+[00:02:42.549] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
+[00:02:48.796] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
+[00:02:49.841] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
+[00:02:51.337] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.

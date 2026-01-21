@@ -37,32 +37,20 @@ const ResizableDialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   ResizableDialogContentProps
 >((props, ref) => {
-  const { className, children, minWidth = 400, minHeight = 300, defaultWidth = 672, defaultHeight, ...otherProps } = props
+  const { className, children, minWidth = 400, minHeight = 300, defaultWidth = 672, defaultHeight = 600, ...otherProps } = props
   const contentRef = React.useRef<HTMLDivElement>(null)
   
-  // Initialize size state - simple default, will adjust in useEffect if needed
   const [size, setSize] = React.useState({ 
     width: defaultWidth, 
-    height: defaultHeight || 0 
+    height: defaultHeight 
   })
-  
   const [position, setPosition] = React.useState({ x: 0, y: 0 })
   const [isResizing, setIsResizing] = React.useState(false)
   const [isDragging, setIsDragging] = React.useState(false)
   const [dragStart, setDragStart] = React.useState({ x: 0, y: 0 })
   const [resizeDirection, setResizeDirection] = React.useState<string>("")
-  
-  // Adjust size to viewport on mount
-  React.useEffect(() => {
-    const viewportWidth = window.innerWidth
-    const viewportHeight = window.innerHeight
-    const constrainedWidth = Math.min(defaultWidth, viewportWidth * 0.9)
-    const constrainedHeight = defaultHeight ? Math.min(defaultHeight, viewportHeight * 0.85) : 0
-    setSize({ width: constrainedWidth, height: constrainedHeight })
-  }, [defaultWidth, defaultHeight])
 
   const handleMouseDown = (e: React.MouseEvent, direction: string) => {
-    console.log('🔵 Resize handle clicked:', direction)
     e.preventDefault()
     e.stopPropagation()
     setIsResizing(true)
@@ -96,24 +84,18 @@ const ResizableDialogContent = React.forwardRef<
         let newHeight = prevSize.height
 
         if (resizeDirection.includes("e")) {
-          const centerX = window.innerWidth / 2
-          const deltaX = e.clientX - centerX
-          newWidth = Math.max(minWidth, deltaX * 2)
+          newWidth = Math.max(minWidth, e.clientX - rect.left)
         }
         if (resizeDirection.includes("w")) {
-          const centerX = window.innerWidth / 2
-          const deltaX = centerX - e.clientX
-          newWidth = Math.max(minWidth, deltaX * 2)
+          const deltaX = rect.right - e.clientX
+          newWidth = Math.max(minWidth, deltaX)
         }
         if (resizeDirection.includes("s")) {
-          const centerY = window.innerHeight / 2
-          const deltaY = e.clientY - centerY
-          newHeight = Math.max(minHeight, deltaY * 2)
+          newHeight = Math.max(minHeight, e.clientY - rect.top)
         }
         if (resizeDirection.includes("n")) {
-          const centerY = window.innerHeight / 2
-          const deltaY = centerY - e.clientY
-          newHeight = Math.max(minHeight, deltaY * 2)
+          const deltaY = rect.bottom - e.clientY
+          newHeight = Math.max(minHeight, deltaY)
         }
 
         return { width: newWidth, height: newHeight }
@@ -142,17 +124,16 @@ const ResizableDialogContent = React.forwardRef<
         ref={contentRef}
         className={cn(
           "fixed z-50 border bg-background shadow-lg sm:rounded-lg",
-          "relative",
           className
         )}
         style={{
           left: position.x !== 0 ? `${position.x}px` : '50%',
-          top: position.y !== 0 ? `${position.y}px` : '5vh',
-          transform: position.x === 0 && position.y === 0 ? 'translateX(-50%)' : 'none',
-          width: size.width + 'px',
+          top: position.y !== 0 ? `${position.y}px` : '50%',
+          transform: position.x === 0 && position.y === 0 ? 'translate(-50%, -50%)' : 'none',
+          width: `${size.width}px`,
+          height: `${size.height}px`,
           maxWidth: "90vw",
-          maxHeight: "85vh",
-          height: size.height > 0 ? size.height + 'px' : "auto",
+          maxHeight: "90vh",
           overflow: "hidden",
           cursor: isDragging ? 'move' : 'default'
         }}
@@ -165,66 +146,55 @@ const ResizableDialogContent = React.forwardRef<
           title="Drag to move"
         />
         
-        <div className="relative w-full h-full" style={{ zIndex: 1 }}>
+        <div className="relative w-full h-full overflow-auto" style={{ zIndex: 1 }}>
           {children}
         </div>
 
-        {/* Resize handles - highly visible and easy to grab */}
+        {/* Resize handles */}
         {/* Top */}
         <div
-          className="absolute top-0 left-0 right-0 h-1 cursor-n-resize bg-red-500 hover:bg-red-600 active:bg-red-700 transition-colors"
-          style={{ zIndex: 9999, pointerEvents: 'auto' }}
+          className="resize-handle absolute top-0 left-0 right-0 h-2 cursor-n-resize hover:bg-blue-500/20 transition-colors"
+          style={{ zIndex: 9999 }}
           onMouseDown={(e) => handleMouseDown(e, "n")}
-          title="Drag to resize vertically"
         />
         {/* Right */}
         <div
-          className="absolute top-0 right-0 bottom-0 w-1 cursor-e-resize bg-red-500 hover:bg-red-600 active:bg-red-700 transition-colors"
-          style={{ zIndex: 9999, pointerEvents: 'auto' }}
+          className="resize-handle absolute top-0 right-0 bottom-0 w-2 cursor-e-resize hover:bg-blue-500/20 transition-colors"
+          style={{ zIndex: 9999 }}
           onMouseDown={(e) => handleMouseDown(e, "e")}
-          title="Drag to resize horizontally"
         />
         {/* Bottom */}
         <div
-          className="absolute bottom-0 left-0 right-0 h-1 cursor-s-resize bg-red-500 hover:bg-red-600 active:bg-red-700 transition-colors"
-          style={{ zIndex: 9999, pointerEvents: 'auto' }}
+          className="resize-handle absolute bottom-0 left-0 right-0 h-2 cursor-s-resize hover:bg-blue-500/20 transition-colors"
+          style={{ zIndex: 9999 }}
           onMouseDown={(e) => handleMouseDown(e, "s")}
-          title="Drag to resize vertically"
         />
         {/* Left */}
         <div
-          className="absolute top-0 left-0 bottom-0 w-1 cursor-w-resize bg-red-500 hover:bg-red-600 active:bg-red-700 transition-colors"
-          style={{ zIndex: 9999, pointerEvents: 'auto' }}
+          className="resize-handle absolute top-0 left-0 bottom-0 w-2 cursor-w-resize hover:bg-blue-500/20 transition-colors"
+          style={{ zIndex: 9999 }}
           onMouseDown={(e) => handleMouseDown(e, "w")}
-          title="Drag to resize horizontally"
         />
-        {/* Top-left corner */}
+        {/* Corners */}
         <div
-          className="absolute top-0 left-0 w-3 h-3 cursor-nw-resize bg-red-500 hover:bg-red-600 active:bg-red-700 transition-colors"
-          style={{ zIndex: 10000, pointerEvents: 'auto' }}
+          className="resize-handle absolute top-0 left-0 w-4 h-4 cursor-nw-resize hover:bg-blue-500/30"
+          style={{ zIndex: 10000 }}
           onMouseDown={(e) => handleMouseDown(e, "nw")}
-          title="Drag to resize diagonally"
         />
-        {/* Top-right corner */}
         <div
-          className="absolute top-0 right-0 w-3 h-3 cursor-ne-resize bg-red-500 hover:bg-red-600 active:bg-red-700 transition-colors"
-          style={{ zIndex: 10000, pointerEvents: 'auto' }}
+          className="resize-handle absolute top-0 right-0 w-4 h-4 cursor-ne-resize hover:bg-blue-500/30"
+          style={{ zIndex: 10000 }}
           onMouseDown={(e) => handleMouseDown(e, "ne")}
-          title="Drag to resize diagonally"
         />
-        {/* Bottom-left corner */}
         <div
-          className="absolute bottom-0 left-0 w-3 h-3 cursor-sw-resize bg-red-500 hover:bg-red-600 active:bg-red-700 transition-colors"
-          style={{ zIndex: 10000, pointerEvents: 'auto' }}
+          className="resize-handle absolute bottom-0 left-0 w-4 h-4 cursor-sw-resize hover:bg-blue-500/30"
+          style={{ zIndex: 10000 }}
           onMouseDown={(e) => handleMouseDown(e, "sw")}
-          title="Drag to resize diagonally"
         />
-        {/* Bottom-right corner */}
         <div
-          className="absolute bottom-0 right-0 w-3 h-3 cursor-se-resize bg-red-500 hover:bg-red-600 active:bg-red-700 transition-colors"
-          style={{ zIndex: 10000, pointerEvents: 'auto' }}
+          className="resize-handle absolute bottom-0 right-0 w-4 h-4 cursor-se-resize hover:bg-blue-500/30"
+          style={{ zIndex: 10000 }}
           onMouseDown={(e) => handleMouseDown(e, "se")}
-          title="Drag to resize diagonally"
         />
         
         <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground" style={{ zIndex: 102 }}>

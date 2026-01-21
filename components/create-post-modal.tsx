@@ -33,7 +33,7 @@ import {
   ResizableDialogTitle as DialogTitle,
   ResizableDialogDescription as DialogDescription,
   ResizableDialogFooter as DialogFooter
-} from "@/components/ui/resizable-dialog-simple";
+} from "@/components/ui/resizable-dialog";
 
 // Component to handle individual additional image loading
 function AdditionalImageThumbnail({

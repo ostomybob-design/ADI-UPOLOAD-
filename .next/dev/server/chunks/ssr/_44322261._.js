@@ -3556,12 +3556,11 @@ const ResizableDialogOverlay = /*#__PURE__*/ __TURBOPACK__imported__module__$5b$
     }, ("TURBOPACK compile-time value", void 0)));
 ResizableDialogOverlay.displayName = "ResizableDialogOverlay";
 const ResizableDialogContent = /*#__PURE__*/ __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["forwardRef"]((props, ref)=>{
-    const { className, children, minWidth = 400, minHeight = 300, defaultWidth = 672, defaultHeight, ...otherProps } = props;
+    const { className, children, minWidth = 400, minHeight = 300, defaultWidth = 672, defaultHeight = 600, ...otherProps } = props;
     const contentRef = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"](null);
-    // Initialize size state - simple default, will adjust in useEffect if needed
     const [size, setSize] = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"]({
         width: defaultWidth,
-        height: defaultHeight || 0
+        height: defaultHeight
     });
     const [position, setPosition] = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"]({
         x: 0,
@@ -3574,22 +3573,7 @@ const ResizableDialogContent = /*#__PURE__*/ __TURBOPACK__imported__module__$5b$
         y: 0
     });
     const [resizeDirection, setResizeDirection] = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"]("");
-    // Adjust size to viewport on mount
-    __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"](()=>{
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        const constrainedWidth = Math.min(defaultWidth, viewportWidth * 0.9);
-        const constrainedHeight = defaultHeight ? Math.min(defaultHeight, viewportHeight * 0.85) : 0;
-        setSize({
-            width: constrainedWidth,
-            height: constrainedHeight
-        });
-    }, [
-        defaultWidth,
-        defaultHeight
-    ]);
     const handleMouseDown = (e, direction)=>{
-        console.log('🔵 Resize handle clicked:', direction);
         e.preventDefault();
         e.stopPropagation();
         setIsResizing(true);
@@ -3622,24 +3606,18 @@ const ResizableDialogContent = /*#__PURE__*/ __TURBOPACK__imported__module__$5b$
                 let newWidth = prevSize.width;
                 let newHeight = prevSize.height;
                 if (resizeDirection.includes("e")) {
-                    const centerX = window.innerWidth / 2;
-                    const deltaX = e.clientX - centerX;
-                    newWidth = Math.max(minWidth, deltaX * 2);
+                    newWidth = Math.max(minWidth, e.clientX - rect.left);
                 }
                 if (resizeDirection.includes("w")) {
-                    const centerX = window.innerWidth / 2;
-                    const deltaX = centerX - e.clientX;
-                    newWidth = Math.max(minWidth, deltaX * 2);
+                    const deltaX = rect.right - e.clientX;
+                    newWidth = Math.max(minWidth, deltaX);
                 }
                 if (resizeDirection.includes("s")) {
-                    const centerY = window.innerHeight / 2;
-                    const deltaY = e.clientY - centerY;
-                    newHeight = Math.max(minHeight, deltaY * 2);
+                    newHeight = Math.max(minHeight, e.clientY - rect.top);
                 }
                 if (resizeDirection.includes("n")) {
-                    const centerY = window.innerHeight / 2;
-                    const deltaY = centerY - e.clientY;
-                    newHeight = Math.max(minHeight, deltaY * 2);
+                    const deltaY = rect.bottom - e.clientY;
+                    newHeight = Math.max(minHeight, deltaY);
                 }
                 return {
                     width: newWidth,
@@ -3671,20 +3649,20 @@ const ResizableDialogContent = /*#__PURE__*/ __TURBOPACK__imported__module__$5b$
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(ResizableDialogOverlay, {}, void 0, false, {
                 fileName: "[project]/components/ui/resizable-dialog.tsx",
-                lineNumber: 140,
+                lineNumber: 122,
                 columnNumber: 7
             }, ("TURBOPACK compile-time value", void 0)),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$radix$2d$ui$2f$react$2d$dialog$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Content"], {
                 ref: contentRef,
-                className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$utils$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["cn"])("fixed z-50 border bg-background shadow-lg sm:rounded-lg", "relative", className),
+                className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$utils$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["cn"])("fixed z-50 border bg-background shadow-lg sm:rounded-lg", className),
                 style: {
                     left: position.x !== 0 ? `${position.x}px` : '50%',
-                    top: position.y !== 0 ? `${position.y}px` : '5vh',
-                    transform: position.x === 0 && position.y === 0 ? 'translateX(-50%)' : 'none',
-                    width: size.width + 'px',
+                    top: position.y !== 0 ? `${position.y}px` : '50%',
+                    transform: position.x === 0 && position.y === 0 ? 'translate(-50%, -50%)' : 'none',
+                    width: `${size.width}px`,
+                    height: `${size.height}px`,
                     maxWidth: "90vw",
-                    maxHeight: "85vh",
-                    height: size.height > 0 ? size.height + 'px' : "auto",
+                    maxHeight: "90vh",
                     overflow: "hidden",
                     cursor: isDragging ? 'move' : 'default'
                 },
@@ -3696,122 +3674,106 @@ const ResizableDialogContent = /*#__PURE__*/ __TURBOPACK__imported__module__$5b$
                         title: "Drag to move"
                     }, void 0, false, {
                         fileName: "[project]/components/ui/resizable-dialog.tsx",
-                        lineNumber: 162,
+                        lineNumber: 143,
                         columnNumber: 9
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "relative w-full h-full",
+                        className: "relative w-full h-full overflow-auto",
                         style: {
                             zIndex: 1
                         },
                         children: children
                     }, void 0, false, {
                         fileName: "[project]/components/ui/resizable-dialog.tsx",
-                        lineNumber: 168,
+                        lineNumber: 149,
                         columnNumber: 9
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "absolute top-0 left-0 right-0 h-1 cursor-n-resize bg-red-500 hover:bg-red-600 active:bg-red-700 transition-colors",
+                        className: "resize-handle absolute top-0 left-0 right-0 h-2 cursor-n-resize hover:bg-blue-500/20 transition-colors",
                         style: {
-                            zIndex: 9999,
-                            pointerEvents: 'auto'
+                            zIndex: 9999
                         },
-                        onMouseDown: (e)=>handleMouseDown(e, "n"),
-                        title: "Drag to resize vertically"
+                        onMouseDown: (e)=>handleMouseDown(e, "n")
                     }, void 0, false, {
                         fileName: "[project]/components/ui/resizable-dialog.tsx",
-                        lineNumber: 174,
+                        lineNumber: 155,
                         columnNumber: 9
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "absolute top-0 right-0 bottom-0 w-1 cursor-e-resize bg-red-500 hover:bg-red-600 active:bg-red-700 transition-colors",
+                        className: "resize-handle absolute top-0 right-0 bottom-0 w-2 cursor-e-resize hover:bg-blue-500/20 transition-colors",
                         style: {
-                            zIndex: 9999,
-                            pointerEvents: 'auto'
+                            zIndex: 9999
                         },
-                        onMouseDown: (e)=>handleMouseDown(e, "e"),
-                        title: "Drag to resize horizontally"
+                        onMouseDown: (e)=>handleMouseDown(e, "e")
                     }, void 0, false, {
                         fileName: "[project]/components/ui/resizable-dialog.tsx",
-                        lineNumber: 181,
+                        lineNumber: 161,
                         columnNumber: 9
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "absolute bottom-0 left-0 right-0 h-1 cursor-s-resize bg-red-500 hover:bg-red-600 active:bg-red-700 transition-colors",
+                        className: "resize-handle absolute bottom-0 left-0 right-0 h-2 cursor-s-resize hover:bg-blue-500/20 transition-colors",
                         style: {
-                            zIndex: 9999,
-                            pointerEvents: 'auto'
+                            zIndex: 9999
                         },
-                        onMouseDown: (e)=>handleMouseDown(e, "s"),
-                        title: "Drag to resize vertically"
+                        onMouseDown: (e)=>handleMouseDown(e, "s")
                     }, void 0, false, {
                         fileName: "[project]/components/ui/resizable-dialog.tsx",
-                        lineNumber: 188,
+                        lineNumber: 167,
                         columnNumber: 9
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "absolute top-0 left-0 bottom-0 w-1 cursor-w-resize bg-red-500 hover:bg-red-600 active:bg-red-700 transition-colors",
+                        className: "resize-handle absolute top-0 left-0 bottom-0 w-2 cursor-w-resize hover:bg-blue-500/20 transition-colors",
                         style: {
-                            zIndex: 9999,
-                            pointerEvents: 'auto'
+                            zIndex: 9999
                         },
-                        onMouseDown: (e)=>handleMouseDown(e, "w"),
-                        title: "Drag to resize horizontally"
+                        onMouseDown: (e)=>handleMouseDown(e, "w")
                     }, void 0, false, {
                         fileName: "[project]/components/ui/resizable-dialog.tsx",
-                        lineNumber: 195,
+                        lineNumber: 173,
                         columnNumber: 9
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "absolute top-0 left-0 w-3 h-3 cursor-nw-resize bg-red-500 hover:bg-red-600 active:bg-red-700 transition-colors",
+                        className: "resize-handle absolute top-0 left-0 w-4 h-4 cursor-nw-resize hover:bg-blue-500/30",
                         style: {
-                            zIndex: 10000,
-                            pointerEvents: 'auto'
+                            zIndex: 10000
                         },
-                        onMouseDown: (e)=>handleMouseDown(e, "nw"),
-                        title: "Drag to resize diagonally"
+                        onMouseDown: (e)=>handleMouseDown(e, "nw")
                     }, void 0, false, {
                         fileName: "[project]/components/ui/resizable-dialog.tsx",
-                        lineNumber: 202,
+                        lineNumber: 179,
                         columnNumber: 9
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "absolute top-0 right-0 w-3 h-3 cursor-ne-resize bg-red-500 hover:bg-red-600 active:bg-red-700 transition-colors",
+                        className: "resize-handle absolute top-0 right-0 w-4 h-4 cursor-ne-resize hover:bg-blue-500/30",
                         style: {
-                            zIndex: 10000,
-                            pointerEvents: 'auto'
+                            zIndex: 10000
                         },
-                        onMouseDown: (e)=>handleMouseDown(e, "ne"),
-                        title: "Drag to resize diagonally"
+                        onMouseDown: (e)=>handleMouseDown(e, "ne")
                     }, void 0, false, {
                         fileName: "[project]/components/ui/resizable-dialog.tsx",
-                        lineNumber: 209,
+                        lineNumber: 184,
                         columnNumber: 9
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "absolute bottom-0 left-0 w-3 h-3 cursor-sw-resize bg-red-500 hover:bg-red-600 active:bg-red-700 transition-colors",
+                        className: "resize-handle absolute bottom-0 left-0 w-4 h-4 cursor-sw-resize hover:bg-blue-500/30",
                         style: {
-                            zIndex: 10000,
-                            pointerEvents: 'auto'
+                            zIndex: 10000
                         },
-                        onMouseDown: (e)=>handleMouseDown(e, "sw"),
-                        title: "Drag to resize diagonally"
+                        onMouseDown: (e)=>handleMouseDown(e, "sw")
                     }, void 0, false, {
                         fileName: "[project]/components/ui/resizable-dialog.tsx",
-                        lineNumber: 216,
+                        lineNumber: 189,
                         columnNumber: 9
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "absolute bottom-0 right-0 w-3 h-3 cursor-se-resize bg-red-500 hover:bg-red-600 active:bg-red-700 transition-colors",
+                        className: "resize-handle absolute bottom-0 right-0 w-4 h-4 cursor-se-resize hover:bg-blue-500/30",
                         style: {
-                            zIndex: 10000,
-                            pointerEvents: 'auto'
+                            zIndex: 10000
                         },
-                        onMouseDown: (e)=>handleMouseDown(e, "se"),
-                        title: "Drag to resize diagonally"
+                        onMouseDown: (e)=>handleMouseDown(e, "se")
                     }, void 0, false, {
                         fileName: "[project]/components/ui/resizable-dialog.tsx",
-                        lineNumber: 223,
+                        lineNumber: 194,
                         columnNumber: 9
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$radix$2d$ui$2f$react$2d$dialog$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Close"], {
@@ -3824,7 +3786,7 @@ const ResizableDialogContent = /*#__PURE__*/ __TURBOPACK__imported__module__$5b$
                                 className: "h-4 w-4"
                             }, void 0, false, {
                                 fileName: "[project]/components/ui/resizable-dialog.tsx",
-                                lineNumber: 231,
+                                lineNumber: 201,
                                 columnNumber: 11
                             }, ("TURBOPACK compile-time value", void 0)),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -3832,25 +3794,25 @@ const ResizableDialogContent = /*#__PURE__*/ __TURBOPACK__imported__module__$5b$
                                 children: "Close"
                             }, void 0, false, {
                                 fileName: "[project]/components/ui/resizable-dialog.tsx",
-                                lineNumber: 232,
+                                lineNumber: 202,
                                 columnNumber: 11
                             }, ("TURBOPACK compile-time value", void 0))
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/ui/resizable-dialog.tsx",
-                        lineNumber: 230,
+                        lineNumber: 200,
                         columnNumber: 9
                     }, ("TURBOPACK compile-time value", void 0))
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/ui/resizable-dialog.tsx",
-                lineNumber: 141,
+                lineNumber: 123,
                 columnNumber: 7
             }, ("TURBOPACK compile-time value", void 0))
         ]
     }, void 0, true, {
         fileName: "[project]/components/ui/resizable-dialog.tsx",
-        lineNumber: 139,
+        lineNumber: 121,
         columnNumber: 5
     }, ("TURBOPACK compile-time value", void 0));
 });
@@ -3860,7 +3822,7 @@ const ResizableDialogHeader = ({ className, ...props })=>/*#__PURE__*/ (0, __TUR
         ...props
     }, void 0, false, {
         fileName: "[project]/components/ui/resizable-dialog.tsx",
-        lineNumber: 244,
+        lineNumber: 214,
         columnNumber: 3
     }, ("TURBOPACK compile-time value", void 0));
 ResizableDialogHeader.displayName = "ResizableDialogHeader";
@@ -3869,7 +3831,7 @@ const ResizableDialogFooter = ({ className, ...props })=>/*#__PURE__*/ (0, __TUR
         ...props
     }, void 0, false, {
         fileName: "[project]/components/ui/resizable-dialog.tsx",
-        lineNumber: 258,
+        lineNumber: 228,
         columnNumber: 3
     }, ("TURBOPACK compile-time value", void 0));
 ResizableDialogFooter.displayName = "ResizableDialogFooter";
@@ -3879,7 +3841,7 @@ const ResizableDialogTitle = /*#__PURE__*/ __TURBOPACK__imported__module__$5b$pr
         ...props
     }, void 0, false, {
         fileName: "[project]/components/ui/resizable-dialog.tsx",
-        lineNumber: 272,
+        lineNumber: 242,
         columnNumber: 3
     }, ("TURBOPACK compile-time value", void 0)));
 ResizableDialogTitle.displayName = "ResizableDialogTitle";
@@ -3889,7 +3851,7 @@ const ResizableDialogDescription = /*#__PURE__*/ __TURBOPACK__imported__module__
         ...props
     }, void 0, false, {
         fileName: "[project]/components/ui/resizable-dialog.tsx",
-        lineNumber: 287,
+        lineNumber: 257,
         columnNumber: 3
     }, ("TURBOPACK compile-time value", void 0)));
 ResizableDialogDescription.displayName = "ResizableDialogDescription";
