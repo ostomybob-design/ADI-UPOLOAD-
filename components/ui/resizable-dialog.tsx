@@ -36,13 +36,18 @@ interface ResizableDialogContentProps
 const ResizableDialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   ResizableDialogContentProps
->(({ className, children, minWidth = 400, minHeight = 300, defaultWidth = 672, defaultHeight, ...props }, ref) => {
+)(({ className, children, minWidth = 400, minHeight = 300, defaultWidth = 672, defaultHeight, ...props }, ref) => {
   const contentRef = React.useRef<HTMLDivElement>(null)
-  const [size, setSize] = React.useState({ width: defaultWidth, height: defaultHeight || 0 })
+  
+  // Constrain initial size to viewport
+  const constrainedWidth = Math.min(defaultWidth, typeof window !== 'undefined' ? window.innerWidth * 0.9 : defaultWidth)
+  const constrainedHeight = defaultHeight ? Math.min(defaultHeight, typeof window !== 'undefined' ? window.innerHeight * 0.9 : defaultHeight) : 0
+  
+  const [size, setSize] = React.useState({ width: constrainedWidth, height: constrainedHeight })
   const [isResizing, setIsResizing] = React.useState(false)
   const [resizeDirection, setResizeDirection] = React.useState<string>("")
 
-  console.log('🔵 ResizableDialog size:', size, 'defaultWidth:', defaultWidth, 'defaultHeight:', defaultHeight)
+  console.log('🔵 ResizableDialog size:', size, 'defaultWidth:', defaultWidth, 'defaultHeight:', defaultHeight, 'constrained:', constrainedWidth, constrainedHeight)
 
   const handleMouseDown = (e: React.MouseEvent, direction: string) => {
     console.log('🔵 Resize handle clicked:', direction)
@@ -109,15 +114,15 @@ const ResizableDialogContent = React.forwardRef<
       <DialogPrimitive.Content
         ref={contentRef}
         className={cn(
-          "fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%] border bg-background shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
+          "fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%] border bg-background shadow-lg sm:rounded-lg",
           "relative",
           className
         )}
         style={{
-          width: `${size.width}px`,
+          width: Math.min(size.width, window.innerWidth * 0.9) + 'px',
           maxWidth: "90vw",
           maxHeight: "90vh",
-          height: size.height > 0 ? `${size.height}px` : "auto",
+          height: size.height > 0 ? Math.min(size.height, window.innerHeight * 0.9) + 'px' : "auto",
           overflow: "hidden"
         }}
         {...props}
