@@ -694,6 +694,13 @@ export function CreatePostModal({
           posted_on_facebook: postOnFacebook,
           raw_data: rawData,
         };
+        
+        console.log("📝 Updates object:", {
+          ...updates,
+          main_image_url: mediaUrl,
+          has_text_overlay: !!overlayText,
+          text_overlay_data: rawData
+        });
 
         // Handle Late.dev post updates
         if (latePostId) {

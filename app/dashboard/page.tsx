@@ -189,7 +189,11 @@ export default function DashboardPage() {
       console.log("⏳ Pending posts found:", filtered.length)
     } else if (activeTab === "approved") {
       console.log("✅ Filtering for approved posts...")
-      filtered = filtered.filter(post => post.approval_status === "approved")
+      // Exclude posts that have been scheduled to Late.dev
+      filtered = filtered.filter(post => 
+        post.approval_status === "approved" && 
+        !post.late_post_id // Exclude if it has a Late.dev post ID (it's scheduled)
+      )
       console.log("✅ Approved posts found:", filtered.length)
     } else if (activeTab === "scheduled") {
       console.log("📅 Filtering for scheduled posts from Late.dev...")
