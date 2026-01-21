@@ -118,45 +118,45 @@ const ResizableDialogContent = React.forwardRef<
         }}
         {...props}
       >
-        {/* Resize handles */}
+        {/* Resize handles - larger hit areas for better usability */}
         {/* Top */}
         <div
-          className="absolute top-0 left-0 right-0 h-1 cursor-n-resize hover:bg-blue-500/50 transition-colors"
+          className="absolute top-0 left-0 right-0 h-2 cursor-n-resize hover:bg-blue-500/30 transition-colors z-20"
           onMouseDown={(e) => handleMouseDown(e, "n")}
         />
         {/* Right */}
         <div
-          className="absolute top-0 right-0 bottom-0 w-1 cursor-e-resize hover:bg-blue-500/50 transition-colors"
+          className="absolute top-0 right-0 bottom-0 w-2 cursor-e-resize hover:bg-blue-500/30 transition-colors z-20"
           onMouseDown={(e) => handleMouseDown(e, "e")}
         />
         {/* Bottom */}
         <div
-          className="absolute bottom-0 left-0 right-0 h-1 cursor-s-resize hover:bg-blue-500/50 transition-colors"
+          className="absolute bottom-0 left-0 right-0 h-2 cursor-s-resize hover:bg-blue-500/30 transition-colors z-20"
           onMouseDown={(e) => handleMouseDown(e, "s")}
         />
         {/* Left */}
         <div
-          className="absolute top-0 left-0 bottom-0 w-1 cursor-w-resize hover:bg-blue-500/50 transition-colors"
+          className="absolute top-0 left-0 bottom-0 w-2 cursor-w-resize hover:bg-blue-500/30 transition-colors z-20"
           onMouseDown={(e) => handleMouseDown(e, "w")}
         />
         {/* Top-left corner */}
         <div
-          className="absolute top-0 left-0 w-3 h-3 cursor-nw-resize hover:bg-blue-500/50 transition-colors"
+          className="absolute top-0 left-0 w-4 h-4 cursor-nw-resize hover:bg-blue-500/30 transition-colors z-30"
           onMouseDown={(e) => handleMouseDown(e, "nw")}
         />
         {/* Top-right corner */}
         <div
-          className="absolute top-0 right-0 w-3 h-3 cursor-ne-resize hover:bg-blue-500/50 transition-colors"
+          className="absolute top-0 right-0 w-4 h-4 cursor-ne-resize hover:bg-blue-500/30 transition-colors z-30"
           onMouseDown={(e) => handleMouseDown(e, "ne")}
         />
         {/* Bottom-left corner */}
         <div
-          className="absolute bottom-0 left-0 w-3 h-3 cursor-sw-resize hover:bg-blue-500/50 transition-colors"
+          className="absolute bottom-0 left-0 w-4 h-4 cursor-sw-resize hover:bg-blue-500/30 transition-colors z-30"
           onMouseDown={(e) => handleMouseDown(e, "sw")}
         />
         {/* Bottom-right corner */}
         <div
-          className="absolute bottom-0 right-0 w-3 h-3 cursor-se-resize hover:bg-blue-500/50 transition-colors"
+          className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize hover:bg-blue-500/30 transition-colors z-30"
           onMouseDown={(e) => handleMouseDown(e, "se")}
         />
 
