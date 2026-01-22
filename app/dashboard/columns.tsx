@@ -160,14 +160,24 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
 
   const handleUnschedule = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    
+    // For Late.dev-only posts (id: -1), warn that they can only be deleted from Late.dev
+    if (post.id === -1) {
+      alert("This post exists only in Late.dev. Please unschedule it directly from Late.dev or delete it there.");
+      return;
+    }
+    
     if (!confirm("Unschedule this post? It will be deleted from Late.dev and moved back to pending.")) return;
 
     setIsUnscheduling(true);
     try {
+      // Use late_post_id if available (for scheduled posts), otherwise use database id
+      const idToUse = post.late_post_id || post.id;
+      
       const response = await fetch("/api/posts/unschedule", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ postId: post.id })
+        body: JSON.stringify({ postId: idToUse })
       });
 
       if (response.ok) {
@@ -279,8 +289,8 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
     );
   }
 
-  // Scheduled tab: Show unschedule button
-  if (post.late_post_id && post.late_scheduled_for && !post.late_published_at) {
+  // Scheduled tab: Show unschedule button (including for Late.dev-only posts)
+  if ((post.late_post_id || post.id === -1) && post.late_scheduled_for && !post.late_published_at) {
     return (
       <div className="flex gap-1">
         <Button
@@ -289,7 +299,7 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
           onClick={handleUnschedule}
           disabled={isUnscheduling}
           className="h-7 px-2 text-orange-600 hover:text-orange-700 hover:bg-orange-50 disabled:opacity-50"
-          title="Unschedule and move to pending"
+          title={post.id === -1 ? "Delete from Late.dev (no local record)" : "Unschedule and move to pending"}
         >
           {isUnscheduling ? (
             <Loader2 className="h-4 w-4 animate-spin" />

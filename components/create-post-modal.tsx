@@ -901,7 +901,10 @@ export function CreatePostModal({
             updates.approved_at = new Date();
             updates.approved_by = "user";
 
-            console.log("✅ Late.dev post created:", latePost.id);
+            console.log("✅ Late.dev post created successfully!");
+            console.log("📋 Late.dev post ID:", latePost.id);
+            console.log("📋 Late.dev post status:", latePost.status);
+            console.log("📋 Will update database with late_post_id:", updates.late_post_id);
           } catch (scheduleError: any) {
             console.error("❌ Scheduling error:", scheduleError);
             alert(`Failed to schedule post: ${scheduleError.message}`);
