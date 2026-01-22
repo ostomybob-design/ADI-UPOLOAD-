@@ -16,11 +16,13 @@ export async function POST(req: Request) {
     console.log("✅ Late.dev API returned:", JSON.stringify(result, null, 2));
     console.log("🔍 Result type:", typeof result);
     console.log("🔍 Result keys:", Object.keys(result));
-    console.log("🔍 Result.id:", result.id);
-    console.log("🔍 Result._id:", (result as any)._id);
-    console.log("🔍 Result.data:", (result as any).data);
     
-    return NextResponse.json(result, { status: 201 });
+    // Late.dev wraps the response in a 'post' property
+    // Return the post object directly for easier access
+    const postData = (result as any).post || result;
+    console.log("� Returning post data:", postData);
+    
+    return NextResponse.json(postData, { status: 201 });
   } catch (error) {
     console.error("❌ Error creating post via Late API:", error);
     console.error("❌ Error details:", (error as Error).message);

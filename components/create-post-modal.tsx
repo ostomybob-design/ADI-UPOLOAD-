@@ -950,11 +950,21 @@ export function CreatePostModal({
 
             const latePost = await lateResponse.json();
 
-            // Update local post with Late.dev info and approve it
-            const latePostIdValue = latePost.id || latePost._id;
+            // Debug: Log the full response structure
+            console.log("🔍 Full Late.dev response:", latePost);
+            console.log("🔍 Response type:", typeof latePost);
+            console.log("🔍 Response keys:", Object.keys(latePost));
+            
+            // Extract post ID - Late.dev wraps response in 'post' property
+            // Look for: post._id, post.id, _id, or id
+            const latePostIdValue = 
+              latePost._id || 
+              latePost.id || 
+              (latePost.post && (latePost.post._id || latePost.post.id));
             
             if (!latePostIdValue) {
               console.error("❌ Late.dev response missing ID:", latePost);
+              console.error("❌ Could not find ID in: post._id, post.id, _id, or id");
               throw new Error("Late.dev post created but no ID returned");
             }
             
