@@ -1279,8 +1279,8 @@ export function CreatePostModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        defaultWidth={896} 
-        defaultHeight={700}
+        defaultWidth={1400} 
+        defaultHeight={900}
         minWidth={600} 
         minHeight={500}
         className="p-0"
