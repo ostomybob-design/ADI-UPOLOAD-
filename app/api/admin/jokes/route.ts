@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/firebase-admin";
+import { FieldValue } from 'firebase-admin/firestore';
 
 // GET joke(s) of the day
 export async function GET(request: NextRequest) {
@@ -9,15 +10,28 @@ export async function GET(request: NextRequest) {
     
     if (date) {
       // Get joke for specific date
-      const joke = await prisma.joke_of_the_day.findUnique({
-        where: { date: new Date(date) }
-      });
-      return NextResponse.json(joke);
+      const snapshot = await db.collection('joke_of_the_day')
+        .where('date', '==', date)
+        .limit(1)
+        .get();
+      
+      if (snapshot.empty) {
+        return NextResponse.json(null);
+      }
+      
+      const doc = snapshot.docs[0];
+      return NextResponse.json({ id: doc.id, ...doc.data() });
     } else {
       // Get all jokes
-      const jokes = await prisma.joke_of_the_day.findMany({
-        orderBy: { date: 'desc' }
-      });
+      const snapshot = await db.collection('joke_of_the_day')
+        .orderBy('date', 'desc')
+        .get();
+      
+      const jokes = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      
       return NextResponse.json(jokes);
     }
   } catch (error) {
@@ -42,24 +56,33 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const newJoke = await prisma.joke_of_the_day.create({
-      data: {
-        joke,
-        punchline,
-        date: new Date(date),
-        is_active,
-      }
-    });
+    // Check if joke already exists for this date
+    const existingJoke = await db.collection('joke_of_the_day')
+      .where('date', '==', date)
+      .get();
     
-    return NextResponse.json(newJoke, { status: 201 });
-  } catch (error: any) {
-    console.error("Error creating joke:", error);
-    if (error.code === 'P2002') {
+    if (!existingJoke.empty) {
       return NextResponse.json(
         { error: "A joke already exists for this date" },
         { status: 409 }
       );
     }
+    
+    const docRef = await db.collection('joke_of_the_day').add({
+      joke,
+      punchline: punchline || null,
+      date,
+      is_active,
+      created_at: FieldValue.serverTimestamp(),
+      updated_at: FieldValue.serverTimestamp(),
+    });
+    
+    const newDoc = await docRef.get();
+    const newJoke = { id: newDoc.id, ...newDoc.data() };
+    
+    return NextResponse.json(newJoke, { status: 201 });
+  } catch (error: any) {
+    console.error("Error creating joke:", error);
     return NextResponse.json(
       { error: "Failed to create joke" },
       { status: 500 }
@@ -80,18 +103,27 @@ export async function PATCH(request: NextRequest) {
       );
     }
     
-    // Convert date string to Date if present
+    // If updating date, check for conflicts
     if (updates.date) {
-      updates.date = new Date(updates.date);
+      const existingJoke = await db.collection('joke_of_the_day')
+        .where('date', '==', updates.date)
+        .get();
+      
+      if (!existingJoke.empty && existingJoke.docs[0].id !== id) {
+        return NextResponse.json(
+          { error: "A joke already exists for this date" },
+          { status: 409 }
+        );
+      }
     }
     
-    const updatedJoke = await prisma.joke_of_the_day.update({
-      where: { id },
-      data: {
-        ...updates,
-        updated_at: new Date(),
-      }
+    await db.collection('joke_of_the_day').doc(id).update({
+      ...updates,
+      updated_at: FieldValue.serverTimestamp(),
     });
+    
+    const updatedDoc = await db.collection('joke_of_the_day').doc(id).get();
+    const updatedJoke = { id: updatedDoc.id, ...updatedDoc.data() };
     
     return NextResponse.json(updatedJoke);
   } catch (error) {
@@ -116,9 +148,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
     
-    await prisma.joke_of_the_day.delete({
-      where: { id: parseInt(id) }
-    });
+    await db.collection('joke_of_the_day').doc(id).delete();
     
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -1,15 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/firebase-admin";
+import { FieldValue } from 'firebase-admin/firestore';
 
 // GET all ticker messages
 export async function GET() {
   try {
-    const messages = await prisma.ticker_messages.findMany({
-      orderBy: [
-        { order_index: 'asc' },
-        { created_at: 'desc' }
-      ]
-    });
+    const snapshot = await db.collection('ticker_messages')
+      .orderBy('order_index', 'asc')
+      .orderBy('created_at', 'desc')
+      .get();
+    
+    const messages = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
     
     return NextResponse.json(messages);
   } catch (error) {
@@ -34,13 +38,16 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const newMessage = await prisma.ticker_messages.create({
-      data: {
-        message,
-        is_active,
-        order_index,
-      }
+    const docRef = await db.collection('ticker_messages').add({
+      message,
+      is_active,
+      order_index,
+      created_at: FieldValue.serverTimestamp(),
+      updated_at: FieldValue.serverTimestamp(),
     });
+    
+    const newDoc = await docRef.get();
+    const newMessage = { id: newDoc.id, ...newDoc.data() };
     
     return NextResponse.json(newMessage, { status: 201 });
   } catch (error) {
@@ -65,13 +72,13 @@ export async function PATCH(request: NextRequest) {
       );
     }
     
-    const updatedMessage = await prisma.ticker_messages.update({
-      where: { id },
-      data: {
-        ...updates,
-        updated_at: new Date(),
-      }
+    await db.collection('ticker_messages').doc(id).update({
+      ...updates,
+      updated_at: FieldValue.serverTimestamp(),
     });
+    
+    const updatedDoc = await db.collection('ticker_messages').doc(id).get();
+    const updatedMessage = { id: updatedDoc.id, ...updatedDoc.data() };
     
     return NextResponse.json(updatedMessage);
   } catch (error) {
@@ -96,9 +103,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
     
-    await prisma.ticker_messages.delete({
-      where: { id: parseInt(id) }
-    });
+    await db.collection('ticker_messages').doc(id).delete();
     
     return NextResponse.json({ success: true });
   } catch (error) {

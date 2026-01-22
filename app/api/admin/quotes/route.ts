@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/firebase-admin";
+import { FieldValue } from 'firebase-admin/firestore';
 
 // GET all quotes
 export async function GET() {
   try {
-    const quotes = await prisma.quotes.findMany({
-      orderBy: { created_at: 'desc' }
-    });
+    const snapshot = await db.collection('quotes')
+      .orderBy('created_at', 'desc')
+      .get();
+    
+    const quotes = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
     
     return NextResponse.json(quotes);
   } catch (error) {
@@ -31,14 +37,17 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const newQuote = await prisma.quotes.create({
-      data: {
-        quote,
-        author,
-        category,
-        is_active,
-      }
+    const docRef = await db.collection('quotes').add({
+      quote,
+      author: author || null,
+      category: category || null,
+      is_active,
+      created_at: FieldValue.serverTimestamp(),
+      updated_at: FieldValue.serverTimestamp(),
     });
+    
+    const newDoc = await docRef.get();
+    const newQuote = { id: newDoc.id, ...newDoc.data() };
     
     return NextResponse.json(newQuote, { status: 201 });
   } catch (error) {
@@ -63,13 +72,13 @@ export async function PATCH(request: NextRequest) {
       );
     }
     
-    const updatedQuote = await prisma.quotes.update({
-      where: { id },
-      data: {
-        ...updates,
-        updated_at: new Date(),
-      }
+    await db.collection('quotes').doc(id).update({
+      ...updates,
+      updated_at: FieldValue.serverTimestamp(),
     });
+    
+    const updatedDoc = await db.collection('quotes').doc(id).get();
+    const updatedQuote = { id: updatedDoc.id, ...updatedDoc.data() };
     
     return NextResponse.json(updatedQuote);
   } catch (error) {
@@ -94,9 +103,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
     
-    await prisma.quotes.delete({
-      where: { id: parseInt(id) }
-    });
+    await db.collection('quotes').doc(id).delete();
     
     return NextResponse.json({ success: true });
   } catch (error) {
