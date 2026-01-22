@@ -38,6 +38,8 @@ export async function PATCH(request: NextRequest) {
     }
 
     console.log('✅ Found existing post:', existingPost.id);
+    console.log('📊 Current late_post_id in DB:', existingPost.late_post_id);
+    console.log('📊 New late_post_id from updates:', updates.late_post_id);
 
     // Update the post
     const updatedPost = await prisma.search_results.update({
@@ -50,12 +52,25 @@ export async function PATCH(request: NextRequest) {
     });
 
     console.log('✅ Post updated successfully:', updatedPost.id);
+    console.log('📊 Updated late_post_id in DB:', updatedPost.late_post_id);
 
     return NextResponse.json(updatedPost);
-  } catch (error) {
+  } catch (error: any) {
     console.error("❌ Error updating post:", error);
+    console.error("❌ Error code:", error.code);
+    console.error("❌ Error meta:", error.meta);
+    
+    // Check for unique constraint violation
+    if (error.code === 'P2002') {
+      console.error("🚨 Unique constraint violation on field:", error.meta?.target);
+      return NextResponse.json(
+        { error: "Unique constraint violation", field: error.meta?.target, details: error.message },
+        { status: 409 }
+      );
+    }
+    
     return NextResponse.json(
-      { error: "Failed to update post", details: (error as Error).message },
+      { error: "Failed to update post", details: error.message },
       { status: 500 }
     );
   }
