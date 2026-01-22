@@ -934,12 +934,21 @@ export function CreatePostModal({
 
         const updatedPost = await updateResponse.json();
         console.log("✅ Post updated in database:", updatedPost);
+        console.log("📊 Updated post details:", {
+          id: updatedPost.id,
+          late_post_id: updatedPost.late_post_id,
+          late_status: updatedPost.late_status,
+          approval_status: updatedPost.approval_status
+        });
 
         const successMessage = schedulePost && scheduledDate
           ? `Post scheduled successfully for ${new Date(scheduledDate).toLocaleString()}! 📅`
           : "Post updated successfully! ✅";
 
         alert(successMessage);
+
+        // Small delay to ensure database update propagates before refresh
+        await new Promise(resolve => setTimeout(resolve, 500));
 
         if (onPostCreated) {
           onPostCreated();
