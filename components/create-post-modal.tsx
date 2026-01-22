@@ -951,7 +951,14 @@ export function CreatePostModal({
             const latePost = await lateResponse.json();
 
             // Update local post with Late.dev info and approve it
-            updates.late_post_id = latePost.id;
+            const latePostIdValue = latePost.id || latePost._id;
+            
+            if (!latePostIdValue) {
+              console.error("❌ Late.dev response missing ID:", latePost);
+              throw new Error("Late.dev post created but no ID returned");
+            }
+            
+            updates.late_post_id = String(latePostIdValue); // Ensure it's a string
             updates.late_status = latePost.status;
             updates.late_scheduled_for = new Date(scheduledDate);
             updates.late_platforms = platforms.map((p: any) => ({ platform: p.platform }));
@@ -960,9 +967,11 @@ export function CreatePostModal({
             updates.approved_by = "user";
 
             console.log("✅ Late.dev post created successfully!");
-            console.log("📋 Late.dev post ID:", latePost.id);
+            console.log("📋 Late.dev post raw response:", latePost);
+            console.log("📋 Late.dev post ID:", latePostIdValue);
             console.log("📋 Late.dev post status:", latePost.status);
             console.log("📋 Will update database with late_post_id:", updates.late_post_id);
+            console.log("📋 late_post_id type:", typeof updates.late_post_id);
           } catch (scheduleError: any) {
             console.error("❌ Scheduling error:", scheduleError);
             alert(`Failed to schedule post: ${scheduleError.message}`);
