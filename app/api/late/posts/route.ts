@@ -13,6 +13,13 @@ export async function POST(req: Request) {
     
     const result = await lateAPI.createPost(body);
     
+    console.log("✅ Late.dev API returned:", JSON.stringify(result, null, 2));
+    console.log("🔍 Result type:", typeof result);
+    console.log("🔍 Result keys:", Object.keys(result));
+    console.log("🔍 Result.id:", result.id);
+    console.log("🔍 Result._id:", (result as any)._id);
+    console.log("🔍 Result.data:", (result as any).data);
+    
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
     console.error("❌ Error creating post via Late API:", error);

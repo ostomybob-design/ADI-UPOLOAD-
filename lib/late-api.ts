@@ -119,17 +119,23 @@ class LateAPIClient {
       );
     }
 
-    return response.json();
+    const jsonResponse = await response.json();
+    console.log(`📦 Late API JSON Response:`, JSON.stringify(jsonResponse, null, 2));
+    
+    return jsonResponse;
   }
 
   /**
    * Create and schedule a post
    */
   async createPost(data: CreatePostRequest): Promise<LatePostResponse> {
-    return this.request<LatePostResponse>("/posts", {
+    console.log("🚀 createPost called with:", JSON.stringify(data, null, 2));
+    const result = await this.request<LatePostResponse>("/posts", {
       method: "POST",
       body: JSON.stringify(data),
     });
+    console.log("🎯 createPost returning:", JSON.stringify(result, null, 2));
+    return result;
   }
 
   /**
