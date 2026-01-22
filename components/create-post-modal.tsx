@@ -281,9 +281,9 @@ export function CreatePostModal({
           return;
         }
 
-        // Instagram's max landscape aspect ratio is 1.91:1
-        // If image is wider than this, crop it to fit
-        const maxAspectRatio = 1.91;
+        // Instagram's aspect ratio constraints: 0.75:1 (portrait) to 1.91:1 (landscape)
+        const minAspectRatio = 0.75; // 3:4 portrait
+        const maxAspectRatio = 1.91; // Maximum landscape
         const currentAspectRatio = img.width / img.height;
         
         let finalWidth = img.width;
@@ -292,10 +292,15 @@ export function CreatePostModal({
         let cropY = 0;
         
         if (currentAspectRatio > maxAspectRatio) {
-          // Image is too wide, crop the width
+          // Image is too wide, crop the width (center crop)
           finalWidth = Math.floor(img.height * maxAspectRatio);
-          cropX = Math.floor((img.width - finalWidth) / 2); // Center crop
-          console.log(`📐 Cropping image for Instagram: ${img.width}×${img.height} (${currentAspectRatio.toFixed(2)}:1) → ${finalWidth}×${finalHeight} (${maxAspectRatio}:1)`);
+          cropX = Math.floor((img.width - finalWidth) / 2);
+          console.log(`📐 Cropping width for Instagram: ${img.width}×${img.height} (${currentAspectRatio.toFixed(2)}:1) → ${finalWidth}×${finalHeight} (${maxAspectRatio}:1)`);
+        } else if (currentAspectRatio < minAspectRatio) {
+          // Image is too tall, crop the height (center crop)
+          finalHeight = Math.floor(img.width / minAspectRatio);
+          cropY = Math.floor((img.height - finalHeight) / 2);
+          console.log(`📐 Cropping height for Instagram: ${img.width}×${img.height} (${currentAspectRatio.toFixed(2)}:1) → ${finalWidth}×${finalHeight} (${minAspectRatio}:1)`);
         }
         
         canvas.width = finalWidth;
@@ -329,7 +334,7 @@ export function CreatePostModal({
 
         // Convert canvas to data URL
         const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
-        console.log(`✅ Canvas created data URL, size: ${finalWidth}×${finalHeight}, length: ${dataUrl.length}`);
+        console.log(`✅ Canvas created data URL, size: ${finalWidth}×${finalHeight}, aspect ratio: ${(finalWidth/finalHeight).toFixed(2)}:1, length: ${dataUrl.length}`);
         resolve(dataUrl);
       };
       
@@ -493,9 +498,57 @@ export function CreatePostModal({
   const handleSaveDraft = async () => {
     setIsSavingDraft(true);
     try {
+      // Apply text overlay to image if needed (same as handlePost)
+      let finalImagePreview = imagePreview;
+      
+      if (overlayText && imagePreview && !imageVideo?.type.startsWith('video/')) {
+        console.log("🎨 Applying text overlay for draft save...");
+        const imageWithText = await applyTextOverlayToImage();
+        if (imageWithText) {
+          finalImagePreview = imageWithText;
+          console.log("✅ Text overlay applied to draft");
+        }
+      }
+      
       // If editing an existing post (postId exists), update the database
       if (postId) {
         console.log("💾 Saving changes to existing post:", postId);
+
+        // Upload media to Supabase if there's a new image OR if text overlay was applied
+        let mediaUrl: string | null = null;
+
+        // Always upload if we have a data URL (new upload or text overlay applied)
+        if (finalImagePreview && finalImagePreview.startsWith('data:')) {
+          try {
+            console.log("📤 Uploading media to Supabase for draft...");
+            const uploadResponse = await fetch("/api/upload", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                file: finalImagePreview,
+                folder: "posts"
+              }),
+            });
+
+            if (!uploadResponse.ok) {
+              throw new Error("Failed to upload media");
+            }
+
+            const uploadResult = await uploadResponse.json();
+            mediaUrl = uploadResult.publicUrl;
+            console.log("✅ Media uploaded for draft:", mediaUrl);
+          } catch (uploadError) {
+            console.error("❌ Error uploading media:", uploadError);
+            alert(`Failed to upload media: ${(uploadError as Error).message}`);
+            setIsSavingDraft(false);
+            return;
+          }
+        } else if (finalImagePreview) {
+          // Use existing URL
+          mediaUrl = finalImagePreview;
+        }
 
         // Convert hashtags string to array
         const hashtagsArray = hashtags
@@ -503,14 +556,26 @@ export function CreatePostModal({
           .filter(tag => tag.startsWith("#"))
           .map(tag => tag.replace("#", "").trim());
 
-        // Prepare updates - use imagePreview as the main image URL
+        // Prepare raw_data with text overlay settings
+        const rawData: any = {};
+        if (overlayText) {
+          rawData.textOverlay = {
+            text: overlayText,
+            position: textPosition,
+            fontSize: fontSize,
+            color: textColor
+          };
+        }
+
+        // Prepare updates - use mediaUrl (which is either uploaded or existing)
         const updates: any = {
           ai_caption: caption,
           ai_hashtags: hashtagsArray,
-          main_image_url: imagePreview, // This is the swapped main image
-          additional_images: additionalImages, // This is the updated array
+          main_image_url: mediaUrl,
+          additional_images: additionalImages,
           posted_on_instagram: postOnInstagram,
           posted_on_facebook: postOnFacebook,
+          raw_data: rawData,
         };
 
         console.log("📤 Updating database with:", updates);
