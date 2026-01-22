@@ -263,6 +263,86 @@ export function CreatePostModal({
     setTextPosition({ x: 50, y: 50 });
   };
 
+  // Function to crop image to Instagram's aspect ratio constraints
+  const cropImageForInstagram = async (imageSrc: string): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        if (!ctx) {
+          console.warn("❌ Failed to get canvas context");
+          resolve(imageSrc);
+          return;
+        }
+
+        // Instagram's aspect ratio constraints: 0.75:1 (portrait) to 1.91:1 (landscape)
+        const minAspectRatio = 0.75; // 3:4 portrait
+        const maxAspectRatio = 1.91; // Maximum landscape
+        const currentAspectRatio = img.width / img.height;
+        
+        let finalWidth = img.width;
+        let finalHeight = img.height;
+        let cropX = 0;
+        let cropY = 0;
+        let needsCrop = false;
+        
+        if (currentAspectRatio > maxAspectRatio) {
+          // Image is too wide, crop the width (center crop)
+          finalWidth = Math.floor(img.height * maxAspectRatio);
+          cropX = Math.floor((img.width - finalWidth) / 2);
+          needsCrop = true;
+          console.log(`📐 Cropping width for Instagram: ${img.width}×${img.height} (${currentAspectRatio.toFixed(2)}:1) → ${finalWidth}×${finalHeight} (${maxAspectRatio}:1)`);
+        } else if (currentAspectRatio < minAspectRatio) {
+          // Image is too tall, crop the height (center crop)
+          finalHeight = Math.floor(img.width / minAspectRatio);
+          cropY = Math.floor((img.height - finalHeight) / 2);
+          needsCrop = true;
+          console.log(`📐 Cropping height for Instagram: ${img.width}×${img.height} (${currentAspectRatio.toFixed(2)}:1) → ${finalWidth}×${finalHeight} (${minAspectRatio}:1)`);
+        } else {
+          console.log(`✅ Image aspect ratio OK for Instagram: ${currentAspectRatio.toFixed(2)}:1`);
+        }
+        
+        // If no crop needed, return original
+        if (!needsCrop) {
+          resolve(imageSrc);
+          return;
+        }
+        
+        canvas.width = finalWidth;
+        canvas.height = finalHeight;
+
+        // Draw cropped image
+        ctx.drawImage(
+          img,
+          cropX, cropY, finalWidth, finalHeight, // Source crop area
+          0, 0, finalWidth, finalHeight           // Destination
+        );
+
+        // Convert canvas to data URL
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+        console.log(`✅ Image cropped for Instagram: ${finalWidth}×${finalHeight}, aspect ratio: ${(finalWidth/finalHeight).toFixed(2)}:1`);
+        resolve(dataUrl);
+      };
+      
+      img.onerror = (error) => {
+        console.error("❌ Image failed to load:", error);
+        resolve(imageSrc);
+      };
+      
+      // Use proxy for external URLs to avoid CORS issues
+      const isExternalUrl = imageSrc.startsWith('http://') || imageSrc.startsWith('https://');
+      if (isExternalUrl) {
+        img.src = `/api/proxy-image?url=${encodeURIComponent(imageSrc)}`;
+      } else {
+        img.src = imageSrc;
+      }
+    });
+  };
+
   // Function to apply text overlay to image and return data URL
   const applyTextOverlayToImage = async (): Promise<string | null> => {
     if (!imagePreview || !overlayText) return imagePreview;
@@ -281,37 +361,12 @@ export function CreatePostModal({
           return;
         }
 
-        // Instagram's aspect ratio constraints: 0.75:1 (portrait) to 1.91:1 (landscape)
-        const minAspectRatio = 0.75; // 3:4 portrait
-        const maxAspectRatio = 1.91; // Maximum landscape
-        const currentAspectRatio = img.width / img.height;
-        
-        let finalWidth = img.width;
-        let finalHeight = img.height;
-        let cropX = 0;
-        let cropY = 0;
-        
-        if (currentAspectRatio > maxAspectRatio) {
-          // Image is too wide, crop the width (center crop)
-          finalWidth = Math.floor(img.height * maxAspectRatio);
-          cropX = Math.floor((img.width - finalWidth) / 2);
-          console.log(`📐 Cropping width for Instagram: ${img.width}×${img.height} (${currentAspectRatio.toFixed(2)}:1) → ${finalWidth}×${finalHeight} (${maxAspectRatio}:1)`);
-        } else if (currentAspectRatio < minAspectRatio) {
-          // Image is too tall, crop the height (center crop)
-          finalHeight = Math.floor(img.width / minAspectRatio);
-          cropY = Math.floor((img.height - finalHeight) / 2);
-          console.log(`📐 Cropping height for Instagram: ${img.width}×${img.height} (${currentAspectRatio.toFixed(2)}:1) → ${finalWidth}×${finalHeight} (${minAspectRatio}:1)`);
-        }
-        
-        canvas.width = finalWidth;
-        canvas.height = finalHeight;
+        // Use the image as-is (cropping happens separately)
+        canvas.width = img.width;
+        canvas.height = img.height;
 
-        // Draw cropped image
-        ctx.drawImage(
-          img,
-          cropX, cropY, finalWidth, finalHeight, // Source crop area
-          0, 0, finalWidth, finalHeight           // Destination
-        );
+        // Draw image
+        ctx.drawImage(img, 0, 0);
 
         // Draw text overlay
         const x = (textPosition.x / 100) * canvas.width;
@@ -334,7 +389,7 @@ export function CreatePostModal({
 
         // Convert canvas to data URL
         const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
-        console.log(`✅ Canvas created data URL, size: ${finalWidth}×${finalHeight}, aspect ratio: ${(finalWidth/finalHeight).toFixed(2)}:1, length: ${dataUrl.length}`);
+        console.log(`✅ Text overlay applied, image size: ${canvas.width}×${canvas.height}`);
         resolve(dataUrl);
       };
       
@@ -657,7 +712,7 @@ export function CreatePostModal({
   const handlePost = async () => {
     setIsLoading(true);
     try {
-      // Apply text overlay to image if needed
+      // Step 1: Apply text overlay if needed
       let finalImagePreview = imagePreview;
       
       console.log("🔍 Text overlay check:");
@@ -669,21 +724,24 @@ export function CreatePostModal({
       
       if (overlayText && imagePreview && !imageVideo?.type.startsWith('video/')) {
         console.log("🎨 Applying text overlay to image...");
-        console.log("Overlay text:", overlayText);
-        console.log("Original image preview length:", imagePreview?.length);
         const imageWithText = await applyTextOverlayToImage();
         if (imageWithText) {
           finalImagePreview = imageWithText;
           console.log("✅ Text applied! New image preview length:", finalImagePreview?.length);
-          console.log("Final image preview starts with:", finalImagePreview?.substring(0, 50));
         } else {
           console.warn("⚠️ applyTextOverlayToImage returned null/undefined");
         }
       } else {
-        console.log("⏭️ Skipping text overlay - Reasons:");
-        console.log("  - No overlay text:", !overlayText);
-        console.log("  - No image preview:", !imagePreview);
-        console.log("  - Is video:", imageVideo?.type?.startsWith('video/'));
+        console.log("⏭️ Skipping text overlay - no text or is video");
+      }
+
+      // Step 2: Crop image for Instagram (always, whether or not there's text)
+      if (finalImagePreview && !imageVideo?.type.startsWith('video/')) {
+        console.log("📐 Cropping image for Instagram compliance...");
+        const croppedImage = await cropImageForInstagram(finalImagePreview);
+        if (croppedImage) {
+          finalImagePreview = croppedImage;
+        }
       }
 
       // If editing an existing post, just update the database
