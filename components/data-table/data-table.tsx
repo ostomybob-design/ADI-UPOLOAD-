@@ -240,8 +240,16 @@ export function DataTable<TData, TValue>({
                       {/* Resize handle */}
                       {header.column.getCanResize() && (
                         <div
-                          onMouseDown={header.getResizeHandler()}
-                          onTouchStart={header.getResizeHandler()}
+                          onMouseDown={(e) => {
+                            e.stopPropagation();
+                            header.getResizeHandler()(e);
+                          }}
+                          onTouchStart={(e) => {
+                            e.stopPropagation();
+                            header.getResizeHandler()(e);
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          draggable={false}
                           className={`absolute right-0 top-0 h-full w-1 cursor-col-resize select-none touch-none bg-gray-300 opacity-0 hover:opacity-100 ${header.column.getIsResizing() ? 'opacity-100 bg-blue-500' : ''
                             }`}
                           style={{
