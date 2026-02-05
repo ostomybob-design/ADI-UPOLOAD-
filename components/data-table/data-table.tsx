@@ -220,15 +220,18 @@ export function DataTable<TData, TValue>({
                         width: header.getSize(),
                         position: 'relative',
                       }}
-                      draggable={!header.isPlaceholder}
-                      onDragStart={() => handleDragStart(header.id)}
                       onDragOver={handleDragOver}
                       onDrop={() => handleDrop(header.id)}
-                      className="cursor-move select-none"
                     >
                       <div className="flex items-center gap-2">
                         {!header.isPlaceholder && (
-                          <GripVertical className="h-4 w-4 text-gray-400" />
+                          <div
+                            draggable={true}
+                            onDragStart={() => handleDragStart(header.id)}
+                            className="cursor-move"
+                          >
+                            <GripVertical className="h-4 w-4 text-gray-400" />
+                          </div>
                         )}
                         {header.isPlaceholder
                           ? null
