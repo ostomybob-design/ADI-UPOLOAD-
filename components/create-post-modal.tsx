@@ -439,11 +439,24 @@ export function CreatePostModal({
     return getCharacterCount() > 2200;
   };
 
+  // Sync draftId prop to state when it changes
+  React.useEffect(() => {
+    if (draftId) {
+      console.log("🔄 Draft ID prop changed:", draftId);
+      setCurrentDraftId(draftId);
+    } else if (!postId) {
+      // Clear draft ID if no draftId and no postId (creating new post)
+      setCurrentDraftId(null);
+    }
+  }, [draftId, postId]);
+
   // Load draft data when modal opens with a draft ID
   React.useEffect(() => {
-    if (open && currentDraftId) {
+    if (open && currentDraftId && !postId) {
+      console.log("📝 Attempting to load draft:", currentDraftId);
       const draft = draftUtils.getDraft(currentDraftId);
       if (draft) {
+        console.log("✅ Draft loaded successfully:", draft);
         setCaption(draft.caption);
         setHashtags(draft.hashtags);
         setSchedulePost(draft.schedulePost);
@@ -452,9 +465,12 @@ export function CreatePostModal({
         setPostOnFacebook(draft.postOnFacebook);
         setImagePreview(draft.imagePreview);
         // Note: We can't restore the File object, only the preview
+      } else {
+        console.error("❌ Draft not found in localStorage:", currentDraftId);
+        console.log("📋 Available drafts:", draftUtils.getAllDrafts().map(d => d.id));
       }
     }
-  }, [open, currentDraftId]);
+  }, [open, currentDraftId, postId]);
 
   // Load post data when modal opens with a post ID
   React.useEffect(() => {
