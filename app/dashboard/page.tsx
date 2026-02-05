@@ -17,6 +17,7 @@ import { RefreshCw, Plus, LayoutGrid, Table as TableIcon, CalendarPlus, Loader2 
 import { useRouter } from "next/navigation"
 import { DataTable } from "@/components/data-table/data-table"
 import { createColumns, SearchResult } from "./columns"
+import { draftUtils } from "@/lib/draft-utils"
 
 type Post = SearchResult
 
@@ -137,7 +138,19 @@ export default function DashboardPage() {
           contentProcessed: data.filter((p: Post) => p.content_processed).length,
           withCaption: data.filter((p: Post) => p.ai_caption).length
         })
-        setPosts(data)
+        
+        // Load drafts from localStorage and merge with API data
+        const drafts = draftUtils.getAllDrafts()
+        console.log("📝 Loaded drafts from localStorage:", drafts.length)
+        
+        // Convert drafts to SearchResult format
+        const draftPosts = drafts.map(draft => draftUtils.draftToSearchResult(draft))
+        
+        // Merge API posts with drafts
+        const allPosts = [...data, ...draftPosts]
+        console.log("📊 Total posts (including drafts):", allPosts.length)
+        
+        setPosts(allPosts)
       } else {
         console.error("❌ Failed to fetch posts:", response.status, response.statusText)
       }

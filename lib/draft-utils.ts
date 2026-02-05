@@ -110,10 +110,11 @@ export const draftUtils = {
       ai_caption: draft.caption,
       ai_hashtags: draft.hashtags,
       ai_summary: null,
-      content_processed: false,
+      content_processed: true, // Set to true so it shows up in pending
       main_image_url: draft.imagePreview,
       additional_images: null,
       is_draft: true,
+      approval_status: "pending", // Drafts appear as pending
     };
   },
 };

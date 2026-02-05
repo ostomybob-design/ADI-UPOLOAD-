@@ -453,6 +453,7 @@ export const createColumns = (
         const lateScheduledFor = row.original.late_scheduled_for;
         const latePostId = row.original.late_post_id;
         const isEdited = row.original.is_edited;
+        const isDraft = row.original.is_draft;
 
         // Determine late status based on actual fields
         let lateStatus = null;
@@ -466,21 +467,25 @@ export const createColumns = (
           <div className="flex flex-col gap-1">
             <Badge
               variant={
-                approvalStatus === "approved"
+                isDraft
+                  ? "secondary"
+                  : approvalStatus === "approved"
                   ? "default"
                   : approvalStatus === "rejected"
                     ? "destructive"
                     : "secondary"
               }
               className={
-                approvalStatus === "approved"
+                isDraft
+                  ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  : approvalStatus === "approved"
                   ? "bg-green-100 text-green-700 hover:bg-green-200"
                   : approvalStatus === "rejected"
                     ? "bg-red-100 text-red-700 hover:bg-red-200"
                     : "bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
               }
             >
-              {approvalStatus || "pending"}
+              {isDraft ? "Draft" : (approvalStatus || "pending")}
             </Badge>
             {lateStatus && (
               <Badge
