@@ -552,6 +552,10 @@ export function CreatePostModal({
 
   const handleSaveDraft = async () => {
     setIsSavingDraft(true);
+    
+    // Defer heavy processing to allow UI to update first
+    await new Promise(resolve => setTimeout(resolve, 0));
+    
     try {
       // Apply text overlay to image if needed (same as handlePost)
       let finalImagePreview = imagePreview;
@@ -711,6 +715,10 @@ export function CreatePostModal({
 
   const handlePost = async () => {
     setIsLoading(true);
+    
+    // Defer heavy processing to allow UI to update first
+    await new Promise(resolve => setTimeout(resolve, 0));
+    
     try {
       // Step 1: Apply text overlay if needed
       let finalImagePreview = imagePreview;
