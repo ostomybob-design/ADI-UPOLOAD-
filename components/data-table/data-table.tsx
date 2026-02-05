@@ -5,6 +5,7 @@ import {
   SortingState,
   ColumnOrderState,
   ColumnSizingState,
+  VisibilityState,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
@@ -21,7 +22,13 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
-import { GripVertical } from "lucide-react";
+import { GripVertical, Columns3 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -36,10 +43,24 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const STORAGE_KEY_ORDER = 'dataTable_columnOrder';
   const STORAGE_KEY_SIZING = 'dataTable_columnSizing';
+  const STORAGE_KEY_VISIBILITY = 'dataTable_columnVisibility';
 
   // Load saved state from localStorage
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState({});
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEY_VISIBILITY);
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          return {};
+        }
+      }
+    }
+    return {};
+  });
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem(STORAGE_KEY_ORDER);
@@ -67,7 +88,7 @@ export function DataTable<TData, TValue>({
     return {};
   });
 
-  // Save to localStorage whenever column order or sizing changes
+  // Save to localStorage whenever column order, sizing, or visibility changes
   useEffect(() => {
     if (typeof window !== 'undefined' && columnOrder.length > 0) {
       localStorage.setItem(STORAGE_KEY_ORDER, JSON.stringify(columnOrder));
@@ -80,6 +101,12 @@ export function DataTable<TData, TValue>({
     }
   }, [columnSizing]);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY_VISIBILITY, JSON.stringify(columnVisibility));
+    }
+  }, [columnVisibility]);
+
   const table = useReactTable({
     data,
     columns,
@@ -87,11 +114,13 @@ export function DataTable<TData, TValue>({
       sorting,
       columnOrder,
       columnSizing,
+      columnVisibility,
       rowSelection,
     },
     onSortingChange: setSorting,
     onColumnOrderChange: setColumnOrder,
     onColumnSizingChange: setColumnSizing,
+    onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -141,6 +170,40 @@ export function DataTable<TData, TValue>({
 
   return (
     <div>
+      {/* Column Visibility Controls */}
+      <div className="flex items-center justify-end py-4">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="ml-auto">
+              <Columns3 className="mr-2 h-4 w-4" />
+              Columns
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-[200px]">
+            {table
+              .getAllColumns()
+              .filter(
+                (column) =>
+                  typeof column.accessorFn !== "undefined" && column.getCanHide()
+              )
+              .map((column) => {
+                return (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    className="capitalize"
+                    checked={column.getIsVisible()}
+                    onCheckedChange={(value) =>
+                      column.toggleVisibility(!!value)
+                    }
+                  >
+                    {column.id}
+                  </DropdownMenuCheckboxItem>
+                )
+              })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      
       <div className="rounded-md border overflow-x-auto">
         <Table style={{ width: table.getTotalSize() }}>
           <TableHeader>
