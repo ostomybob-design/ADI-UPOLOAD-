@@ -481,11 +481,8 @@ export default function DashboardPage() {
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-2">
             <div>
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Content Dashboard
+                Ostomy Social Content Dashboard
               </h1>
-              <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-lg font-medium">
-                Manage your ostomy awareness content
-              </p>
             </div>
             <div className="flex gap-2 flex-wrap">
               <div className="flex gap-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-1 shadow-sm">
