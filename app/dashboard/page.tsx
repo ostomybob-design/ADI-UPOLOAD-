@@ -456,6 +456,7 @@ export default function DashboardPage() {
       totalPosts: posts.length,
       pendingApproval: posts.filter(p => p.approval_status === "pending" && p.content_processed && !p.is_draft).length,
       drafts: posts.filter(p => p.is_draft === true).length,
+      approved: posts.filter(p => p.approval_status === "approved" && !p.late_post_id && !p.is_draft).length,
       scheduled: lateScheduledPosts.length,
       published: latePublishedPosts.length
     }
@@ -529,6 +530,7 @@ export default function DashboardPage() {
             totalPosts={stats.totalPosts}
             readyToPost={stats.pendingApproval}
             drafts={stats.drafts}
+            approved={stats.approved}
             scheduled={stats.scheduled}
             published={stats.published}
             activeTab={activeTab}

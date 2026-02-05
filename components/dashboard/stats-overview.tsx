@@ -1,19 +1,20 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { FileText, CheckCircle2, Clock, TrendingUp, FileEdit } from "lucide-react"
+import { FileText, CheckCircle2, Clock, TrendingUp, FileEdit, ThumbsUp } from "lucide-react"
 
 interface StatsOverviewProps {
   totalPosts: number
   readyToPost: number
   drafts: number
+  approved: number
   scheduled: number
   published: number
   activeTab: string
   onTabChange: (tab: string) => void
 }
 
-export function StatsOverview({ totalPosts, readyToPost, drafts, scheduled, published, activeTab, onTabChange }: StatsOverviewProps) {
+export function StatsOverview({ totalPosts, readyToPost, drafts, approved, scheduled, published, activeTab, onTabChange }: StatsOverviewProps) {
   const stats = [
     {
       title: "Drafts",
@@ -30,6 +31,14 @@ export function StatsOverview({ totalPosts, readyToPost, drafts, scheduled, publ
       description: "Processed & ready",
       color: "text-green-600",
       tab: "pending"
+    },
+    {
+      title: "Approved",
+      value: approved,
+      icon: ThumbsUp,
+      description: "Not yet scheduled",
+      color: "text-teal-600",
+      tab: "approved"
     },
     {
       title: "Scheduled",
@@ -58,7 +67,7 @@ export function StatsOverview({ totalPosts, readyToPost, drafts, scheduled, publ
   ]
 
   return (
-    <div className="grid gap-2 sm:gap-3 grid-cols-5">
+    <div className="grid gap-2 sm:gap-3 grid-cols-6">
       {stats.map((stat) => {
         const Icon = stat.icon
         const isActive = activeTab === stat.tab
@@ -66,6 +75,7 @@ export function StatsOverview({ totalPosts, readyToPost, drafts, scheduled, publ
           'text-blue-600': 'from-blue-500 to-cyan-500',
           'text-green-600': 'from-green-500 to-emerald-500',
           'text-gray-600': 'from-gray-500 to-slate-600',
+          'text-teal-600': 'from-teal-500 to-cyan-600',
           'text-orange-600': 'from-orange-500 to-amber-500',
           'text-purple-600': 'from-purple-500 to-pink-500'
         }
