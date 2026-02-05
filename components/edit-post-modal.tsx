@@ -278,7 +278,7 @@ export function EditPostModal({ post, open, onOpenChange, onEditComplete }: Edit
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="caption">Caption</Label>
+              <Label htmlFor="caption">Body</Label>
               <Button
                 variant="outline"
                 size="sm"
@@ -297,7 +297,7 @@ export function EditPostModal({ post, open, onOpenChange, onEditComplete }: Edit
               value={formData.ai_caption}
               onChange={(e) => setFormData({ ...formData, ai_caption: e.target.value })}
               placeholder="Social media caption"
-              rows={6}
+              rows={15}
             />
             <p className="text-xs text-muted-foreground">
               {formData.ai_caption.length} characters
