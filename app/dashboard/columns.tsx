@@ -182,13 +182,12 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
   const handleUnschedule = async (e: React.MouseEvent) => {
     e.stopPropagation();
     
-    // For Late.dev-only posts (id: -1), warn that they can only be deleted from Late.dev
-    if (post.id === -1) {
-      alert("This post exists only in Late.dev. Please unschedule it directly from Late.dev or delete it there.");
-      return;
-    }
+    // Different confirmation message for Late.dev-only posts vs posts with local records
+    const confirmMessage = post.id === -1
+      ? "Unschedule this post? It will be removed from Late.dev. (Note: This post has no local record and will disappear from the dashboard.)"
+      : "Unschedule this post? It will be deleted from Late.dev and moved back to approved.";
     
-    if (!confirm("Unschedule this post? It will be deleted from Late.dev and moved back to approved.")) return;
+    if (!confirm(confirmMessage)) return;
 
     setIsUnscheduling(true);
     try {
@@ -202,7 +201,10 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
       });
 
       if (response.ok) {
-        alert("✅ Post unscheduled and moved back to approved");
+        const successMessage = post.id === -1
+          ? "✅ Post removed from Late.dev"
+          : "✅ Post unscheduled and moved back to approved";
+        alert(successMessage);
         onRefresh?.();
       } else {
         const data = await response.json();

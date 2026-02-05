@@ -50,6 +50,25 @@ export async function POST(request: Request) {
     
     console.log("📊 Database query result:", post ? { id: post.id, title: post.title, hasLatePostId: !!post.late_post_id } : "NOT FOUND");
 
+    // If no database record but we have a Late.dev ID, just delete from Late.dev
+    if (!post && isLateDevId) {
+      console.log("ℹ️ No database record found, but have Late.dev ID - deleting from Late.dev only");
+      try {
+        await lateAPI.deletePost(postId);
+        console.log(`✅ Deleted Late.dev-only post ${postId} from Late.dev`);
+        return NextResponse.json({ 
+          success: true,
+          message: "Post deleted from Late.dev (no local record to update)"
+        });
+      } catch (lateError: any) {
+        console.error("❌ Failed to delete from Late.dev:", lateError);
+        return NextResponse.json(
+          { error: `Failed to delete from Late.dev: ${lateError.message}` },
+          { status: 500 }
+        );
+      }
+    }
+
     if (!post) {
       console.error("❌ Post not found in database:", postId);
       return NextResponse.json(
