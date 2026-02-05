@@ -258,7 +258,7 @@ export default function SchedulingPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => window.open('https://getlate.dev/accounts', '_blank')}
+                    onClick={() => window.open('https://app.getlate.dev/settings/accounts', '_blank')}
                   >
                     Manage
                   </Button>
