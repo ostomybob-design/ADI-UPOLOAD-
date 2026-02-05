@@ -1498,12 +1498,12 @@ export function CreatePostModal({
                   </div>
                 )}
 
-                {/* Caption */}
+                {/* Body */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <Label className="text-sm font-semibold flex items-center gap-2">
                       <Type className="h-4 w-4" />
-                      Caption
+                      Body
                     </Label>
                     <Button
                       variant="outline"
@@ -1522,7 +1522,7 @@ export function CreatePostModal({
                     placeholder="What's on your mind? Share your story..."
                     value={caption}
                     onChange={(e) => setCaption(e.target.value)}
-                    className="min-h-[120px] resize-none border-gray-300 focus:border-blue-500 rounded-xl"
+                    className="min-h-[380px] resize-none border-gray-300 focus:border-blue-500 rounded-xl"
                   />
                   <div className={cn(
                     "text-xs text-right",
