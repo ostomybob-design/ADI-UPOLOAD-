@@ -29,7 +29,7 @@ export default function DashboardPage() {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null)
   const [statusFilter, setStatusFilter] = useState("all")
   const [sortBy, setSortBy] = useState("newest")
-  const [activeTab, setActiveTab] = useState("pending")
+  const [activeTab, setActiveTab] = useState("draft")
   const [viewMode, setViewMode] = useState<"card" | "table">("table")
   const [createModalOpen, setCreateModalOpen] = useState(false)
   const [editingPostId, setEditingPostId] = useState<number | null>(null)
@@ -588,14 +588,14 @@ export default function DashboardPage() {
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4 md:mb-6">
           <TabsList className="grid w-full grid-cols-6 md:w-[720px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-1 shadow-sm">
+            <TabsTrigger value="draft" className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-gray-500 data-[state=active]:to-gray-700 data-[state=active]:text-white">
+              Drafts
+            </TabsTrigger>
             <TabsTrigger value="pending" className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-500 data-[state=active]:to-orange-500 data-[state=active]:text-white">
               Pending
             </TabsTrigger>
             <TabsTrigger value="approved" className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white">
               Approved
-            </TabsTrigger>
-            <TabsTrigger value="draft" className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-gray-500 data-[state=active]:to-gray-700 data-[state=active]:text-white">
-              Drafts
             </TabsTrigger>
             <TabsTrigger value="scheduled" className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white">
               Scheduled
