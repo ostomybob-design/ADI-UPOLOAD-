@@ -7,6 +7,7 @@ import { RowActions } from "./row-actions";
 import { ColumnHeader } from "./column-header";
 import { useState } from "react";
 import { SchedulePostModal } from "@/components/schedule-post-modal";
+import { getProxiedImageUrl } from "@/lib/image-proxy";
 
 export type DraftPost = {
   id: string;
@@ -379,10 +380,13 @@ export const createColumns = (
         );
       }
 
+      // Use proxied URL to avoid CORS issues
+      const proxiedUrl = getProxiedImageUrl(imageUrl) || imageUrl;
+
       return (
         <div className="w-10 h-10 rounded overflow-hidden bg-gray-100">
           <img
-            src={imageUrl}
+            src={proxiedUrl}
             alt="Thumbnail"
             className="w-full h-full object-cover"
             onError={(e) => {

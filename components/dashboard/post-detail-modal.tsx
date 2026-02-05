@@ -14,6 +14,7 @@ import { ExternalLink, Instagram, Facebook, Calendar, Copy, Check, Edit2, CheckC
 import { format } from "date-fns"
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
+import { getProxiedImageUrl } from "@/lib/image-proxy"
 
 interface PostDetailModalProps {
   post: any
@@ -163,7 +164,7 @@ export function PostDetailModal({ post, open, onOpenChange, onEdit, onApprovalCh
           {post.main_image_url && (
             <div className="relative h-48 sm:h-64 w-full rounded-lg overflow-hidden bg-muted">
               <img
-                src={post.main_image_url}
+                src={getProxiedImageUrl(post.main_image_url) || post.main_image_url}
                 alt={post.title}
                 className="w-full h-full object-cover"
                 onError={(e) => {

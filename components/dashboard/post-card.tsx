@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { ExternalLink, Instagram, Facebook, Calendar, Eye, Trash2, CheckCircle2, XCircle } from "lucide-react"
 import { format } from "date-fns"
 import { useState } from "react"
+import { getProxiedImageUrl } from "@/lib/image-proxy"
 
 interface PostCardProps {
   post: {
@@ -165,7 +166,7 @@ export function PostCard({ post, onView, onDelete, onSchedule, onRefresh }: Post
       {post.main_image_url && (
         <div className="relative h-48 w-full bg-muted overflow-hidden">
           <img
-            src={post.main_image_url}
+            src={getProxiedImageUrl(post.main_image_url) || post.main_image_url}
             alt={post.title}
             className="w-full h-full object-cover"
             onError={(e) => {
