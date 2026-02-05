@@ -102,7 +102,7 @@ export function StatsOverview({ totalPosts, readyToPost, drafts, approved, sched
             }`}
           >
             <div className={`absolute top-0 right-0 w-16 h-16 bg-gradient-to-br ${gradient} opacity-${isActive ? '20' : '10'} rounded-full -mr-8 -mt-8`}></div>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 relative z-10 p-2 sm:p-3">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 relative z-10 p-1.5 sm:p-2">
               <CardTitle className={`text-[10px] sm:text-xs font-semibold ${isActive ? stat.color : 'text-muted-foreground'}`}>
                 {stat.title}
               </CardTitle>
@@ -110,8 +110,8 @@ export function StatsOverview({ totalPosts, readyToPost, drafts, approved, sched
                 <Icon className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
               </div>
             </CardHeader>
-            <CardContent className="relative z-10 p-2 sm:p-3 pt-0">
-              <div className={`text-xl sm:text-2xl font-bold bg-gradient-to-r ${gradient} bg-clip-text text-transparent`}>{stat.value}</div>
+            <CardContent className="relative z-10 p-1.5 sm:p-2 pt-0">
+              <div className={`text-lg sm:text-xl font-bold bg-gradient-to-r ${gradient} bg-clip-text text-transparent`}>{stat.value}</div>
               <p className={`text-[9px] sm:text-[10px] mt-0.5 font-medium ${isActive ? stat.color : 'text-muted-foreground'}`}>
                 {stat.description}
               </p>

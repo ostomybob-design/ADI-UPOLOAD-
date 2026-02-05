@@ -177,7 +177,7 @@ export function DataTable<TData, TValue>({
   return (
     <div>
       {/* Column Visibility Controls */}
-      <div className="flex items-center justify-end gap-2 py-4">
+      <div className="flex items-center justify-end gap-2 py-2">
         {headerActions}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
