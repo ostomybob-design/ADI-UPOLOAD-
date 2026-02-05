@@ -127,9 +127,13 @@ export function DataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    columnResizeMode: "onChange",
+    columnResizeMode: "onEnd",
     enableColumnResizing: true,
     enableRowSelection: true,
+    defaultColumn: {
+      minSize: 50,
+      maxSize: 500,
+    },
   });
 
   // Notify parent of selection changes
@@ -243,22 +247,12 @@ export function DataTable<TData, TValue>({
                       {/* Resize handle */}
                       {header.column.getCanResize() && (
                         <div
-                          onMouseDown={(e) => {
-                            e.stopPropagation();
-                            header.getResizeHandler()(e);
-                          }}
-                          onTouchStart={(e) => {
-                            e.stopPropagation();
-                            header.getResizeHandler()(e);
-                          }}
-                          onClick={(e) => e.stopPropagation()}
-                          draggable={false}
-                          className={`absolute right-0 top-0 h-full w-1 cursor-col-resize select-none touch-none bg-gray-300 opacity-0 hover:opacity-100 ${header.column.getIsResizing() ? 'opacity-100 bg-blue-500' : ''
+                          onMouseDown={header.getResizeHandler()}
+                          onTouchStart={header.getResizeHandler()}
+                          className={`absolute right-0 top-0 h-full w-2 cursor-col-resize select-none touch-none hover:bg-blue-400 ${header.column.getIsResizing() ? 'bg-blue-500' : 'bg-transparent'
                             }`}
                           style={{
-                            transform: header.column.getIsResizing()
-                              ? `translateX(${table.getState().columnSizingInfo.deltaOffset}px)`
-                              : '',
+                            userSelect: 'none',
                           }}
                         />
                       )}
