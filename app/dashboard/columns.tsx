@@ -188,7 +188,7 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
       return;
     }
     
-    if (!confirm("Unschedule this post? It will be deleted from Late.dev and moved back to pending.")) return;
+    if (!confirm("Unschedule this post? It will be deleted from Late.dev and moved back to approved.")) return;
 
     setIsUnscheduling(true);
     try {
@@ -202,7 +202,7 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
       });
 
       if (response.ok) {
-        alert("✅ Post unscheduled and moved back to pending");
+        alert("✅ Post unscheduled and moved back to approved");
         onRefresh?.();
       } else {
         const data = await response.json();
@@ -356,7 +356,7 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
           onClick={handleUnschedule}
           disabled={isUnscheduling}
           className="h-7 px-2 text-orange-600 hover:text-orange-700 hover:bg-orange-50 disabled:opacity-50"
-          title={post.id === -1 ? "Delete from Late.dev (no local record)" : "Unschedule and move to pending"}
+          title={post.id === -1 ? "Delete from Late.dev (no local record)" : "Unschedule and move to approved"}
         >
           {isUnscheduling ? (
             <Loader2 className="h-4 w-4 animate-spin" />

@@ -76,12 +76,12 @@ export async function POST(request: Request) {
       console.log("ℹ️ No late_post_id found, skipping Late.dev deletion");
     }
 
-    // Update local database to set status back to pending
-    console.log("💾 Updating database to clear Late.dev fields");
+    // Update local database to set status back to approved
+    console.log("💾 Updating database to clear Late.dev fields and move to approved");
     await prisma.search_results.update({
       where: { id: post.id },
       data: {
-        approval_status: "pending",
+        approval_status: "approved",
         late_post_id: null,
         late_status: null,
         late_scheduled_for: null,
@@ -95,7 +95,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ 
       success: true,
-      message: "Post unscheduled and moved back to pending"
+      message: "Post unscheduled and moved back to approved"
     });
   } catch (error: any) {
     console.error("❌ Unschedule error:", {
