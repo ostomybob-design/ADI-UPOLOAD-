@@ -33,6 +33,7 @@ export default function DashboardPage() {
   const [viewMode, setViewMode] = useState<"card" | "table">("table")
   const [createModalOpen, setCreateModalOpen] = useState(false)
   const [editingPostId, setEditingPostId] = useState<number | null>(null)
+  const [editingDraftId, setEditingDraftId] = useState<string | null>(null)
   const [lateScheduledPosts, setLateScheduledPosts] = useState<any[]>([])
   const [latePublishedPosts, setLatePublishedPosts] = useState<any[]>([])
   const [loadingLatePosts, setLoadingLatePosts] = useState(false)
@@ -663,7 +664,7 @@ export default function DashboardPage() {
             ) : (
               <DataTable
                 columns={createColumns(
-                  undefined,
+                  (draftId) => setEditingDraftId(draftId),
                   (postId) => setEditingPostId(postId),
                   fetchPosts,
                   (post) => setSelectedPost(post),
@@ -690,18 +691,21 @@ export default function DashboardPage() {
 
         {/* Create/Edit Post Modal */}
         <CreatePostModal
-          open={createModalOpen || !!editingPostId}
+          open={createModalOpen || !!editingPostId || !!editingDraftId}
           onOpenChange={(open) => {
             if (!open) {
               setCreateModalOpen(false)
               setEditingPostId(null)
+              setEditingDraftId(null)
             }
           }}
           onPostCreated={() => {
             fetchPosts()
             setEditingPostId(null)
+            setEditingDraftId(null)
           }}
           postId={editingPostId || undefined}
+          draftId={editingDraftId || undefined}
         />
       </div>
     </div>
