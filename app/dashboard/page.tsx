@@ -458,7 +458,8 @@ export default function DashboardPage() {
       drafts: posts.filter(p => p.is_draft === true).length,
       approved: posts.filter(p => p.approval_status === "approved" && !p.late_post_id && !p.is_draft).length,
       scheduled: lateScheduledPosts.length,
-      published: latePublishedPosts.length
+      published: latePublishedPosts.length,
+      rejected: posts.filter(p => p.approval_status === "rejected").length
     }
     console.log("📊 Stats calculated:", calculated)
     return calculated
@@ -533,6 +534,7 @@ export default function DashboardPage() {
             approved={stats.approved}
             scheduled={stats.scheduled}
             published={stats.published}
+            rejected={stats.rejected}
             activeTab={activeTab}
             onTabChange={setActiveTab}
           />

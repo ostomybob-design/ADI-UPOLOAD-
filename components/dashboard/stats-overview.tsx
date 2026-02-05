@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { FileText, CheckCircle2, Clock, TrendingUp, FileEdit, ThumbsUp } from "lucide-react"
+import { FileText, CheckCircle2, Clock, TrendingUp, FileEdit, ThumbsUp, XCircle } from "lucide-react"
 
 interface StatsOverviewProps {
   totalPosts: number
@@ -10,11 +10,12 @@ interface StatsOverviewProps {
   approved: number
   scheduled: number
   published: number
+  rejected: number
   activeTab: string
   onTabChange: (tab: string) => void
 }
 
-export function StatsOverview({ totalPosts, readyToPost, drafts, approved, scheduled, published, activeTab, onTabChange }: StatsOverviewProps) {
+export function StatsOverview({ totalPosts, readyToPost, drafts, approved, scheduled, published, rejected, activeTab, onTabChange }: StatsOverviewProps) {
   const stats = [
     {
       title: "Drafts",
@@ -57,6 +58,14 @@ export function StatsOverview({ totalPosts, readyToPost, drafts, approved, sched
       tab: "published"
     },
     {
+      title: "Rejected",
+      value: rejected,
+      icon: XCircle,
+      description: "Not suitable",
+      color: "text-red-600",
+      tab: "rejected"
+    },
+    {
       title: "Total Content",
       value: totalPosts,
       icon: FileText,
@@ -67,7 +76,7 @@ export function StatsOverview({ totalPosts, readyToPost, drafts, approved, sched
   ]
 
   return (
-    <div className="grid gap-2 sm:gap-3 grid-cols-6">
+    <div className="grid gap-2 sm:gap-3 grid-cols-7">
       {stats.map((stat) => {
         const Icon = stat.icon
         const isActive = activeTab === stat.tab
@@ -77,7 +86,8 @@ export function StatsOverview({ totalPosts, readyToPost, drafts, approved, sched
           'text-gray-600': 'from-gray-500 to-slate-600',
           'text-teal-600': 'from-teal-500 to-cyan-600',
           'text-orange-600': 'from-orange-500 to-amber-500',
-          'text-purple-600': 'from-purple-500 to-pink-500'
+          'text-purple-600': 'from-purple-500 to-pink-500',
+          'text-red-600': 'from-red-500 to-rose-600'
         }
         const gradient = gradients[stat.color as keyof typeof gradients] || 'from-gray-500 to-gray-600'
 
