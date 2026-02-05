@@ -474,54 +474,14 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-slate-950 dark:via-blue-950 dark:to-purple-950">
-      <DashboardHeader />
+      <DashboardHeader 
+        viewMode={viewMode}
+        onViewModeChange={handleViewModeChange}
+        onRefresh={() => fetchPosts(true)}
+        onCreatePost={() => setCreateModalOpen(true)}
+        loading={loading}
+      />
       <div className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Header */}
-        <div className="mb-6 md:mb-8">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-2">
-            <div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Ostomy Social Content Dashboard
-              </h1>
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              <div className="flex gap-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-1 shadow-sm">
-                <Button
-                  variant={viewMode === "card" ? "default" : "ghost"}
-                  size="icon"
-                  onClick={() => handleViewModeChange("card")}
-                  className={`h-8 w-8 ${viewMode === "card" ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white' : ''}`}
-                >
-                  <LayoutGrid className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === "table" ? "default" : "ghost"}
-                  size="icon"
-                  onClick={() => handleViewModeChange("table")}
-                  className={`h-8 w-8 ${viewMode === "table" ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white' : ''}`}
-                >
-                  <TableIcon className="h-4 w-4" />
-                </Button>
-              </div>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => fetchPosts(true)}
-                disabled={loading}
-                className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 dark:hover:from-blue-900/20 dark:hover:to-purple-900/20 shadow-sm"
-                title="Sync with Late.dev and refresh"
-              >
-                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-              </Button>
-              <Button onClick={() => setCreateModalOpen(true)} className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transition-all">
-                <Plus className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Create Post</span>
-                <span className="sm:hidden">Create</span>
-              </Button>
-            </div>
-          </div>
-        </div>
-
         {/* Stats Overview - Now acts as tab selector */}
         <div className="mb-6 md:mb-8">
           <StatsOverview
