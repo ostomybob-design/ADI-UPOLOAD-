@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Eye, Share2, Trash, Edit } from "lucide-react";
+import { MoreHorizontal, Eye, Share2, Trash, Edit, FileEdit } from "lucide-react";
 import { SearchResult } from "./columns";
 import { useState } from "react";
 
@@ -22,8 +22,10 @@ interface RowActionsProps {
 
 export function RowActions({ row, onEditDraft, onEditPost, onRefresh, onViewPost }: RowActionsProps) {
   const isDraft = row.original.is_draft;
+  const isRejected = row.original.approval_status === "rejected";
   const draftId = isDraft ? row.original.url.replace("draft://", "") : null;
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isMovingToDrafts, setIsMovingToDrafts] = useState(false);
 
   const handleDelete = async () => {
     if (!confirm("Are you sure you want to delete this post? This action cannot be undone.")) {
@@ -73,6 +75,38 @@ export function RowActions({ row, onEditDraft, onEditPost, onRefresh, onViewPost
     }
   };
 
+  const handleMoveToDrafts = async () => {
+    if (!confirm("Move this post back to drafts?")) {
+      return;
+    }
+
+    setIsMovingToDrafts(true);
+    try {
+      const response = await fetch("/api/posts/edit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          postId: row.original.id,
+          is_draft: true,
+          approval_status: "pending",
+          rejection_reason: null
+        })
+      });
+
+      if (response.ok) {
+        alert("✅ Post moved to drafts");
+        onRefresh?.();
+      } else {
+        alert("Failed to move post to drafts. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error moving to drafts:", error);
+      alert("Failed to move post to drafts. Please try again.");
+    } finally {
+      setIsMovingToDrafts(false);
+    }
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -100,6 +134,16 @@ export function RowActions({ row, onEditDraft, onEditPost, onRefresh, onViewPost
           <Edit className="mr-2 h-4 w-4" />
           Edit Post
         </DropdownMenuItem>
+        {isRejected && (
+          <DropdownMenuItem
+            onClick={handleMoveToDrafts}
+            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+            disabled={isMovingToDrafts}
+          >
+            <FileEdit className="mr-2 h-4 w-4" />
+            {isMovingToDrafts ? "Moving..." : "Move to Drafts"}
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem
           onClick={() => window.open(row.original.url, "_blank")}
           className="text-gray-700 hover:text-gray-900 hover:bg-gray-100"
