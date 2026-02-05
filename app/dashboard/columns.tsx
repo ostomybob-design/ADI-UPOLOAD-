@@ -184,7 +184,7 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
     
     // Different confirmation message for Late.dev-only posts vs posts with local records
     const confirmMessage = post.id === -1
-      ? "Unschedule this post? It will be removed from Late.dev. (Note: This post has no local record and will disappear from the dashboard.)"
+      ? "Delete this post? This post was created in Late.dev (not in this dashboard), so it cannot be moved to approved and will be permanently deleted from Late.dev."
       : "Unschedule this post? It will be deleted from Late.dev and moved back to approved.";
     
     if (!confirm(confirmMessage)) return;
@@ -202,7 +202,7 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
 
       if (response.ok) {
         const successMessage = post.id === -1
-          ? "✅ Post removed from Late.dev"
+          ? "✅ Post permanently deleted from Late.dev"
           : "✅ Post unscheduled and moved back to approved";
         alert(successMessage);
         onRefresh?.();
@@ -358,7 +358,7 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
           onClick={handleUnschedule}
           disabled={isUnscheduling}
           className="h-7 px-2 text-orange-600 hover:text-orange-700 hover:bg-orange-50 disabled:opacity-50"
-          title={post.id === -1 ? "Unschedule from Late.dev (no local record to keep)" : "Unschedule and move to approved"}
+          title={post.id === -1 ? "Delete permanently (created in Late.dev)" : "Unschedule and move to approved"}
         >
           {isUnscheduling ? (
             <Loader2 className="h-4 w-4 animate-spin" />
