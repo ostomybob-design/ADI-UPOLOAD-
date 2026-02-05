@@ -1,16 +1,17 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { FileText, CheckCircle2, Clock, TrendingUp } from "lucide-react"
+import { FileText, CheckCircle2, Clock, TrendingUp, FileEdit } from "lucide-react"
 
 interface StatsOverviewProps {
   totalPosts: number
   readyToPost: number
+  drafts: number
   scheduled: number
   published: number
 }
 
-export function StatsOverview({ totalPosts, readyToPost, scheduled, published }: StatsOverviewProps) {
+export function StatsOverview({ totalPosts, readyToPost, drafts, scheduled, published }: StatsOverviewProps) {
   const stats = [
     {
       title: "Total Content",
@@ -25,6 +26,13 @@ export function StatsOverview({ totalPosts, readyToPost, scheduled, published }:
       icon: CheckCircle2,
       description: "Processed & ready",
       color: "text-green-600"
+    },
+    {
+      title: "Drafts",
+      value: drafts,
+      icon: FileEdit,
+      description: "Saved for later",
+      color: "text-gray-600"
     },
     {
       title: "Scheduled",
@@ -43,12 +51,13 @@ export function StatsOverview({ totalPosts, readyToPost, scheduled, published }:
   ]
 
   return (
-    <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-5">
       {stats.map((stat) => {
         const Icon = stat.icon
         const gradients = {
           'text-blue-600': 'from-blue-500 to-cyan-500',
           'text-green-600': 'from-green-500 to-emerald-500',
+          'text-gray-600': 'from-gray-500 to-slate-600',
           'text-orange-600': 'from-orange-500 to-amber-500',
           'text-purple-600': 'from-purple-500 to-pink-500'
         }

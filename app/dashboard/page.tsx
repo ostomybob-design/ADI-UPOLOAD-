@@ -193,7 +193,7 @@ export default function DashboardPage() {
     if (activeTab === "pending") {
       console.log("⏳ Filtering for pending posts...")
       const pendingPosts = posts.filter(post => {
-        const isPending = post.approval_status === "pending" && post.content_processed
+        const isPending = post.approval_status === "pending" && post.content_processed && !post.is_draft
         if (isPending) {
           console.log("  ✓ Pending post:", post.id, post.title.substring(0, 50))
         }
@@ -209,6 +209,10 @@ export default function DashboardPage() {
         !post.late_post_id // Exclude if it has a Late.dev post ID (it's scheduled)
       )
       console.log("✅ Approved posts found:", filtered.length)
+    } else if (activeTab === "draft") {
+      console.log("📝 Filtering for draft posts...")
+      filtered = filtered.filter(post => post.is_draft === true)
+      console.log("📝 Draft posts found:", filtered.length)
     } else if (activeTab === "scheduled") {
       console.log("📅 Filtering for scheduled posts from Late.dev...")
       console.log("📊 Late scheduled posts count:", lateScheduledPosts.length)
@@ -447,7 +451,8 @@ export default function DashboardPage() {
   const stats = React.useMemo(() => {
     const calculated = {
       totalPosts: posts.length,
-      pendingApproval: posts.filter(p => p.approval_status === "pending" && p.content_processed).length,
+      pendingApproval: posts.filter(p => p.approval_status === "pending" && p.content_processed && !p.is_draft).length,
+      drafts: posts.filter(p => p.is_draft === true).length,
       scheduled: lateScheduledPosts.length,
       published: latePublishedPosts.length
     }
@@ -520,6 +525,7 @@ export default function DashboardPage() {
           <StatsOverview
             totalPosts={stats.totalPosts}
             readyToPost={stats.pendingApproval}
+            drafts={stats.drafts}
             scheduled={stats.scheduled}
             published={stats.published}
           />
@@ -581,12 +587,15 @@ export default function DashboardPage() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4 md:mb-6">
-          <TabsList className="grid w-full grid-cols-5 md:w-[600px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-1 shadow-sm">
+          <TabsList className="grid w-full grid-cols-6 md:w-[720px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-1 shadow-sm">
             <TabsTrigger value="pending" className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-500 data-[state=active]:to-orange-500 data-[state=active]:text-white">
               Pending
             </TabsTrigger>
             <TabsTrigger value="approved" className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white">
               Approved
+            </TabsTrigger>
+            <TabsTrigger value="draft" className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-gray-500 data-[state=active]:to-gray-700 data-[state=active]:text-white">
+              Drafts
             </TabsTrigger>
             <TabsTrigger value="scheduled" className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white">
               Scheduled
