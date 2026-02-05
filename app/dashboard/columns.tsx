@@ -619,15 +619,41 @@ export const createColumns = (
         );
       },
     },
-    // 11. Created
+    // 11. Date Added
     {
       accessorKey: "created_at",
-      header: ({ column }) => <ColumnHeader column={column} title="Created" />,
+      header: ({ column }) => <ColumnHeader column={column} title="Date Added" />,
       cell: ({ row }) => {
         const date = new Date(row.getValue("created_at"));
         return (
-          <div className="font-medium text-gray-600 text-sm">
-            {date.toLocaleDateString()}
+          <div className="text-sm">
+            <div className="font-medium text-gray-700">{date.toLocaleDateString()}</div>
+            <div className="text-xs text-gray-500">{date.toLocaleTimeString()}</div>
+          </div>
+        );
+      },
+    },
+    // 12. Date Last Edited
+    {
+      accessorKey: "updated_at",
+      header: ({ column }) => <ColumnHeader column={column} title="Date Last Edited" />,
+      cell: ({ row }) => {
+        const date = new Date(row.getValue("updated_at"));
+        const createdDate = new Date(row.getValue("created_at"));
+        
+        // Check if the post was actually edited (updated_at is different from created_at)
+        const wasEdited = date.getTime() !== createdDate.getTime();
+        
+        return (
+          <div className="text-sm">
+            {wasEdited ? (
+              <>
+                <div className="font-medium text-gray-700">{date.toLocaleDateString()}</div>
+                <div className="text-xs text-gray-500">{date.toLocaleTimeString()}</div>
+              </>
+            ) : (
+              <span className="text-xs text-gray-400">Not edited</span>
+            )}
           </div>
         );
       },

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { ensureHttps } from "@/lib/utils";
 
 export async function POST(req: Request) {
   try {
@@ -17,7 +18,8 @@ export async function POST(req: Request) {
     } = await req.json();
 
     // imageVideo should be a Supabase storage URL (uploaded via /api/upload before calling this endpoint)
-    const main_image_url = imageVideo;
+    // Convert HTTP to HTTPS to avoid mixed content warnings
+    let main_image_url = ensureHttps(imageVideo);
     
     // Validate that it's a proper URL, not a data URL
     if (main_image_url && !main_image_url.startsWith('http://') && !main_image_url.startsWith('https://')) {

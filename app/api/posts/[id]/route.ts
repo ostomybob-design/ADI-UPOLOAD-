@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { ensureHttps } from "@/lib/utils";
 
 // GET a single post by ID
 export async function GET(
@@ -75,7 +76,7 @@ export async function PUT(
       snippet: caption.substring(0, 250),
       ai_caption: caption,
       ai_hashtags: hashtagsArray,
-      main_image_url: imageVideo,
+      main_image_url: ensureHttps(imageVideo), // Convert HTTP to HTTPS
       posted_on_instagram: postOnInstagram,
       posted_on_facebook: postOnFacebook,
       updated_at: new Date(),
