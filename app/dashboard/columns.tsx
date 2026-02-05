@@ -70,7 +70,36 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
   const [isRejecting, setIsRejecting] = useState(false);
   const [isSendingToPending, setIsSendingToPending] = useState(false);
   const [isUnscheduling, setIsUnscheduling] = useState(false);
+  const [isMovingToReadyToPost, setIsMovingToReadyToPost] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
+
+  const handleMoveToReadyToPost = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsMovingToReadyToPost(true);
+    try {
+      const response = await fetch("/api/posts/edit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          postId: post.id,
+          is_draft: false,
+          approval_status: "pending"
+        })
+      });
+
+      if (response.ok) {
+        alert("✅ Post moved to Ready to Post");
+        onRefresh?.();
+      } else {
+        alert("Failed to move post. Please try again.");
+      }
+    } catch (error) {
+      console.error("Move to ready error:", error);
+      alert("Failed to move post. Please try again.");
+    } finally {
+      setIsMovingToReadyToPost(false);
+    }
+  };
 
   const handleApprove = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -82,24 +111,15 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
         body: JSON.stringify({
           postIds: [post.id],
           approvedBy: "admin",
-          autoSchedule: true
+          autoSchedule: false
         })
       });
 
       if (response.ok) {
-        const data = await response.json();
-
-        if (data.scheduledPosts && data.scheduledPosts.length > 0) {
-          const scheduledTime = new Date(data.scheduledPosts[0].scheduledFor).toLocaleString();
-          alert(`✅ Post approved and scheduled for ${scheduledTime}`);
-        } else if (data.schedulingErrors && data.schedulingErrors.length > 0) {
-          const errorMsg = data.schedulingErrors.join("\n");
-          alert(`⚠️ Post approved but scheduling failed:\n\n${errorMsg}\n\n📋 To fix this:\n1. Go to Scheduling page\n2. Configure your posting queue\n3. Try approving again`);
-        } else {
-          alert("✅ Post approved successfully");
-        }
-
+        alert("✅ Post approved");
         onRefresh?.();
+      } else {
+        alert("Failed to approve post. Please try again.");
       }
     } catch (error) {
       console.error("Approval error:", error);
@@ -196,7 +216,43 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
     }
   };
 
-  // Pending tab: Show approve and reject buttons
+  // Draft posts: Show "Move to Ready to Post" button
+  if (post.is_draft) {
+    return (
+      <div className="flex gap-1">
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={handleMoveToReadyToPost}
+          disabled={isMovingToReadyToPost}
+          className="h-7 px-2 text-green-600 hover:text-green-700 hover:bg-green-50 disabled:opacity-50"
+          title="Move to Ready to Post"
+        >
+          {isMovingToReadyToPost ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <CheckCircle2 className="h-4 w-4" />
+          )}
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={handleReject}
+          disabled={isMovingToReadyToPost || isRejecting}
+          className="h-7 px-2 text-red-600 hover:text-red-700 hover:bg-red-50 disabled:opacity-50"
+          title="Reject"
+        >
+          {isRejecting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <XCircle className="h-4 w-4" />
+          )}
+        </Button>
+      </div>
+    );
+  }
+
+  // Pending tab (Ready to Post): Show approve and reject buttons
   if (post.approval_status === "pending" && post.ai_caption) {
     return (
       <div className="flex gap-1">
@@ -206,7 +262,7 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
           onClick={handleApprove}
           disabled={isApproving || isRejecting}
           className="h-7 px-2 text-green-600 hover:text-green-700 hover:bg-green-50 disabled:opacity-50"
-          title="Approve and schedule"
+          title="Approve"
         >
           {isApproving ? (
             <Loader2 className="h-4 w-4 animate-spin" />
