@@ -103,6 +103,42 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
 
   const handleApprove = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    
+    // Validation checks
+    const warnings: string[] = [];
+    const errors: string[] = [];
+    
+    // Check for body/caption (required)
+    if (!post.ai_caption || post.ai_caption.trim() === "") {
+      errors.push("❌ Body/Caption is required");
+    }
+    
+    // Check for image (optional but warn)
+    if (!post.main_image_url) {
+      warnings.push("⚠️ No image attached");
+    }
+    
+    // Check for hashtags (optional but warn)
+    if (!post.ai_hashtags || 
+        (typeof post.ai_hashtags === 'string' && post.ai_hashtags.trim() === "") ||
+        (Array.isArray(post.ai_hashtags) && post.ai_hashtags.length === 0)) {
+      warnings.push("⚠️ No hashtags added");
+    }
+    
+    // If there are errors, block approval
+    if (errors.length > 0) {
+      alert(errors.join("\n") + "\n\nPost cannot be approved without a body/caption.");
+      return;
+    }
+    
+    // If there are warnings, ask for confirmation
+    if (warnings.length > 0) {
+      const warningMessage = warnings.join("\n") + "\n\nDo you want to approve this post anyway?";
+      if (!confirm(warningMessage)) {
+        return;
+      }
+    }
+    
     setIsApproving(true);
     try {
       const response = await fetch("/api/posts/approve", {
