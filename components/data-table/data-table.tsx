@@ -212,7 +212,7 @@ export function DataTable<TData, TValue>({
       </div>
       
       <div className="rounded-md border overflow-x-auto">
-        <Table style={{ width: table.getTotalSize() }}>
+        <Table style={{ width: '100%', tableLayout: 'fixed' }}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -249,12 +249,15 @@ export function DataTable<TData, TValue>({
                         <div
                           onMouseDown={header.getResizeHandler()}
                           onTouchStart={header.getResizeHandler()}
-                          className={`absolute right-0 top-0 h-full w-2 cursor-col-resize select-none touch-none hover:bg-blue-400 ${header.column.getIsResizing() ? 'bg-blue-500' : 'bg-transparent'
+                          className={`absolute -right-2 top-0 h-full w-4 cursor-col-resize select-none touch-none group ${header.column.getIsResizing() ? 'bg-blue-100' : ''
                             }`}
                           style={{
                             userSelect: 'none',
+                            zIndex: 1,
                           }}
-                        />
+                        >
+                          <div className={`h-full w-0.5 mx-auto group-hover:bg-blue-500 ${header.column.getIsResizing() ? 'bg-blue-600' : 'bg-gray-300'}`} />
+                        </div>
                       )}
                     </TableHead>
                   );
