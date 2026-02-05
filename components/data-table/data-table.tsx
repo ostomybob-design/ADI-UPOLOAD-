@@ -34,12 +34,14 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   onRowSelectionChange?: (selectedRows: Record<string, boolean>) => void;
+  headerActions?: React.ReactNode;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   onRowSelectionChange,
+  headerActions,
 }: DataTableProps<TData, TValue>) {
   const STORAGE_KEY_ORDER = 'dataTable_columnOrder';
   const STORAGE_KEY_SIZING = 'dataTable_columnSizing';
@@ -171,7 +173,8 @@ export function DataTable<TData, TValue>({
   return (
     <div>
       {/* Column Visibility Controls */}
-      <div className="flex items-center justify-end py-4">
+      <div className="flex items-center justify-end gap-2 py-4">
+        {headerActions}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="ml-auto">

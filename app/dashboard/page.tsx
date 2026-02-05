@@ -537,60 +537,6 @@ export default function DashboardPage() {
           />
         </div>
 
-        {/* Bulk Actions Bar - Always show in approved tab */}
-        {activeTab === "approved" && (
-          <div className="mb-4 p-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-xl border border-purple-200 dark:border-purple-700 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                {selectedPosts.length > 0 ? (
-                  <>
-                    <Badge className="bg-purple-500 text-white">
-                      {selectedPosts.length} selected
-                    </Badge>
-                    <span className="text-sm text-gray-600 dark:text-gray-300">
-                      Schedule selected posts to next available queue slots
-                    </span>
-                  </>
-                ) : (
-                  <span className="text-sm text-gray-600 dark:text-gray-300">
-                    Select posts using checkboxes to bulk schedule them
-                  </span>
-                )}
-              </div>
-              <div className="flex gap-2">
-                {selectedPosts.length > 0 && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setSelectedPosts([])}
-                    disabled={bulkScheduling}
-                  >
-                    Clear Selection
-                  </Button>
-                )}
-                <Button
-                  size="sm"
-                  onClick={handleBulkSchedule}
-                  disabled={bulkScheduling || selectedPosts.length === 0}
-                  className="bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {bulkScheduling ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Scheduling...
-                    </>
-                  ) : (
-                    <>
-                      <CalendarPlus className="h-4 w-4 mr-2" />
-                      Bulk Schedule {selectedPosts.length > 0 ? `(${selectedPosts.length})` : ''}
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Filters - Only show for card view, but without search */}
         {viewMode === "card" && (
           <div className="mb-4 md:mb-6">
@@ -663,6 +609,40 @@ export default function DashboardPage() {
                 )}
                 data={filteredPosts}
                 onRowSelectionChange={handleRowSelectionChange}
+                headerActions={
+                  activeTab === "approved" ? (
+                    <>
+                      {selectedPosts.length > 0 && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setSelectedPosts([])}
+                          disabled={bulkScheduling}
+                        >
+                          Clear Selection
+                        </Button>
+                      )}
+                      <Button
+                        size="sm"
+                        onClick={handleBulkSchedule}
+                        disabled={bulkScheduling || selectedPosts.length === 0}
+                        className="bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {bulkScheduling ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Scheduling...
+                          </>
+                        ) : (
+                          <>
+                            <CalendarPlus className="h-4 w-4 mr-2" />
+                            Bulk Schedule {selectedPosts.length > 0 ? `(${selectedPosts.length})` : ''}
+                          </>
+                        )}
+                      </Button>
+                    </>
+                  ) : null
+                }
               />
             )}
           </div>
