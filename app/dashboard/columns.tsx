@@ -108,6 +108,13 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
     const warnings: string[] = [];
     const errors: string[] = [];
     
+    console.log("🔍 Approval validation - Post data:", {
+      id: post.id,
+      ai_caption: post.ai_caption,
+      main_image_url: post.main_image_url,
+      ai_hashtags: post.ai_hashtags
+    });
+    
     // Check for body/caption (required)
     if (!post.ai_caption || post.ai_caption.trim() === "") {
       errors.push("❌ Body/Caption is required");
@@ -124,6 +131,8 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
         (Array.isArray(post.ai_hashtags) && post.ai_hashtags.length === 0)) {
       warnings.push("⚠️ No hashtags added");
     }
+    
+    console.log("🔍 Validation results:", { errors, warnings });
     
     // If there are errors, block approval
     if (errors.length > 0) {
