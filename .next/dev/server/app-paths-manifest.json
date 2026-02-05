@@ -1,7 +1,1 @@
-{
-  "/admin/page": "app/admin/page.js",
-  "/api/admin/jokes/route": "app/api/admin/jokes/route.js",
-  "/api/admin/quotes/route": "app/api/admin/quotes/route.js",
-  "/api/admin/ticker/route": "app/api/admin/ticker/route.js",
-  "/login/page": "app/login/page.js"
-}
+{}

@@ -12,7 +12,6 @@ import { EmptyState } from "@/components/dashboard/empty-state"
 import { CreatePostModal } from "@/components/create-post-modal"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { RefreshCw, Plus, LayoutGrid, Table as TableIcon, CalendarPlus, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { DataTable } from "@/components/data-table/data-table"
@@ -190,7 +189,11 @@ export default function DashboardPage() {
     }
 
     // Apply tab filter (primary filter)
-    if (activeTab === "pending") {
+    if (activeTab === "all") {
+      console.log("🌐 Showing all posts (including drafts, pending, approved, scheduled, published, rejected)...")
+      // No filtering - show everything
+      console.log("🌐 Total posts displayed:", filtered.length)
+    } else if (activeTab === "pending") {
       console.log("⏳ Filtering for pending posts...")
       const pendingPosts = posts.filter(post => {
         const isPending = post.approval_status === "pending" && post.content_processed && !post.is_draft
@@ -520,7 +523,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Stats Overview */}
+        {/* Stats Overview - Now acts as tab selector */}
         <div className="mb-6 md:mb-8">
           <StatsOverview
             totalPosts={stats.totalPosts}
@@ -528,6 +531,8 @@ export default function DashboardPage() {
             drafts={stats.drafts}
             scheduled={stats.scheduled}
             published={stats.published}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
           />
         </div>
 
@@ -584,30 +589,6 @@ export default function DashboardPage() {
             </div>
           </div>
         )}
-
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4 md:mb-6">
-          <TabsList className="grid w-full grid-cols-6 md:w-[720px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-1 shadow-sm">
-            <TabsTrigger value="draft" className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-gray-500 data-[state=active]:to-gray-700 data-[state=active]:text-white">
-              Drafts
-            </TabsTrigger>
-            <TabsTrigger value="pending" className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-500 data-[state=active]:to-orange-500 data-[state=active]:text-white">
-              Pending
-            </TabsTrigger>
-            <TabsTrigger value="approved" className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white">
-              Approved
-            </TabsTrigger>
-            <TabsTrigger value="scheduled" className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white">
-              Scheduled
-            </TabsTrigger>
-            <TabsTrigger value="published" className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-600 data-[state=active]:text-white">
-              Published
-            </TabsTrigger>
-            <TabsTrigger value="rejected" className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-red-700 data-[state=active]:text-white">
-              Rejected
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
 
         {/* Filters - Only show for card view, but without search */}
         {viewMode === "card" && (
