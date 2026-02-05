@@ -123,6 +123,21 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
     // Check for image (optional but warn)
     if (!post.main_image_url) {
       warnings.push("⚠️ No image attached");
+    } else {
+      // If there is an image URL, verify it's accessible
+      try {
+        const imageCheckResponse = await fetch(`/api/proxy-image?url=${encodeURIComponent(post.main_image_url)}`, {
+          method: 'HEAD',
+        });
+        
+        if (!imageCheckResponse.ok) {
+          warnings.push("⚠️ Image URL exists but may not be accessible (proxy error)");
+          console.warn("Image proxy check failed:", imageCheckResponse.status, post.main_image_url);
+        }
+      } catch (error) {
+        warnings.push("⚠️ Unable to verify image accessibility");
+        console.warn("Image verification error:", error);
+      }
     }
     
     // Check for hashtags (optional but warn)
