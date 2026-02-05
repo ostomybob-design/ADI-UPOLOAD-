@@ -1,6 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, XCircle, Calendar, ExternalLink, Loader2, CalendarPlus } from "lucide-react";
+import { CheckCircle2, XCircle, Calendar, ExternalLink, Loader2, CalendarPlus, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RowActions } from "./row-actions";
@@ -71,7 +71,38 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
   const [isSendingToPending, setIsSendingToPending] = useState(false);
   const [isUnscheduling, setIsUnscheduling] = useState(false);
   const [isMovingToReadyToPost, setIsMovingToReadyToPost] = useState(false);
+  const [isMovingBackward, setIsMovingBackward] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
+
+  const handleMoveToDrafts = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm("Move this post back to Drafts?")) return;
+
+    setIsMovingBackward(true);
+    try {
+      const response = await fetch("/api/posts/edit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          postId: post.id,
+          is_draft: true,
+          approval_status: "pending"
+        })
+      });
+
+      if (response.ok) {
+        alert("✅ Post moved to Drafts");
+        onRefresh?.();
+      } else {
+        alert("Failed to move post. Please try again.");
+      }
+    } catch (error) {
+      console.error("Move to drafts error:", error);
+      alert("Failed to move post. Please try again.");
+    } finally {
+      setIsMovingBackward(false);
+    }
+  };
 
   const handleMoveToReadyToPost = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -314,15 +345,29 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
     );
   }
 
-  // Pending tab (Ready to Post): Show approve and reject buttons
+  // Pending tab (Ready to Post): Show back arrow, approve and reject buttons
   if (post.approval_status === "pending" && post.ai_caption) {
     return (
       <div className="flex gap-1">
         <Button
           size="sm"
           variant="ghost"
+          onClick={handleMoveToDrafts}
+          disabled={isMovingBackward || isApproving || isRejecting}
+          className="h-7 px-2 text-gray-600 hover:text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          title="Move back to Drafts"
+        >
+          {isMovingBackward ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <ArrowLeft className="h-4 w-4" />
+          )}
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
           onClick={handleApprove}
-          disabled={isApproving || isRejecting}
+          disabled={isMovingBackward || isApproving || isRejecting}
           className="h-7 px-2 text-green-600 hover:text-green-700 hover:bg-green-50 disabled:opacity-50"
           title="Approve"
         >
@@ -336,7 +381,7 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
           size="sm"
           variant="ghost"
           onClick={handleReject}
-          disabled={isApproving || isRejecting}
+          disabled={isMovingBackward || isApproving || isRejecting}
           className="h-7 px-2 text-red-600 hover:text-red-700 hover:bg-red-50 disabled:opacity-50"
           title="Reject"
         >
@@ -350,7 +395,7 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
     );
   }
 
-  // Approved tab: Show schedule, send to pending and reject buttons
+  // Approved tab: Show back arrow, schedule, send to pending and reject buttons
   if (post.approval_status === "approved" && !post.late_post_id) {
     return (
       <>
@@ -358,11 +403,25 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
           <Button
             size="sm"
             variant="ghost"
+            onClick={handleSendToPending}
+            disabled={isMovingBackward || isSendingToPending || isRejecting}
+            className="h-7 px-2 text-gray-600 hover:text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            title="Move back to Ready to Post"
+          >
+            {isSendingToPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <ArrowLeft className="h-4 w-4" />
+            )}
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
             onClick={(e) => {
               e.stopPropagation();
               setShowScheduleModal(true);
             }}
-            disabled={isSendingToPending || isRejecting}
+            disabled={isMovingBackward || isSendingToPending || isRejecting}
             className="h-7 px-2 text-purple-600 hover:text-purple-700 hover:bg-purple-50 disabled:opacity-50"
             title="Schedule to queue"
           >
@@ -371,22 +430,8 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
           <Button
             size="sm"
             variant="ghost"
-            onClick={handleSendToPending}
-            disabled={isSendingToPending || isRejecting}
-            className="h-7 px-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 disabled:opacity-50"
-            title="Send back to pending"
-          >
-            {isSendingToPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Calendar className="h-4 w-4" />
-            )}
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
             onClick={handleReject}
-            disabled={isSendingToPending || isRejecting}
+            disabled={isMovingBackward || isSendingToPending || isRejecting}
             className="h-7 px-2 text-red-600 hover:text-red-700 hover:bg-red-50 disabled:opacity-50"
             title="Reject"
           >
@@ -408,7 +453,7 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
     );
   }
 
-  // Scheduled tab: Show unschedule button (including for Late.dev-only posts)
+  // Scheduled tab: Show back arrow to unschedule (including for Late.dev-only posts)
   if ((post.late_post_id || post.id === -1) && post.late_scheduled_for && !post.late_published_at) {
     return (
       <div className="flex gap-1">
@@ -417,13 +462,13 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
           variant="ghost"
           onClick={handleUnschedule}
           disabled={isUnscheduling}
-          className="h-7 px-2 text-orange-600 hover:text-orange-700 hover:bg-orange-50 disabled:opacity-50"
-          title={post.id === -1 ? "Delete permanently (created in Late.dev)" : "Unschedule and move to approved"}
+          className="h-7 px-2 text-gray-600 hover:text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          title={post.id === -1 ? "Delete permanently (created in Late.dev)" : "Unschedule and move back to Approved"}
         >
           {isUnscheduling ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            <XCircle className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4" />
           )}
         </Button>
       </div>
