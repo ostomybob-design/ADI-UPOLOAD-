@@ -356,7 +356,7 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
           onClick={handleUnschedule}
           disabled={isUnscheduling}
           className="h-7 px-2 text-orange-600 hover:text-orange-700 hover:bg-orange-50 disabled:opacity-50"
-          title={post.id === -1 ? "Delete from Late.dev (no local record)" : "Unschedule and move to approved"}
+          title={post.id === -1 ? "Unschedule from Late.dev (no local record to keep)" : "Unschedule and move to approved"}
         >
           {isUnscheduling ? (
             <Loader2 className="h-4 w-4 animate-spin" />
