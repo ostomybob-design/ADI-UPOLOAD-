@@ -4,6 +4,20 @@ import { ensureHttps } from "@/lib/utils";
 
 export async function POST(req: Request) {
   try {
+    // 🔍 DIAGNOSTIC LOGGING - Track where posts are coming from
+    const requestBody = await req.json();
+    const headers = Object.fromEntries(req.headers.entries());
+    
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    console.log("🤖 POST REQUEST TO /api/posts");
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    console.log("⏰ Timestamp:", new Date().toISOString());
+    console.log("🌐 Origin:", headers.origin || headers.referer || "Unknown");
+    console.log("🔑 User-Agent:", headers["user-agent"]?.substring(0, 100) || "Unknown");
+    console.log("📦 Request Body:", JSON.stringify(requestBody, null, 2));
+    console.log("🎯 Approval Status in Request:", requestBody.approval_status || "NOT SET (will use DB default 'pending')");
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+    
     const {
       imageVideo,
       caption,
@@ -15,7 +29,8 @@ export async function POST(req: Request) {
       latePostId,
       lateStatus,
       rawData,
-    } = await req.json();
+      approval_status, // Capture if sent by external bot
+    } = requestBody;
 
     // imageVideo should be a Supabase storage URL (uploaded via /api/upload before calling this endpoint)
     // Convert HTTP to HTTPS to avoid mixed content warnings
@@ -47,6 +62,15 @@ export async function POST(req: Request) {
       content_processed: true, // Assuming content is processed upon creation
       raw_data: rawData || {},
     };
+    
+    // 🛡️ SECURITY: Force all new posts to 'pending' status to prevent auto-approval bypass
+    // If you want to allow external systems to set approval_status, change this logic
+    if (approval_status) {
+      console.warn("⚠️  WARNING: External system attempted to set approval_status to:", approval_status);
+      console.warn("⚠️  FORCING to 'pending' for security. Update API if this is intentional.");
+    }
+    // Always default to pending, don't allow external systems to bypass approval
+    postData.approval_status = "pending";
 
     // Add Late API tracking fields if provided
     if (latePostId) {
@@ -79,6 +103,10 @@ export async function POST(req: Request) {
     const newPost = await prisma.search_results.create({
       data: postData,
     });
+    
+    console.log("✅ Post created successfully with ID:", newPost.id);
+    console.log("📊 Final approval_status:", newPost.approval_status);
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
     return NextResponse.json(newPost, { status: 201 });
   } catch (error) {
