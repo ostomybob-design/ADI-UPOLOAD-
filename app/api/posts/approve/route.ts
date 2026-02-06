@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { lateAPI } from "@/lib/late-api";
+import { checkAndAutoApproveForAwayDay } from "@/lib/away-mode-utils";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
@@ -75,6 +76,12 @@ export async function POST(request: Request) {
                 // Get next queue slot
                 const queueSlot = await lateAPI.getNextQueueSlot(profileId);
                 console.log(`Next queue slot: ${queueSlot.nextSlot}`);
+
+                // 🏖️ Check if this is an away day and auto-approve posts if needed
+                const awayModeCheck = await checkAndAutoApproveForAwayDay(new Date(queueSlot.nextSlot));
+                if (awayModeCheck.autoApproved) {
+                  console.log(`🤖 Away Mode: Auto-approved ${awayModeCheck.autoApprovedCount} post(s) for ${queueSlot.nextSlot}`);
+                }
 
               // Prepare content
               const hashtags = Array.isArray(post.ai_hashtags)
