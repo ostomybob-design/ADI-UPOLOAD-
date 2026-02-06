@@ -1,8 +1,10 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Calendar, LayoutDashboard, LayoutGrid, Table as TableIcon, RefreshCw, Plus } from "lucide-react"
+import { Calendar, LayoutDashboard, LayoutGrid, Table as TableIcon, RefreshCw, Plus, Plane } from "lucide-react"
 import { useRouter, usePathname } from "next/navigation"
+import { AwayModeModal } from "@/components/away-mode-modal"
 
 interface DashboardHeaderProps {
   viewMode?: "card" | "table"
@@ -22,6 +24,39 @@ export function DashboardHeader({
   const router = useRouter()
   const pathname = usePathname()
   const isDashboard = pathname === "/dashboard"
+  const [awayModeOpen, setAwayModeOpen] = useState(false)
+  const [awayDaysCount, setAwayDaysCount] = useState(0)
+  const [insufficientPosts, setInsufficientPosts] = useState(false)
+
+  // Fetch away mode status
+  const fetchAwayModeStatus = async () => {
+    try {
+      const response = await fetch("/api/away-mode")
+      if (response.ok) {
+        const data = await response.json()
+        setAwayDaysCount(data.awayDays.length)
+        
+        // Check if we have enough posts (simple check: 1 post per day minimum)
+        const totalAvailable = data.stats.approvedPosts + data.stats.pendingPosts
+        setInsufficientPosts(totalAvailable < data.awayDays.length)
+      }
+    } catch (error) {
+      console.error("Failed to fetch away mode status:", error)
+    }
+  }
+
+  useEffect(() => {
+    fetchAwayModeStatus()
+    // Refresh every minute
+    const interval = setInterval(fetchAwayModeStatus, 60000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const awayModeTooltip = awayDaysCount === 0 
+    ? "Set days when you'll be away" 
+    : insufficientPosts
+    ? `${awayDaysCount} day(s) set - insufficient posts available!`
+    : `${awayDaysCount} day(s) set to away mode`
 
   return (
     <header className="border-b border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-r from-white via-blue-50/30 to-purple-50/30 dark:from-slate-900 dark:via-blue-900/20 dark:to-purple-900/20 backdrop-blur-md sticky top-0 z-50 shadow-sm">
@@ -55,6 +90,21 @@ export function DashboardHeader({
             >
               <Calendar className="h-4 w-4 sm:mr-2" />
               <span className="hidden sm:inline">Scheduling</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setAwayModeOpen(true)}
+              className={`relative ${awayDaysCount > 0 ? 'border-2 border-red-500' : ''}`}
+              title={awayModeTooltip}
+            >
+              <Plane className={`h-4 w-4 sm:mr-2 ${insufficientPosts ? 'text-red-500' : awayDaysCount > 0 ? 'text-orange-500' : ''}`} />
+              <span className="hidden sm:inline">Away Mode</span>
+              {awayDaysCount > 0 && (
+                <span className={`absolute -top-1 -right-1 h-5 w-5 rounded-full flex items-center justify-center text-xs font-bold ${insufficientPosts ? 'bg-red-500' : 'bg-orange-500'} text-white`}>
+                  {awayDaysCount}
+                </span>
+              )}
             </Button>
           </nav>
 
@@ -102,6 +152,13 @@ export function DashboardHeader({
           )}
         </div>
       </div>
+
+      {/* Away Mode Modal */}
+      <AwayModeModal 
+        open={awayModeOpen} 
+        onOpenChange={setAwayModeOpen}
+        onAwayDaysUpdated={fetchAwayModeStatus}
+      />
     </header>
   )
 }
