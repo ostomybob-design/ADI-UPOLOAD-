@@ -413,11 +413,16 @@ export function EditPostModal({ post, open, onOpenChange, onEditComplete }: Edit
         onHashtagsUpdate={(hashtags) => setFormData(prev => ({ ...prev, ai_hashtags: hashtags }))}
         onPlatformToggle={() => { }}
         onSchedule={() => { }}
-        onSave={() => {
-          // Just close the AI editor - don't save yet
-          // User will click the main Save button to save changes
-          console.log('✅ AI Editor closed - caption is now:', formData.ai_caption.substring(0, 100) + '...');
+        onSave={async () => {
+          // Close AI editor first
           setAiEditorOpen(false);
+          
+          // Wait a moment for state to update
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
+          // Trigger the save
+          console.log('💾 AI Editor Save button clicked - triggering handleSave');
+          await handleSave();
         }}
         // Don't pass postId - we don't want AI editor to save directly
         // postId={post.id}
