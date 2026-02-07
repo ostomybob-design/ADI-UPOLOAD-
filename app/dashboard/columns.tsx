@@ -126,21 +126,104 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
     e.stopPropagation();
     setIsMovingToReadyToPost(true);
     try {
-      const response = await fetch("/api/posts/edit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          postId: post.id,
-          is_draft: false,
-          approval_status: "pending"
-        })
-      });
+      // Check if this is a localStorage draft
+      const isDraft = post.url?.startsWith("draft://");
+      const draftId = isDraft ? post.url.replace("draft://", "") : null;
 
-      if (response.ok) {
-        alert("✅ Post moved to Ready to Post");
+      if (isDraft && draftId) {
+        // For localStorage drafts, we need to delete from localStorage and create a database post
+        const { draftUtils } = await import("@/lib/draft-utils");
+        const draft = draftUtils.getDraft(draftId);
+        
+        if (!draft) {
+          alert("Draft not found. Please refresh the page.");
+          return;
+        }
+
+        // Upload the image to Supabase first
+        let mainImageUrl = draft.imagePreview;
+        if (draft.imagePreview && draft.imagePreview.startsWith('data:')) {
+          const uploadResponse = await fetch("/api/upload", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              file: draft.imagePreview,
+              folder: "posts"
+            }),
+          });
+
+          if (!uploadResponse.ok) {
+            throw new Error("Failed to upload image");
+          }
+
+          const uploadResult = await uploadResponse.json();
+          mainImageUrl = uploadResult.publicUrl;
+        }
+
+        // Create database post using /api/posts
+        const createResponse = await fetch("/api/posts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            imageVideo: mainImageUrl,
+            caption: draft.caption,
+            hashtags: draft.hashtags,
+            schedulePost: draft.schedulePost || false,
+            scheduledDate: draft.scheduledDate || null,
+            postOnInstagram: draft.postOnInstagram || false,
+            postOnFacebook: draft.postOnFacebook || false,
+            rawData: draft.overlayText ? {
+              textOverlay: {
+                text: draft.overlayText,
+                position: draft.textPosition,
+                fontSize: draft.fontSize,
+                color: draft.textColor,
+                fontFamily: draft.fontFamily,
+                shadowIntensity: draft.shadowIntensity,
+                bgEnabled: draft.textBgEnabled,
+                bgColor: draft.textBgColor,
+                bgOpacity: draft.textBgOpacity,
+                strokeEnabled: draft.textStrokeEnabled,
+                strokeColor: draft.textStrokeColor,
+                strokeWidth: draft.textStrokeWidth,
+                backdropBlurEnabled: draft.backdropBlurEnabled,
+                backdropBlurAmount: draft.backdropBlurAmount,
+              }
+            } : {}
+          })
+        });
+
+        if (!createResponse.ok) {
+          const errorText = await createResponse.text();
+          console.error("Failed to create post:", errorText);
+          throw new Error("Failed to create post");
+        }
+
+        // Delete the draft from localStorage
+        draftUtils.deleteDraft(draftId);
+        
+        alert("✅ Draft moved to Ready to Post");
         onRefresh?.();
       } else {
-        alert("Failed to move post. Please try again.");
+        // For database posts, just update the status
+        const response = await fetch("/api/posts/edit", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            postId: post.id,
+            updates: {
+              is_draft: false,
+              approval_status: "pending"
+            }
+          })
+        });
+
+        if (response.ok) {
+          alert("✅ Post moved to Ready to Post");
+          onRefresh?.();
+        } else {
+          alert("Failed to move post. Please try again.");
+        }
       }
     } catch (error) {
       console.error("Move to ready error:", error);
