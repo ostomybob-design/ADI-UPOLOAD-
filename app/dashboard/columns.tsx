@@ -322,27 +322,59 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
 
   const handleReject = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    const reason = prompt("Rejection reason (optional):");
-    if (reason === null) return;
+    
+    // Check if this is a localStorage draft
+    const isDraft = post.url?.startsWith("draft://");
+    const draftId = isDraft ? post.url.replace("draft://", "") : null;
 
-    setIsRejecting(true);
-    try {
-      const response = await fetch("/api/posts/reject", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          postId: post.id,
-          reason: reason || "Rejected from dashboard"
-        })
-      });
-
-      if (response.ok) {
-        onRefresh?.();
+    if (isDraft && draftId) {
+      // For localStorage drafts, just delete them
+      if (!confirm("Delete this draft? This action cannot be undone.")) return;
+      
+      setIsRejecting(true);
+      try {
+        const { draftUtils } = await import("@/lib/draft-utils");
+        const success = draftUtils.deleteDraft(draftId);
+        
+        if (success) {
+          alert("✅ Draft deleted");
+          onRefresh?.();
+        } else {
+          alert("Failed to delete draft. Please try again.");
+        }
+      } catch (error) {
+        console.error("Draft deletion error:", error);
+        alert("Failed to delete draft. Please try again.");
+      } finally {
+        setIsRejecting(false);
       }
-    } catch (error) {
-      console.error("Rejection error:", error);
-    } finally {
-      setIsRejecting(false);
+    } else {
+      // For database posts, use the reject API
+      const reason = prompt("Rejection reason (optional):");
+      if (reason === null) return;
+
+      setIsRejecting(true);
+      try {
+        const response = await fetch("/api/posts/reject", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            postId: post.id,
+            reason: reason || "Rejected from dashboard"
+          })
+        });
+
+        if (response.ok) {
+          onRefresh?.();
+        } else {
+          alert("Failed to reject post. Please try again.");
+        }
+      } catch (error) {
+        console.error("Rejection error:", error);
+        alert("Failed to reject post. Please try again.");
+      } finally {
+        setIsRejecting(false);
+      }
     }
   };
 
