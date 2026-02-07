@@ -90,6 +90,8 @@ export function CreatePostModal({
   draftId?: string;
   postId?: number;
 }) {
+  console.log('🔵 CreatePostModal rendered - postId:', postId, 'draftId:', draftId, 'open:', open);
+  
   const [imageVideo, setImageVideo] = React.useState<File | null>(null);
   const [imagePreview, setImagePreview] = React.useState<string | null>(null);
   const [additionalImages, setAdditionalImages] = React.useState<string[]>([]);
