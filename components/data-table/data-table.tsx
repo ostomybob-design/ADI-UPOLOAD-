@@ -48,23 +48,13 @@ export function DataTable<TData, TValue>({
   const STORAGE_KEY_ORDER = `dataTable_columnOrder_${storageKey}`;
   const STORAGE_KEY_SIZING = `dataTable_columnSizing_${storageKey}`;
   const STORAGE_KEY_VISIBILITY = `dataTable_columnVisibility_${storageKey}`;
+  const PREFERENCE_KEY_VISIBILITY = `column_visibility_${storageKey}`;
 
   // Load saved state from localStorage
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState({});
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem(STORAGE_KEY_VISIBILITY);
-      if (saved) {
-        try {
-          return JSON.parse(saved);
-        } catch (e) {
-          return {};
-        }
-      }
-    }
-    return {};
-  });
+  const [defaultColumnVisibility, setDefaultColumnVisibility] = useState<VisibilityState>({});
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem(STORAGE_KEY_ORDER);
@@ -92,24 +82,78 @@ export function DataTable<TData, TValue>({
     return {};
   });
 
+  // Load default column visibility from database on mount
+  useEffect(() => {
+    const loadDefaults = async () => {
+      try {
+        const response = await fetch(`/api/preferences?key=${PREFERENCE_KEY_VISIBILITY}`);
+        if (response.ok) {
+          const { value } = await response.json();
+          setDefaultColumnVisibility(value || {});
+          
+          // Merge database defaults with localStorage overrides
+          if (typeof window !== 'undefined') {
+            const localOverrides = localStorage.getItem(STORAGE_KEY_VISIBILITY);
+            if (localOverrides) {
+              try {
+                const parsed = JSON.parse(localOverrides);
+                // localStorage overrides take precedence
+                setColumnVisibility({ ...value, ...parsed });
+              } catch (e) {
+                setColumnVisibility(value || {});
+              }
+            } else {
+              // No local overrides, use defaults
+              setColumnVisibility(value || {});
+            }
+          } else {
+            setColumnVisibility(value || {});
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load default column visibility:", error);
+        // Fallback to localStorage only
+        if (typeof window !== 'undefined') {
+          const saved = localStorage.getItem(STORAGE_KEY_VISIBILITY);
+          if (saved) {
+            try {
+              setColumnVisibility(JSON.parse(saved));
+            } catch (e) {
+              setColumnVisibility({});
+            }
+          }
+        }
+      }
+    };
+    
+    loadDefaults();
+  }, [STORAGE_KEY_VISIBILITY, PREFERENCE_KEY_VISIBILITY]);
+
   // Save to localStorage whenever column order, sizing, or visibility changes
   useEffect(() => {
     if (typeof window !== 'undefined' && columnOrder.length > 0) {
       localStorage.setItem(STORAGE_KEY_ORDER, JSON.stringify(columnOrder));
     }
-  }, [columnOrder]);
+  }, [columnOrder, STORAGE_KEY_ORDER]);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && Object.keys(columnSizing).length > 0) {
       localStorage.setItem(STORAGE_KEY_SIZING, JSON.stringify(columnSizing));
     }
-  }, [columnSizing]);
+  }, [columnSizing, STORAGE_KEY_SIZING]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem(STORAGE_KEY_VISIBILITY, JSON.stringify(columnVisibility));
+      // Save only the differences from defaults (personal overrides)
+      const overrides: VisibilityState = {};
+      Object.keys(columnVisibility).forEach(key => {
+        if (columnVisibility[key] !== defaultColumnVisibility[key]) {
+          overrides[key] = columnVisibility[key];
+        }
+      });
+      localStorage.setItem(STORAGE_KEY_VISIBILITY, JSON.stringify(overrides));
     }
-  }, [columnVisibility]);
+  }, [columnVisibility, defaultColumnVisibility, STORAGE_KEY_VISIBILITY]);
 
   const table = useReactTable({
     data,
