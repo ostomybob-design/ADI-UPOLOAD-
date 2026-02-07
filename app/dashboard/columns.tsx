@@ -394,7 +394,7 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
     );
   }
 
-  // Approved tab: Show back arrow, schedule, send to pending and reject buttons
+  // Approved tab: Show back arrow, schedule to queue, set schedule, send to pending and reject buttons
   if (post.approval_status === "approved" && !post.late_post_id) {
     return (
       <>
@@ -425,6 +425,19 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
             title="Schedule to queue"
           >
             <CalendarPlus className="h-4 w-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowScheduleModal(true);
+            }}
+            disabled={isMovingBackward || isSendingToPending || isRejecting}
+            className="h-7 px-3 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-300 disabled:opacity-50"
+            title="Set specific schedule date"
+          >
+            Set Schedule
           </Button>
           <Button
             size="sm"
