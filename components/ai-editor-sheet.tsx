@@ -731,7 +731,10 @@ export function AIEditorSheet({
         {/* Action Buttons - Fixed at bottom */}
         <div className="border-t bg-background p-6 space-y-2">
           <Button
-            onClick={handleSaveToDatabase}
+            onClick={() => {
+              console.log('🔴 SAVE BUTTON CLICKED IN AI EDITOR');
+              handleSaveToDatabase();
+            }}
             disabled={isSaving}
             className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
           >
