@@ -720,9 +720,10 @@ export default function DashboardPage() {
           }}
           onPostCreated={() => {
             console.log('✅ Post created/updated - clearing IDs and refreshing');
-            fetchPosts()
+            setCreateModalOpen(false)
             setEditingPostId(null)
             setEditingDraftId(null)
+            fetchPosts()
           }}
           postId={editingPostId || undefined}
           draftId={editingDraftId || undefined}
