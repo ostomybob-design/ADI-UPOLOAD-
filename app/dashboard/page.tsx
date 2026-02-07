@@ -129,7 +129,8 @@ export default function DashboardPage() {
         console.log("✅ Posts fetched successfully:", data.length)
         console.log("📋 Post statuses breakdown:", {
           total: data.length,
-          pending: data.filter((p: Post) => p.approval_status === "pending").length,
+          drafts: data.filter((p: Post) => p.is_draft).length,
+          pending: data.filter((p: Post) => p.approval_status === "pending" && !p.is_draft).length,
           approved: data.filter((p: Post) => p.approval_status === "approved").length,
           rejected: data.filter((p: Post) => p.approval_status === "rejected").length,
           withLatePostId: data.filter((p: Post) => p.late_post_id).length,
@@ -139,18 +140,10 @@ export default function DashboardPage() {
           withCaption: data.filter((p: Post) => p.ai_caption).length
         })
         
-        // Load drafts from localStorage and merge with API data
-        const drafts = draftUtils.getAllDrafts()
-        console.log("📝 Loaded drafts from localStorage:", drafts.length)
+        // All posts are now in the database (no more localStorage)
+        console.log("📊 Total posts (all from database):", data.length)
         
-        // Convert drafts to SearchResult format
-        const draftPosts = drafts.map(draft => draftUtils.draftToSearchResult(draft))
-        
-        // Merge API posts with drafts
-        const allPosts = [...data, ...draftPosts]
-        console.log("📊 Total posts (including drafts):", allPosts.length)
-        
-        setPosts(allPosts)
+        setPosts(data)
       } else {
         console.error("❌ Failed to fetch posts:", response.status, response.statusText)
       }

@@ -40,6 +40,7 @@ model search_results {
   approved_by             String?   @db.VarChar(100)
   rejection_reason        String?
   is_edited               Boolean?  @default(false)
+  is_draft                Boolean   @default(false) // True for draft posts, false for posts in workflow
   
   // Late.dev integration
   late_post_id            String?   @unique @db.VarChar(100) // Late.dev post ID after scheduling
@@ -62,6 +63,7 @@ model search_results {
   @@index([late_post_id], map: "idx_late_post_id")
   @@index([late_status], map: "idx_late_status")
   @@index([late_scheduled_for], map: "idx_late_scheduled_for")
+  @@index([is_draft], map: "idx_is_draft")
 }
 
 // Late.dev profile and account configuration
