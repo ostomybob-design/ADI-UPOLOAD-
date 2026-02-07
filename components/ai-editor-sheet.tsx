@@ -306,9 +306,15 @@ export function AIEditorSheet({
     
     if (!postId) {
       console.log('⚠️ No postId provided - calling onSave callback');
-      // If no postId, just call onSave (which in edit-post-modal just closes the sheet)
-      if (onSave) {
-        onSave();
+      setIsSaving(true);
+      try {
+        if (onSave) {
+          await onSave();
+        }
+      } catch (error) {
+        console.error('❌ Error in onSave:', error);
+      } finally {
+        setIsSaving(false);
       }
       return;
     }

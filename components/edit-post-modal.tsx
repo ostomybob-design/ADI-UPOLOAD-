@@ -414,15 +414,20 @@ export function EditPostModal({ post, open, onOpenChange, onEditComplete }: Edit
         onPlatformToggle={() => { }}
         onSchedule={() => { }}
         onSave={async () => {
-          // Close AI editor first
-          setAiEditorOpen(false);
-          
-          // Wait a moment for state to update
-          await new Promise(resolve => setTimeout(resolve, 100));
-          
-          // Trigger the save
-          console.log('💾 AI Editor Save button clicked - triggering handleSave');
-          await handleSave();
+          try {
+            // Trigger the save FIRST
+            console.log('💾 AI Editor Save button clicked - triggering handleSave');
+            console.log('📝 Current caption in formData:', formData.ai_caption.substring(0, 100) + '...');
+            
+            await handleSave();
+            
+            // Only close AI editor if save was successful
+            console.log('✅ Save successful - closing AI editor');
+            setAiEditorOpen(false);
+          } catch (error) {
+            console.error('❌ Error saving from AI editor:', error);
+            // Don't close the AI editor if save failed
+          }
         }}
         // Don't pass postId - we don't want AI editor to save directly
         // postId={post.id}
