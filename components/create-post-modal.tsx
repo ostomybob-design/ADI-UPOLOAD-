@@ -127,6 +127,17 @@ export function CreatePostModal({
   const [dragOffset, setDragOffset] = React.useState({ x: 0, y: 0 });
   const imagePreviewRef = React.useRef<HTMLDivElement>(null);
   const [showInstagramGrid, setShowInstagramGrid] = React.useState(false);
+  
+  // Enhanced text overlay effects
+  const [textBgEnabled, setTextBgEnabled] = React.useState(false);
+  const [textBgColor, setTextBgColor] = React.useState("#000000");
+  const [textBgOpacity, setTextBgOpacity] = React.useState(50);
+  const [textStrokeEnabled, setTextStrokeEnabled] = React.useState(false);
+  const [textStrokeColor, setTextStrokeColor] = React.useState("#000000");
+  const [textStrokeWidth, setTextStrokeWidth] = React.useState(2);
+  const [shadowIntensity, setShadowIntensity] = React.useState(4);
+  const [backdropBlurEnabled, setBackdropBlurEnabled] = React.useState(false);
+  const [backdropBlurAmount, setBackdropBlurAmount] = React.useState(8);
 
   // Fetch connected accounts and profiles on mount
   React.useEffect(() => {
@@ -255,6 +266,11 @@ export function CreatePostModal({
       // Reset text overlay when new image is uploaded
       setOverlayText("");
       setTextPosition({ x: 50, y: 50 });
+      // Reset all text effects to defaults
+      setTextBgEnabled(false);
+      setBackdropBlurEnabled(false);
+      setTextStrokeEnabled(false);
+      setShadowIntensity(4);
     }
   };
 
@@ -263,6 +279,11 @@ export function CreatePostModal({
     setImagePreview(null);
     setOverlayText("");
     setTextPosition({ x: 50, y: 50 });
+    // Reset all text effects to defaults
+    setTextBgEnabled(false);
+    setBackdropBlurEnabled(false);
+    setTextStrokeEnabled(false);
+    setShadowIntensity(4);
   };
 
   // Function to crop image to Instagram's aspect ratio constraints
@@ -370,23 +391,77 @@ export function CreatePostModal({
         // Draw image
         ctx.drawImage(img, 0, 0);
 
-        // Draw text overlay
+        // Draw text overlay with effects
         const x = (textPosition.x / 100) * canvas.width;
         const y = (textPosition.y / 100) * canvas.height;
         
         // Scale font size based on image size
         const scaledFontSize = (fontSize / 500) * Math.min(canvas.width, canvas.height);
         ctx.font = `bold ${scaledFontSize}px Arial, sans-serif`;
-        ctx.fillStyle = textColor;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         
-        // Add text shadow
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-        ctx.shadowBlur = 4;
-        ctx.shadowOffsetX = 2;
-        ctx.shadowOffsetY = 2;
+        // Measure text for background
+        const textMetrics = ctx.measureText(overlayText);
+        const textWidth = textMetrics.width;
+        const textHeight = scaledFontSize; // Approximate height
         
+        // Draw background blur effect if enabled (simulate with multiple shadow layers)
+        if (backdropBlurEnabled) {
+          const padding = 16;
+          const bgX = x - textWidth / 2 - padding;
+          const bgY = y - textHeight / 2 - padding;
+          const bgWidth = textWidth + padding * 2;
+          const bgHeight = textHeight + padding * 2;
+          
+          // Create a blurred background effect using multiple overlapping rectangles
+          for (let i = 0; i < backdropBlurAmount / 2; i++) {
+            ctx.fillStyle = `rgba(255, 255, 255, ${0.05})`;
+            ctx.fillRect(
+              bgX - i,
+              bgY - i,
+              bgWidth + i * 2,
+              bgHeight + i * 2
+            );
+          }
+        }
+        
+        // Draw background highlight if enabled
+        if (textBgEnabled) {
+          const padding = 16;
+          const bgX = x - textWidth / 2 - padding;
+          const bgY = y - textHeight / 2 - padding;
+          const bgWidth = textWidth + padding * 2;
+          const bgHeight = textHeight + padding * 2;
+          
+          // Convert hex to rgba with opacity
+          const r = parseInt(textBgColor.slice(1, 3), 16);
+          const g = parseInt(textBgColor.slice(3, 5), 16);
+          const b = parseInt(textBgColor.slice(5, 7), 16);
+          const alpha = textBgOpacity / 100;
+          
+          ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+          ctx.roundRect(bgX, bgY, bgWidth, bgHeight, 8);
+          ctx.fill();
+        }
+        
+        // Add text shadow
+        if (shadowIntensity > 0) {
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+          ctx.shadowBlur = shadowIntensity * 2;
+          ctx.shadowOffsetX = shadowIntensity;
+          ctx.shadowOffsetY = shadowIntensity;
+        }
+        
+        // Draw text stroke/outline if enabled
+        if (textStrokeEnabled) {
+          ctx.strokeStyle = textStrokeColor;
+          ctx.lineWidth = textStrokeWidth;
+          ctx.strokeText(overlayText, x, y);
+        }
+        
+        // Draw the text
+        ctx.fillStyle = textColor;
         ctx.fillText(overlayText, x, y);
 
         // Convert canvas to data URL
@@ -542,6 +617,15 @@ export function CreatePostModal({
               setTextPosition(rawData.textOverlay.position || { x: 50, y: 50 });
               setFontSize(rawData.textOverlay.fontSize || 32);
               setTextColor(rawData.textOverlay.color || "#FFFFFF");
+              setShadowIntensity(rawData.textOverlay.shadowIntensity ?? 4);
+              setTextBgEnabled(rawData.textOverlay.bgEnabled || false);
+              setTextBgColor(rawData.textOverlay.bgColor || "#000000");
+              setTextBgOpacity(rawData.textOverlay.bgOpacity ?? 50);
+              setTextStrokeEnabled(rawData.textOverlay.strokeEnabled || false);
+              setTextStrokeColor(rawData.textOverlay.strokeColor || "#000000");
+              setTextStrokeWidth(rawData.textOverlay.strokeWidth ?? 2);
+              setBackdropBlurEnabled(rawData.textOverlay.backdropBlurEnabled || false);
+              setBackdropBlurAmount(rawData.textOverlay.backdropBlurAmount ?? 8);
             }
           }
 
@@ -640,7 +724,16 @@ export function CreatePostModal({
             text: overlayText,
             position: textPosition,
             fontSize: fontSize,
-            color: textColor
+            color: textColor,
+            shadowIntensity: shadowIntensity,
+            bgEnabled: textBgEnabled,
+            bgColor: textBgColor,
+            bgOpacity: textBgOpacity,
+            strokeEnabled: textStrokeEnabled,
+            strokeColor: textStrokeColor,
+            strokeWidth: textStrokeWidth,
+            backdropBlurEnabled: backdropBlurEnabled,
+            backdropBlurAmount: backdropBlurAmount,
           };
         }
 
@@ -829,7 +922,16 @@ export function CreatePostModal({
             text: overlayText,
             position: textPosition,
             fontSize: fontSize,
-            color: textColor
+            color: textColor,
+            shadowIntensity: shadowIntensity,
+            bgEnabled: textBgEnabled,
+            bgColor: textBgColor,
+            bgOpacity: textBgOpacity,
+            strokeEnabled: textStrokeEnabled,
+            strokeColor: textStrokeColor,
+            strokeWidth: textStrokeWidth,
+            backdropBlurEnabled: backdropBlurEnabled,
+            backdropBlurAmount: backdropBlurAmount,
           };
         }
 
@@ -1231,7 +1333,16 @@ export function CreatePostModal({
             text: overlayText,
             position: textPosition,
             fontSize: fontSize,
-            color: textColor
+            color: textColor,
+            shadowIntensity: shadowIntensity,
+            bgEnabled: textBgEnabled,
+            bgColor: textBgColor,
+            bgOpacity: textBgOpacity,
+            strokeEnabled: textStrokeEnabled,
+            strokeColor: textStrokeColor,
+            strokeWidth: textStrokeWidth,
+            backdropBlurEnabled: backdropBlurEnabled,
+            backdropBlurAmount: backdropBlurAmount,
           };
         }
         
@@ -1408,10 +1519,6 @@ export function CreatePostModal({
                                   left: `${textPosition.x}%`,
                                   top: `${textPosition.y}%`,
                                   transform: 'translate(-50%, -50%)',
-                                  fontSize: `${fontSize}px`,
-                                  color: textColor,
-                                  fontWeight: 'bold',
-                                  textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
                                   pointerEvents: 'auto',
                                   zIndex: 20,
                                 }}
@@ -1426,7 +1533,21 @@ export function CreatePostModal({
                                   }
                                 }}
                               >
-                                {overlayText}
+                                <div
+                                  style={{
+                                    fontSize: `${fontSize}px`,
+                                    color: textColor,
+                                    fontWeight: 'bold',
+                                    textShadow: `${shadowIntensity}px ${shadowIntensity}px ${shadowIntensity * 2}px rgba(0,0,0,0.8)`,
+                                    WebkitTextStroke: textStrokeEnabled ? `${textStrokeWidth}px ${textStrokeColor}` : 'none',
+                                    padding: textBgEnabled || backdropBlurEnabled ? '8px 16px' : '0',
+                                    backgroundColor: textBgEnabled ? `${textBgColor}${Math.round(textBgOpacity * 2.55).toString(16).padStart(2, '0')}` : 'transparent',
+                                    backdropFilter: backdropBlurEnabled ? `blur(${backdropBlurAmount}px)` : 'none',
+                                    borderRadius: (textBgEnabled || backdropBlurEnabled) ? '8px' : '0',
+                                  }}
+                                >
+                                  {overlayText}
+                                </div>
                               </div>
                             )}
                           </>
@@ -1512,6 +1633,134 @@ export function CreatePostModal({
                             />
                           </div>
                         </div>
+                      </div>
+
+                      {/* Shadow Intensity */}
+                      <div>
+                        <Label className="text-xs text-gray-600 mb-1 block">Shadow Intensity: {shadowIntensity}px</Label>
+                        <input
+                          type="range"
+                          min="0"
+                          max="12"
+                          value={shadowIntensity}
+                          onChange={(e) => setShadowIntensity(Number(e.target.value))}
+                          className="w-full"
+                        />
+                      </div>
+
+                      {/* Text Background Highlight */}
+                      <div className="space-y-2 p-3 bg-white rounded-lg border border-gray-200">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="text-bg-enabled"
+                            checked={textBgEnabled}
+                            onCheckedChange={(checked) => setTextBgEnabled(checked as boolean)}
+                          />
+                          <Label htmlFor="text-bg-enabled" className="text-xs font-medium cursor-pointer">
+                            Background Highlight
+                          </Label>
+                        </div>
+                        {textBgEnabled && (
+                          <div className="space-y-2 pl-6">
+                            <div className="flex gap-2 items-center">
+                              <Label className="text-xs text-gray-600 w-12">Color</Label>
+                              <input
+                                type="color"
+                                value={textBgColor}
+                                onChange={(e) => setTextBgColor(e.target.value)}
+                                className="w-10 h-8 rounded cursor-pointer"
+                              />
+                              <Input
+                                value={textBgColor}
+                                onChange={(e) => setTextBgColor(e.target.value)}
+                                className="flex-1 bg-white text-xs h-8"
+                                placeholder="#000000"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs text-gray-600 mb-1 block">Opacity: {textBgOpacity}%</Label>
+                              <input
+                                type="range"
+                                min="0"
+                                max="100"
+                                value={textBgOpacity}
+                                onChange={(e) => setTextBgOpacity(Number(e.target.value))}
+                                className="w-full"
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Backdrop Blur (Fuzzy Effect) */}
+                      <div className="space-y-2 p-3 bg-white rounded-lg border border-gray-200">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="backdrop-blur-enabled"
+                            checked={backdropBlurEnabled}
+                            onCheckedChange={(checked) => setBackdropBlurEnabled(checked as boolean)}
+                          />
+                          <Label htmlFor="backdrop-blur-enabled" className="text-xs font-medium cursor-pointer">
+                            Fuzzy Background Blur
+                          </Label>
+                        </div>
+                        {backdropBlurEnabled && (
+                          <div className="pl-6">
+                            <Label className="text-xs text-gray-600 mb-1 block">Blur Amount: {backdropBlurAmount}px</Label>
+                            <input
+                              type="range"
+                              min="2"
+                              max="20"
+                              value={backdropBlurAmount}
+                              onChange={(e) => setBackdropBlurAmount(Number(e.target.value))}
+                              className="w-full"
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Text Stroke/Outline */}
+                      <div className="space-y-2 p-3 bg-white rounded-lg border border-gray-200">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="text-stroke-enabled"
+                            checked={textStrokeEnabled}
+                            onCheckedChange={(checked) => setTextStrokeEnabled(checked as boolean)}
+                          />
+                          <Label htmlFor="text-stroke-enabled" className="text-xs font-medium cursor-pointer">
+                            Text Outline/Stroke
+                          </Label>
+                        </div>
+                        {textStrokeEnabled && (
+                          <div className="space-y-2 pl-6">
+                            <div className="flex gap-2 items-center">
+                              <Label className="text-xs text-gray-600 w-12">Color</Label>
+                              <input
+                                type="color"
+                                value={textStrokeColor}
+                                onChange={(e) => setTextStrokeColor(e.target.value)}
+                                className="w-10 h-8 rounded cursor-pointer"
+                              />
+                              <Input
+                                value={textStrokeColor}
+                                onChange={(e) => setTextStrokeColor(e.target.value)}
+                                className="flex-1 bg-white text-xs h-8"
+                                placeholder="#000000"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs text-gray-600 mb-1 block">Width: {textStrokeWidth}px</Label>
+                              <input
+                                type="range"
+                                min="1"
+                                max="8"
+                                value={textStrokeWidth}
+                                onChange={(e) => setTextStrokeWidth(Number(e.target.value))}
+                                className="w-full"
+                              />
+                            </div>
+                          </div>
+                        )}
                       </div>
 
                       {overlayText && (
