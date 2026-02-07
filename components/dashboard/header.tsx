@@ -64,11 +64,18 @@ export function DashboardHeader({
         <div className="flex items-center justify-between gap-4">
           {/* Left: Dashboard title (only on dashboard page) */}
           {isDashboard && (
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent whitespace-nowrap">
-              <span className="hidden md:inline">Ostomy Social Content Dashboard</span>
-              <span className="hidden sm:inline md:hidden">Ostomy Dashboard</span>
-              <span className="sm:hidden">Dashboard</span>
-            </h1>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <img 
+                src="/bob.jpg" 
+                alt="Ostomy Hub Logo" 
+                className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 rounded-full object-cover"
+              />
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent whitespace-nowrap">
+                <span className="hidden md:inline">Ostomy Content Dashboard</span>
+                <span className="hidden sm:inline md:hidden">Ostomy Dashboard</span>
+                <span className="sm:hidden">Dashboard</span>
+              </h1>
+            </div>
           )}
 
           {/* Center: Navigation */}
