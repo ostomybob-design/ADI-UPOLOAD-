@@ -2169,11 +2169,21 @@ export function CreatePostModal({
           if (platform === 'facebook') setPostOnFacebook(enabled);
         }}
         onSchedule={() => setSchedulePost(true)}
-        onSave={() => {
-          // Just close the AI editor - don't save yet
-          // User will click Save Draft or Post button to save
-          console.log('✅ AI Editor closed (create) - caption is now:', caption.substring(0, 100) + '...');
-          setAiEditorOpen(false);
+        onSave={async () => {
+          try {
+            // If editing an existing post, trigger save
+            if (postId) {
+              console.log('💾 AI Editor Save clicked - editing post, calling handleSaveDraft');
+              setAiEditorOpen(false);
+              await handleSaveDraft();
+            } else {
+              // Just close the AI editor - user will click Save Draft or Post button
+              console.log('✅ AI Editor closed (create) - caption is now:', caption.substring(0, 100) + '...');
+              setAiEditorOpen(false);
+            }
+          } catch (error) {
+            console.error('❌ Error in onSave:', error);
+          }
         }}
         // Don't pass postId - we don't want AI editor to save directly
         // postId={postId}
