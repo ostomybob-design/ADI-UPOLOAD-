@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { sendNotificationEmail } from "@/lib/email-notifications";
 
 /**
  * Check if a date is an "away day" and auto-approve posts if needed
@@ -79,6 +80,16 @@ export async function checkAndAutoApproveForAwayDay(scheduledDate: Date): Promis
     });
 
     console.log(`✅ Auto-approved ${result.count} post(s) for away day`);
+
+    // Send notification email about auto-approval
+    await sendNotificationEmail({
+      type: 'away-mode-auto-approval',
+      data: {
+        awayDate: dateOnly,
+        count: result.count,
+        scheduledFor: scheduledDate
+      }
+    });
 
     return { 
       isAwayDay: true, 

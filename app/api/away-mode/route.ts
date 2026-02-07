@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { sendNotificationEmail } from "@/lib/email-notifications";
 
 // GET - Fetch all away days and check post availability
 export async function GET() {
@@ -68,6 +69,34 @@ export async function POST(request: Request) {
         })),
         skipDuplicates: true
       });
+
+      // Check if there are enough posts available
+      const approvedCount = await prisma.search_results.count({
+        where: {
+          approval_status: "approved",
+          late_post_id: null
+        }
+      });
+
+      const pendingCount = await prisma.search_results.count({
+        where: {
+          approval_status: "pending"
+        }
+      });
+
+      const totalAvailable = approvedCount + pendingCount;
+      
+      // Send notification if insufficient posts (assume 1 post per day minimum)
+      if (totalAvailable < awayDates.length) {
+        await sendNotificationEmail({
+          type: 'insufficient-posts',
+          data: {
+            awayDaysCount: awayDates.length,
+            approvedCount,
+            pendingCount
+          }
+        });
+      }
     }
 
     return NextResponse.json({

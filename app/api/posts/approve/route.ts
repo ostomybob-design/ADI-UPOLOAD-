@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { lateAPI } from "@/lib/late-api";
 import { checkAndAutoApproveForAwayDay } from "@/lib/away-mode-utils";
+import { sendNotificationEmail } from "@/lib/email-notifications";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
@@ -154,6 +155,18 @@ export async function POST(request: Request) {
                 const errorMsg = scheduleError.message || String(scheduleError);
                 console.error(`Failed to schedule post ${post.id}:`, errorMsg);
                 schedulingErrors.push(`Post ${post.id}: ${errorMsg}`);
+                
+                // Send email notification for failed post
+                await sendNotificationEmail({
+                  type: 'post-failed',
+                  data: {
+                    postId: post.id,
+                    title: post.title,
+                    platform: 'Social Media',
+                    error: errorMsg
+                  }
+                });
+                
                 // Continue with other posts even if one fails
               }
             }
