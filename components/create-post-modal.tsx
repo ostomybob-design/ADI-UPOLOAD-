@@ -724,8 +724,8 @@ export function CreatePostModal({
       }
 
       if (postId) {
-        // Update existing post in database
-        console.log("💾 Updating existing post as draft:", postId);
+        // Update existing post in database (preserve draft status - don't force to draft)
+        console.log("💾 Updating existing post:", postId);
 
         const updates: any = {
           ai_caption: caption,
@@ -735,7 +735,7 @@ export function CreatePostModal({
           posted_on_instagram: postOnInstagram,
           posted_on_facebook: postOnFacebook,
           raw_data: rawData,
-          is_draft: true,
+          // DON'T set is_draft - preserve the current status
         };
 
         const updateResponse = await fetch("/api/posts/edit", {

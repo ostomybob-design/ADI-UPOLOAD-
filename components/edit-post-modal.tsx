@@ -20,6 +20,8 @@ interface Post {
   ai_caption: string | null
   ai_summary: string | null
   ai_hashtags: string | string[] | null
+  is_draft?: boolean
+  status?: string
 }
 
 interface EditPostModalProps {
@@ -99,25 +101,32 @@ export function EditPostModal({ post, open, onOpenChange, onEditComplete }: Edit
     try {
       setSaving(true)
 
+      console.log('💾 handleSave called with formData.ai_caption:', formData.ai_caption.substring(0, 100) + '...');
+
       // Convert hashtags string back to array
       const hashtagsArray = formData.ai_hashtags
         .split(/\s+/)
         .filter(tag => tag.startsWith("#"))
         .map(tag => tag.trim())
 
+      const updates = {
+        title: formData.title,
+        ai_caption: formData.ai_caption,
+        ai_summary: formData.ai_summary,
+        ai_hashtags: hashtagsArray,
+        main_image_url: mainImageUrl,
+        additional_images: additionalImages,
+        is_draft: post.is_draft // Preserve the current draft status
+      };
+
+      console.log('💾 Sending updates:', updates);
+
       const response = await fetch("/api/posts/edit", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           postId: post.id,
-          updates: {
-            title: formData.title,
-            ai_caption: formData.ai_caption,
-            ai_summary: formData.ai_summary,
-            ai_hashtags: hashtagsArray,
-            main_image_url: mainImageUrl,
-            additional_images: additionalImages
-          }
+          updates
         })
       })
 
