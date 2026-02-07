@@ -73,12 +73,11 @@ export function AIEditorSheet({
   latePostId,
   isScheduled
 }: AIEditorSheetProps) {
-  const [isRewriting, setIsRewriting] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [variations, setVariations] = useState<CaptionVariation[]>([]);
-  const [customEditPreview, setCustomEditPreview] = useState<{ caption: string; explanation: string } | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [previews, setPreviews] = useState<Array<{ caption: string; explanation: string; tone?: string }>>([]);
   const [customInstruction, setCustomInstruction] = useState('');
   const [includeCaption, setIncludeCaption] = useState(true);
+  const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
   const [editedCaption, setEditedCaption] = useState(postData.caption);
   const [editedHashtags, setEditedHashtags] = useState(postData.hashtags);
   const [isSaving, setIsSaving] = useState(false);
@@ -122,8 +121,8 @@ export function AIEditorSheet({
   };
 
   const handleRewrite = async () => {
-    setIsRewriting(true);
-    setVariations([]);
+    setIsGenerating(true);
+    setPreviews([]);
 
     try {
       const response = await fetch('/api/ai/rewrite-caption', {
@@ -148,7 +147,11 @@ export function AIEditorSheet({
         throw new Error(data.error || 'Unknown error occurred');
       }
 
-      setVariations(data.variations);
+      setPreviews(data.variations.map(v => ({ 
+        caption: v.caption, 
+        explanation: `${v.tone} variation`,
+        tone: v.tone 
+      })));
       toast({
         title: "Success",
         description: `Generated ${data.variations.length} caption variations`,
@@ -160,7 +163,7 @@ export function AIEditorSheet({
         variant: "destructive"
       });
     } finally {
-      setIsRewriting(false);
+      setIsGenerating(false);
     }
   };
 
@@ -174,8 +177,8 @@ export function AIEditorSheet({
       return;
     }
 
-    setIsEditing(true);
-    setCustomEditPreview(null);
+    setIsGenerating(true);
+    setPreviews([]);
 
     try {
       const response = await fetch('/api/ai/edit-caption', {
@@ -201,10 +204,10 @@ export function AIEditorSheet({
         throw new Error(data.error || 'Unknown error occurred');
       }
 
-      setCustomEditPreview({
+      setPreviews([{
         caption: data.editedCaption,
         explanation: data.explanation || "Caption edited successfully"
-      });
+      }]);
 
       toast({
         title: "Preview Ready",
@@ -217,8 +220,77 @@ export function AIEditorSheet({
         variant: "destructive"
       });
     } finally {
-      setIsEditing(false);
+      setIsGenerating(false);
     }
+  };
+
+  const handleGeneratePreview = async () => {
+    // If custom instruction is provided, use custom edit
+    if (customInstruction.trim()) {
+      await handleCustomEdit();
+      return;
+    }
+
+    // If styles are selected, generate variations for those styles
+    if (selectedStyles.length > 0) {
+      setIsGenerating(true);
+      setPreviews([]);
+
+      try {
+        const response = await fetch('/api/ai/rewrite-caption', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            caption: editedCaption,
+            context: {
+              hashtags: editedHashtags,
+              platform: getPlatform()
+            }
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to rewrite caption');
+        }
+
+        const data: RewriteResponse = await response.json();
+
+        if (!data.success) {
+          throw new Error(data.error || 'Unknown error occurred');
+        }
+
+        // Filter variations to only show selected styles
+        const filteredVariations = data.variations
+          .filter(v => selectedStyles.includes(v.tone))
+          .map(v => ({ 
+            caption: v.caption, 
+            explanation: `${v.tone} variation`,
+            tone: v.tone 
+          }));
+
+        setPreviews(filteredVariations);
+        toast({
+          title: "Success",
+          description: `Generated ${filteredVariations.length} caption variation${filteredVariations.length > 1 ? 's' : ''}`,
+        });
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to generate variations. Please try again.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsGenerating(false);
+      }
+      return;
+    }
+
+    // If nothing is selected or entered, show error
+    toast({
+      title: "Error",
+      description: "Please enter a custom instruction or select at least one style",
+      variant: "destructive"
+    });
   };
 
   const handleSaveToDatabase = async () => {
@@ -445,67 +517,76 @@ export function AIEditorSheet({
               AI Tools
             </h3>
 
-            {/* Rewrite with AI */}
+            {/* Style Selection Checkboxes */}
             <div className="space-y-3">
-              <Button
-                onClick={handleRewrite}
-                disabled={isRewriting || !editedCaption.trim()}
-                className="w-full bg-purple-600 hover:bg-purple-700"
-                aria-label="Rewrite caption with AI"
-                aria-busy={isRewriting}
-              >
-                {isRewriting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Rewriting...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Rewrite with AI
-                  </>
-                )}
-              </Button>
-
-              {/* Display variations */}
-              {variations.length > 0 && (
-                <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">
-                    Select a variation:
-                  </Label>
-                  {variations.map((variation) => (
-                    <div
-                      key={variation.id}
-                      className="group p-3 border rounded-lg hover:border-purple-300 cursor-pointer transition-all duration-300 ease-in-out overflow-hidden"
-                      onClick={() => {
-                        setEditedCaption(variation.caption);
-                        onCaptionUpdate(variation.caption);
-                        toast({
-                          title: "Variation applied",
-                          description: `Applied ${variation.tone} variation`,
-                        });
-                      }}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <Badge variant="outline" className="text-xs">
-                          {variation.tone}
-                        </Badge>
-                      </div>
-                      <div className="max-h-[4.5rem] group-hover:max-h-[1000px] transition-all duration-500 ease-in-out overflow-hidden">
-                        <div className="text-sm text-gray-700 whitespace-pre-wrap">
-                          {renderFormattedText(variation.caption)}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+              <Label className="text-sm font-medium">
+                Select Writing Styles
+              </Label>
+              <div className="flex flex-wrap gap-3">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="style-professional"
+                    checked={selectedStyles.includes('Professional')}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedStyles([...selectedStyles, 'Professional']);
+                      } else {
+                        setSelectedStyles(selectedStyles.filter(s => s !== 'Professional'));
+                      }
+                    }}
+                  />
+                  <label
+                    htmlFor="style-professional"
+                    className="text-sm cursor-pointer"
+                  >
+                    Professional
+                  </label>
                 </div>
-              )}
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="style-casual"
+                    checked={selectedStyles.includes('Casual')}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedStyles([...selectedStyles, 'Casual']);
+                      } else {
+                        setSelectedStyles(selectedStyles.filter(s => s !== 'Casual'));
+                      }
+                    }}
+                  />
+                  <label
+                    htmlFor="style-casual"
+                    className="text-sm cursor-pointer"
+                  >
+                    Casual
+                  </label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="style-empathetic"
+                    checked={selectedStyles.includes('Empathetic')}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedStyles([...selectedStyles, 'Empathetic']);
+                      } else {
+                        setSelectedStyles(selectedStyles.filter(s => s !== 'Empathetic'));
+                      }
+                    }}
+                  />
+                  <label
+                    htmlFor="style-empathetic"
+                    className="text-sm cursor-pointer"
+                  >
+                    Empathetic
+                  </label>
+                </div>
+              </div>
             </div>
 
             {/* Custom Instruction */}
             <div className="space-y-3 border-t pt-4">
               <Label className="text-sm font-medium">
-                Custom AI Instruction
+                Custom AI Instruction (Optional)
               </Label>
               <Textarea
                 placeholder="E.g., Make it more empathetic, Add a call to action, Simplify the language..."
@@ -533,69 +614,72 @@ export function AIEditorSheet({
                 </span>
               </div>
               <Button
-                onClick={handleCustomEdit}
-                disabled={isEditing || !customInstruction.trim()}
+                onClick={handleGeneratePreview}
+                disabled={isGenerating || (!customInstruction.trim() && selectedStyles.length === 0)}
                 className="w-full bg-black hover:bg-gray-800 text-white"
               >
-                {isEditing ? (
+                {isGenerating ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Processing...
+                    Generating...
                   </>
                 ) : (
                   'Generate Preview'
                 )}
               </Button>
 
-              {/* Custom Edit Preview */}
-              {customEditPreview && (
+              {/* Previews */}
+              {previews.length > 0 && (
                 <div className="space-y-2 mt-3">
                   <Label className="text-xs text-muted-foreground">
-                    Preview:
+                    {previews.length > 1 ? 'Select a variation:' : 'Preview:'}
                   </Label>
-                  <div
-                    className="group p-3 border rounded-lg hover:border-purple-300 cursor-pointer transition-all duration-300 ease-in-out overflow-hidden"
-                    onMouseDown={(e) => {
-                      setIsMouseDown(true);
-                      setMouseDownPosition({ x: e.clientX, y: e.clientY });
-                    }}
-                    onMouseUp={(e) => {
-                      setIsMouseDown(false);
-                    }}
-                    onClick={(e) => {
-                      // Only apply if this was a click (not a drag/scroll)
-                      const deltaX = Math.abs(e.clientX - mouseDownPosition.x);
-                      const deltaY = Math.abs(e.clientY - mouseDownPosition.y);
-                      const isDrag = deltaX > 5 || deltaY > 5;
-                      
-                      if (!isDrag) {
-                        setEditedCaption(customEditPreview.caption);
-                        onCaptionUpdate(customEditPreview.caption);
-                        toast({
-                          title: "Custom edit applied",
-                          description: customEditPreview.explanation,
-                        });
-                        setCustomEditPreview(null);
-                        setCustomInstruction('');
-                      }
-                    }}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-300">
-                        Custom Edit
-                      </Badge>
-                    </div>
-                    <div className="max-h-[4.5rem] group-hover:max-h-[1000px] transition-all duration-500 ease-in-out overflow-hidden">
-                      <div className="text-sm text-gray-700 whitespace-pre-wrap">
-                        {renderFormattedText(customEditPreview.caption)}
+                  {previews.map((preview, index) => (
+                    <div
+                      key={index}
+                      className="group p-3 border rounded-lg hover:border-purple-300 cursor-pointer transition-all duration-300 ease-in-out overflow-hidden"
+                      onMouseDown={(e) => {
+                        setIsMouseDown(true);
+                        setMouseDownPosition({ x: e.clientX, y: e.clientY });
+                      }}
+                      onMouseUp={(e) => {
+                        setIsMouseDown(false);
+                      }}
+                      onClick={(e) => {
+                        // Only apply if this was a click (not a drag/scroll)
+                        const deltaX = Math.abs(e.clientX - mouseDownPosition.x);
+                        const deltaY = Math.abs(e.clientY - mouseDownPosition.y);
+                        const isDrag = deltaX > 5 || deltaY > 5;
+                        
+                        if (!isDrag) {
+                          setEditedCaption(preview.caption);
+                          onCaptionUpdate(preview.caption);
+                          toast({
+                            title: "Variation applied",
+                            description: preview.explanation,
+                          });
+                          setPreviews([]);
+                          setCustomInstruction('');
+                        }
+                      }}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-300">
+                          {preview.tone || 'Custom Edit'}
+                        </Badge>
                       </div>
-                    </div>
-                    {customEditPreview.explanation && (
-                      <div className="mt-2 pt-2 border-t text-xs text-muted-foreground">
-                        {customEditPreview.explanation}
+                      <div className="max-h-[4.5rem] group-hover:max-h-[1000px] transition-all duration-500 ease-in-out overflow-hidden">
+                        <div className="text-sm text-gray-700 whitespace-pre-wrap">
+                          {renderFormattedText(preview.caption)}
+                        </div>
                       </div>
-                    )}
-                  </div>
+                      {preview.explanation && !preview.tone && (
+                        <div className="mt-2 pt-2 border-t text-xs text-muted-foreground">
+                          {preview.explanation}
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
