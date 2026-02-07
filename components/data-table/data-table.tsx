@@ -220,11 +220,80 @@ export function DataTable<TData, TValue>({
     setDraggedColumn(null);
   };
 
+  // Function to save default column visibility to database
+  const saveDefaultVisibility = async (newDefaults: VisibilityState) => {
+    try {
+      const response = await fetch('/api/preferences', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          key: PREFERENCE_KEY_VISIBILITY,
+          value: newDefaults,
+          description: `Default column visibility for ${storageKey} tab`
+        })
+      });
+
+      if (response.ok) {
+        setDefaultColumnVisibility(newDefaults);
+        alert('✅ Default column visibility saved for all users!');
+      } else {
+        throw new Error('Failed to save defaults');
+      }
+    } catch (error) {
+      console.error('Error saving default visibility:', error);
+      alert('❌ Failed to save default column visibility');
+    }
+  };
+
   return (
     <div>
       {/* Column Visibility Controls */}
       <div className="flex items-center justify-end gap-2 py-2">
         {headerActions}
+        
+        {/* Default Columns Button (Admin - sets defaults for everyone) */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm">
+              <Columns3 className="mr-2 h-4 w-4" />
+              Default Columns
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-[200px]">
+            <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+              Set defaults for all users
+            </div>
+            {table
+              .getAllColumns()
+              .filter(
+                (column) =>
+                  typeof column.accessorFn !== "undefined" && column.getCanHide()
+              )
+              .map((column) => {
+                const isVisibleByDefault = defaultColumnVisibility[column.id] !== false;
+                return (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    className="capitalize"
+                    checked={isVisibleByDefault}
+                    onCheckedChange={(value) => {
+                      const newDefaults = { ...defaultColumnVisibility };
+                      if (!value) {
+                        newDefaults[column.id] = false;
+                      } else {
+                        delete newDefaults[column.id]; // Remove from object means visible
+                      }
+                      saveDefaultVisibility(newDefaults);
+                    }}
+                  >
+                    {column.id}
+                  </DropdownMenuCheckboxItem>
+                )
+              })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+        
+        {/* Personal Columns Button (Your personal overrides) */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="ml-auto">
@@ -233,6 +302,9 @@ export function DataTable<TData, TValue>({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-[200px]">
+            <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+              Your personal view
+            </div>
             {table
               .getAllColumns()
               .filter(
