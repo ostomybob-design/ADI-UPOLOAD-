@@ -1838,62 +1838,6 @@ export function CreatePostModal({
                   )}
                 </div>
 
-                {/* Scheduling */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      id="schedule-post"
-                      checked={schedulePost}
-                      onChange={(e) => {
-                        setSchedulePost(e.target.checked);
-                        if (e.target.checked) setAddToQueue(false);
-                      }}
-                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                    />
-                    <Label htmlFor="schedule-post" className="text-sm font-semibold flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      Schedule for specific time
-                    </Label>
-                  </div>
-
-                  {schedulePost && (
-                    <div className="ml-7 space-y-2">
-                      <Input
-                        type="datetime-local"
-                        value={scheduledDate}
-                        onChange={(e) => setScheduledDate(e.target.value)}
-                        className="border-gray-300 focus:border-blue-500 rounded-xl"
-                      />
-                    </div>
-                  )}
-
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      id="add-to-queue"
-                      checked={addToQueue}
-                      onChange={(e) => {
-                        setAddToQueue(e.target.checked);
-                        if (e.target.checked) setSchedulePost(false);
-                      }}
-                      className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
-                    />
-                    <Label htmlFor="add-to-queue" className="text-sm font-semibold flex items-center gap-2">
-                      <Clock className="h-4 w-4" />
-                      Add to queue (auto-schedule)
-                    </Label>
-                  </div>
-
-                  {addToQueue && (
-                    <div className="ml-7 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
-                      <p className="text-xs text-purple-700 dark:text-purple-300">
-                        Post will be automatically scheduled to the next available time slot in your queue.
-                      </p>
-                    </div>
-                  )}
-                </div>
-
                 {/* Platform Selection */}
                 <div className="space-y-3">
                   <Label className="text-sm font-semibold">Publish to:</Label>
