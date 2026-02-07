@@ -123,6 +123,7 @@ export function CreatePostModal({
   const [textPosition, setTextPosition] = React.useState({ x: 50, y: 50 }); // percentage-based
   const [fontSize, setFontSize] = React.useState(32);
   const [textColor, setTextColor] = React.useState("#FFFFFF");
+  const [fontFamily, setFontFamily] = React.useState("Arial");
   const [isDraggingText, setIsDraggingText] = React.useState(false);
   const [dragOffset, setDragOffset] = React.useState({ x: 0, y: 0 });
   const imagePreviewRef = React.useRef<HTMLDivElement>(null);
@@ -267,6 +268,7 @@ export function CreatePostModal({
       setOverlayText("");
       setTextPosition({ x: 50, y: 50 });
       // Reset all text effects to defaults
+      setFontFamily("Arial");
       setTextBgEnabled(false);
       setBackdropBlurEnabled(false);
       setTextStrokeEnabled(false);
@@ -280,6 +282,7 @@ export function CreatePostModal({
     setOverlayText("");
     setTextPosition({ x: 50, y: 50 });
     // Reset all text effects to defaults
+    setFontFamily("Arial");
     setTextBgEnabled(false);
     setBackdropBlurEnabled(false);
     setTextStrokeEnabled(false);
@@ -397,7 +400,7 @@ export function CreatePostModal({
         
         // Scale font size based on image size
         const scaledFontSize = (fontSize / 500) * Math.min(canvas.width, canvas.height);
-        ctx.font = `bold ${scaledFontSize}px Arial, sans-serif`;
+        ctx.font = `bold ${scaledFontSize}px ${fontFamily}, sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         
@@ -617,6 +620,7 @@ export function CreatePostModal({
               setTextPosition(rawData.textOverlay.position || { x: 50, y: 50 });
               setFontSize(rawData.textOverlay.fontSize || 32);
               setTextColor(rawData.textOverlay.color || "#FFFFFF");
+              setFontFamily(rawData.textOverlay.fontFamily || "Arial");
               setShadowIntensity(rawData.textOverlay.shadowIntensity ?? 4);
               setTextBgEnabled(rawData.textOverlay.bgEnabled || false);
               setTextBgColor(rawData.textOverlay.bgColor || "#000000");
@@ -725,6 +729,7 @@ export function CreatePostModal({
             position: textPosition,
             fontSize: fontSize,
             color: textColor,
+            fontFamily: fontFamily,
             shadowIntensity: shadowIntensity,
             bgEnabled: textBgEnabled,
             bgColor: textBgColor,
@@ -923,6 +928,7 @@ export function CreatePostModal({
             position: textPosition,
             fontSize: fontSize,
             color: textColor,
+            fontFamily: fontFamily,
             shadowIntensity: shadowIntensity,
             bgEnabled: textBgEnabled,
             bgColor: textBgColor,
@@ -1334,6 +1340,7 @@ export function CreatePostModal({
             position: textPosition,
             fontSize: fontSize,
             color: textColor,
+            fontFamily: fontFamily,
             shadowIntensity: shadowIntensity,
             bgEnabled: textBgEnabled,
             bgColor: textBgColor,
@@ -1549,6 +1556,27 @@ export function CreatePostModal({
                                   />
                                 </div>
                               </div>
+                            </div>
+
+                            {/* Font Family */}
+                            <div>
+                              <Label className="text-xs text-gray-600 mb-1 block">Font Family</Label>
+                              <select
+                                value={fontFamily}
+                                onChange={(e) => setFontFamily(e.target.value)}
+                                className="w-full h-9 px-3 rounded-md border border-gray-300 bg-white text-sm"
+                              >
+                                <option value="Arial">Arial</option>
+                                <option value="Helvetica">Helvetica</option>
+                                <option value="Times New Roman">Times New Roman</option>
+                                <option value="Georgia">Georgia</option>
+                                <option value="Courier New">Courier New</option>
+                                <option value="Verdana">Verdana</option>
+                                <option value="Trebuchet MS">Trebuchet MS</option>
+                                <option value="Impact">Impact</option>
+                                <option value="Comic Sans MS">Comic Sans MS</option>
+                                <option value="Brush Script MT">Brush Script MT</option>
+                              </select>
                             </div>
 
                             {/* Shadow Intensity */}
@@ -2104,6 +2132,7 @@ export function CreatePostModal({
                               style={{
                                 fontSize: `${fontSize}px`,
                                 color: textColor,
+                                fontFamily: `${fontFamily}, sans-serif`,
                                 fontWeight: 'bold',
                                 textShadow: shadowIntensity > 0 ? `${shadowIntensity}px ${shadowIntensity}px ${shadowIntensity * 2}px rgba(0,0,0,0.8)` : 'none',
                                 WebkitTextStroke: textStrokeEnabled ? `${textStrokeWidth}px ${textStrokeColor}` : '',
