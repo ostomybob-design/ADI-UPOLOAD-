@@ -118,13 +118,14 @@ export function BulkApproval({ posts, onApprovalComplete }: BulkApprovalProps) {
         setSelectedPosts(new Set())
         onApprovalComplete()
       } else {
-        throw new Error("Failed to approve posts")
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to approve posts")
       }
     } catch (error) {
       console.error("Bulk approval error:", error)
       toast({
         title: "Error",
-        description: "Failed to approve posts",
+        description: (error as Error).message || "Failed to approve posts",
         variant: "destructive"
       })
     } finally {

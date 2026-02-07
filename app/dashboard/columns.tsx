@@ -208,11 +208,12 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
         alert("✅ Post approved");
         onRefresh?.();
       } else {
-        alert("Failed to approve post. Please try again.");
+        const errorData = await response.json();
+        alert(errorData.error || "Failed to approve post. Please try again.");
       }
     } catch (error) {
       console.error("Approval error:", error);
-      alert("Failed to approve post. Please try again.");
+      alert((error as Error).message || "Failed to approve post. Please try again.");
     } finally {
       setIsApproving(false);
     }

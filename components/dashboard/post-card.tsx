@@ -78,10 +78,13 @@ export function PostCard({ post, onView, onDelete, onSchedule, onRefresh }: Post
           alert("✅ Post approved successfully")
         }
         onRefresh?.()
+      } else {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to approve post")
       }
     } catch (error) {
       console.error("Approval error:", error)
-      alert("Failed to approve post. Please try again.")
+      alert((error as Error).message || "Failed to approve post. Please try again.")
     } finally {
       setIsApproving(false)
     }

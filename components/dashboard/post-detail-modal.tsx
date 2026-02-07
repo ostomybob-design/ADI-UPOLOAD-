@@ -56,13 +56,14 @@ export function PostDetailModal({ post, open, onOpenChange, onEdit, onApprovalCh
         onApprovalChange?.()
         onOpenChange(false)
       } else {
-        throw new Error("Failed to approve")
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to approve")
       }
     } catch (error) {
       console.error("Approval error:", error)
       toast({
         title: "Error",
-        description: "Failed to approve post",
+        description: (error as Error).message || "Failed to approve post",
         variant: "destructive"
       })
     } finally {

@@ -38,6 +38,38 @@ export async function POST(request: Request) {
       orderBy: { created_at: "asc" }
     });
 
+    // Check for posts with past scheduled dates
+    const now = new Date();
+    const postsWithPastDates = approvedPosts.filter(post => 
+      post.late_scheduled_for && new Date(post.late_scheduled_for) < now
+    );
+
+    if (postsWithPastDates.length > 0) {
+      // Rollback the approval
+      await prisma.search_results.updateMany({
+        where: { id: { in: postIds } },
+        data: {
+          approval_status: "pending",
+          approved_at: null,
+          approved_by: null,
+          updated_at: new Date()
+        }
+      });
+
+      const pastPostDetails = postsWithPastDates.map(p => 
+        `Post ID ${p.id} (scheduled for ${new Date(p.late_scheduled_for!).toLocaleString()})`
+      ).join(', ');
+
+      return NextResponse.json({
+        error: `Cannot approve posts with past schedule dates. Please update or remove the schedule date first. ${pastPostDetails}`,
+        postsWithPastDates: postsWithPastDates.map(p => ({
+          id: p.id,
+          title: p.title,
+          scheduledFor: p.late_scheduled_for
+        }))
+      }, { status: 400 });
+    }
+
     // Auto-schedule to Late.dev queue if enabled
     const scheduledPosts: any[] = [];
     const schedulingErrors: string[] = [];
