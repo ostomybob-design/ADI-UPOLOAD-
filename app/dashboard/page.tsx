@@ -31,7 +31,11 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("draft")
   const [viewMode, setViewMode] = useState<"card" | "table">("table")
   const [createModalOpen, setCreateModalOpen] = useState(false)
-  const [editingPostId, setEditingPostId] = useState<number | null>(null)
+  const [editingPostId, setEditingPostIdState] = useState<number | null>(null)
+  const setEditingPostId = (id: number | null) => {
+    console.log('🎯 setEditingPostId called with:', id);
+    setEditingPostIdState(id);
+  };
   const [editingDraftId, setEditingDraftId] = useState<string | null>(null)
   const [lateScheduledPosts, setLateScheduledPosts] = useState<any[]>([])
   const [latePublishedPosts, setLatePublishedPosts] = useState<any[]>([])
