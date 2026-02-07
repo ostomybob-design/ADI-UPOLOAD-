@@ -1467,96 +1467,19 @@ export function CreatePostModal({
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {/* Instagram Grid Preview Toggle */}
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="instagram-grid-create"
-                          checked={showInstagramGrid}
-                          onCheckedChange={(checked) => setShowInstagramGrid(checked as boolean)}
-                        />
-                        <Label
-                          htmlFor="instagram-grid-create"
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                        >
-                          Preview as Instagram Profile Grid (1:1)
-                        </Label>
-                      </div>
-
-                      {/* Main Image */}
-                      <div 
-                        ref={imagePreviewRef}
-                        className={`relative rounded-xl overflow-hidden bg-gray-100 ${showInstagramGrid ? 'aspect-square max-w-md mx-auto' : ''}`}
-                      >
-                        <div className="absolute top-2 left-2 z-10">
-                          <Badge className="bg-blue-600 text-white">Main Photo</Badge>
+                      {/* Media Uploaded Indicator */}
+                      <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <ImageIcon className="h-4 w-4 text-green-600" />
+                          <span className="text-sm font-medium text-green-700">
+                            {imageVideo?.type.startsWith('video/') ? 'Video uploaded - See preview on right →' : 'Image uploaded - See preview on right →'}
+                          </span>
                         </div>
-                        {showInstagramGrid && (
-                          <div className="absolute top-2 right-12 z-10">
-                            <Badge variant="secondary" className="text-xs">
-                              <Instagram className="h-3 w-3 mr-1" />
-                              Grid View
-                            </Badge>
-                          </div>
-                        )}
-                        {imageVideo?.type.startsWith('video/') ? (
-                          <video
-                            src={imagePreview}
-                            className={`w-full object-cover ${showInstagramGrid ? 'h-full' : 'h-48'}`}
-                            controls
-                          />
-                        ) : (
-                          <>
-                            <img
-                              src={getProxiedImageUrl(imagePreview) || imagePreview}
-                              alt="Main preview"
-                              className={`w-full object-cover ${showInstagramGrid ? 'h-full' : 'h-48'}`}
-                            />
-                            {/* Draggable Text Overlay */}
-                            {overlayText && (
-                              <div
-                                className="absolute cursor-move select-none"
-                                style={{
-                                  left: `${textPosition.x}%`,
-                                  top: `${textPosition.y}%`,
-                                  transform: 'translate(-50%, -50%)',
-                                  pointerEvents: 'auto',
-                                  zIndex: 20,
-                                }}
-                                onMouseDown={(e) => {
-                                  e.preventDefault();
-                                  setIsDraggingText(true);
-                                  if (imagePreviewRef.current) {
-                                    const rect = imagePreviewRef.current.getBoundingClientRect();
-                                    const offsetX = ((e.clientX - rect.left) / rect.width) * 100 - textPosition.x;
-                                    const offsetY = ((e.clientY - rect.top) / rect.height) * 100 - textPosition.y;
-                                    setDragOffset({ x: offsetX, y: offsetY });
-                                  }
-                                }}
-                              >
-                                <div
-                                  style={{
-                                    fontSize: `${fontSize}px`,
-                                    color: textColor,
-                                    fontWeight: 'bold',
-                                    textShadow: `${shadowIntensity}px ${shadowIntensity}px ${shadowIntensity * 2}px rgba(0,0,0,0.8)`,
-                                    WebkitTextStroke: textStrokeEnabled ? `${textStrokeWidth}px ${textStrokeColor}` : 'none',
-                                    padding: textBgEnabled || backdropBlurEnabled ? '8px 16px' : '0',
-                                    backgroundColor: textBgEnabled ? `${textBgColor}${Math.round(textBgOpacity * 2.55).toString(16).padStart(2, '0')}` : 'transparent',
-                                    backdropFilter: backdropBlurEnabled ? `blur(${backdropBlurAmount}px)` : 'none',
-                                    borderRadius: (textBgEnabled || backdropBlurEnabled) ? '8px' : '0',
-                                  }}
-                                >
-                                  {overlayText}
-                                </div>
-                              </div>
-                            )}
-                          </>
-                        )}
                         <Button
-                          variant="destructive"
+                          variant="ghost"
                           size="sm"
                           onClick={removeMedia}
-                          className="absolute top-2 right-2 z-10"
+                          className="h-7 text-red-600 hover:text-red-700 hover:bg-red-50"
                         >
                           <X className="h-4 w-4" />
                         </Button>
@@ -1567,10 +1490,25 @@ export function CreatePostModal({
                         <div className="space-y-3 p-4 bg-blue-50 border border-blue-200 rounded-xl">
                           <Label className="text-sm font-semibold flex items-center gap-2">
                             <Type className="h-4 w-4" />
-                            Text Overlay (Drag text on image to position)
+                            Text Overlay (See preview on right →)
                           </Label>
                           
                           <div className="space-y-3">
+                            {/* Instagram Grid Toggle */}
+                            <div className="flex items-center space-x-2 p-2 bg-white rounded border border-gray-200">
+                              <Checkbox
+                                id="instagram-grid-create"
+                                checked={showInstagramGrid}
+                                onCheckedChange={(checked) => setShowInstagramGrid(checked as boolean)}
+                              />
+                              <Label
+                                htmlFor="instagram-grid-create"
+                                className="text-xs font-medium leading-none cursor-pointer"
+                              >
+                                Preview as Instagram Profile Grid (1:1)
+                              </Label>
+                            </div>
+
                             <div>
                               <Label className="text-xs text-gray-600 mb-1 block">Text</Label>
                               <Input
@@ -1743,7 +1681,7 @@ export function CreatePostModal({
 
                             {overlayText && (
                               <p className="text-xs text-blue-600">
-                                💡 Tip: Click and drag the text on the image above to reposition it
+                                💡 Tip: Click and drag the text on the preview image (right panel) to reposition it
                               </p>
                             )}
                           </div>
@@ -2113,36 +2051,71 @@ export function CreatePostModal({
 
                 {/* Post Media */}
                 {imagePreview && (
-                  <div className="w-full bg-gray-100 flex items-center justify-center relative" style={{ minHeight: '300px', maxHeight: '500px' }}>
+                  <div 
+                    ref={imagePreviewRef}
+                    className={`w-full bg-gray-100 flex items-center justify-center relative ${showInstagramGrid ? 'aspect-square' : ''}`} 
+                    style={{ minHeight: '300px', maxHeight: showInstagramGrid ? 'none' : '500px' }}
+                  >
+                    {showInstagramGrid && (
+                      <div className="absolute top-2 left-2 z-10">
+                        <Badge variant="secondary" className="text-xs">
+                          <Instagram className="h-3 w-3 mr-1" />
+                          Grid View (1:1)
+                        </Badge>
+                      </div>
+                    )}
                     {imageVideo?.type.startsWith('video/') ? (
                       <video
                         src={imagePreview}
-                        className="w-full h-auto object-contain"
-                        style={{ maxHeight: '500px' }}
+                        className={`w-full object-cover ${showInstagramGrid ? 'h-full' : 'h-auto'}`}
+                        style={{ maxHeight: showInstagramGrid ? 'none' : '500px' }}
                       />
                     ) : (
                       <>
                         <img
-                          src={imagePreview}
+                          src={getProxiedImageUrl(imagePreview) || imagePreview}
                           alt="Post preview"
-                          className="w-full h-auto object-contain"
-                          style={{ maxHeight: '500px' }}
+                          className={`w-full object-cover ${showInstagramGrid ? 'h-full' : 'h-auto'}`}
+                          style={{ maxHeight: showInstagramGrid ? 'none' : '500px' }}
                         />
-                        {/* Text Overlay in Preview */}
+                        {/* Draggable Text Overlay with Effects */}
                         {overlayText && (
                           <div
-                            className="absolute select-none pointer-events-none"
+                            className="absolute cursor-move select-none"
                             style={{
                               left: `${textPosition.x}%`,
                               top: `${textPosition.y}%`,
                               transform: 'translate(-50%, -50%)',
-                              fontSize: `${fontSize}px`,
-                              color: textColor,
-                              fontWeight: 'bold',
-                              textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
+                              pointerEvents: 'auto',
+                              zIndex: 20,
+                            }}
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              setIsDraggingText(true);
+                              if (imagePreviewRef.current) {
+                                const rect = imagePreviewRef.current.getBoundingClientRect();
+                                const offsetX = ((e.clientX - rect.left) / rect.width) * 100 - textPosition.x;
+                                const offsetY = ((e.clientY - rect.top) / rect.height) * 100 - textPosition.y;
+                                setDragOffset({ x: offsetX, y: offsetY });
+                              }
                             }}
                           >
-                            {overlayText}
+                            <div
+                              style={{
+                                fontSize: `${fontSize}px`,
+                                color: textColor,
+                                fontWeight: 'bold',
+                                textShadow: `${shadowIntensity}px ${shadowIntensity}px ${shadowIntensity * 2}px rgba(0,0,0,0.8)`,
+                                WebkitTextStroke: textStrokeEnabled ? `${textStrokeWidth}px ${textStrokeColor}` : 'none',
+                                padding: textBgEnabled || backdropBlurEnabled ? '8px 16px' : '0',
+                                backgroundColor: textBgEnabled ? `${textBgColor}${Math.round(textBgOpacity * 2.55).toString(16).padStart(2, '0')}` : 'transparent',
+                                backdropFilter: backdropBlurEnabled ? `blur(${backdropBlurAmount}px)` : 'none',
+                                WebkitBackdropFilter: backdropBlurEnabled ? `blur(${backdropBlurAmount}px)` : 'none',
+                                borderRadius: (textBgEnabled || backdropBlurEnabled) ? '8px' : '0',
+                              }}
+                            >
+                              {overlayText}
+                            </div>
                           </div>
                         )}
                       </>
