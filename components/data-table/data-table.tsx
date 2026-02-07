@@ -298,7 +298,7 @@ export function DataTable<TData, TValue>({
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="ml-auto">
               <Columns3 className="mr-2 h-4 w-4" />
-              Columns
+              My Columns
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-[200px]">
@@ -427,6 +427,9 @@ export function DataTable<TData, TValue>({
             setColumnSizing({});
             localStorage.removeItem(STORAGE_KEY_ORDER);
             localStorage.removeItem(STORAGE_KEY_SIZING);
+            localStorage.removeItem(STORAGE_KEY_VISIBILITY);
+            // Reset to defaults by reloading the table with default visibility
+            table.setColumnVisibility(defaultColumnVisibility);
           }}
           className="border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900 text-xs sm:text-sm w-full sm:w-auto"
         >
