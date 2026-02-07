@@ -99,12 +99,14 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
     setIsMovingBackward(true);
     try {
       const response = await fetch("/api/posts/edit", {
-        method: "POST",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           postId: post.id,
-          is_draft: true,
-          approval_status: "pending"
+          updates: {
+            is_draft: true,
+            approval_status: "pending"
+          }
         })
       });
 
