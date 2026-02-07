@@ -223,6 +223,7 @@ export default function DashboardPage() {
 
       // Get database posts with schedule dates (not yet on Late.dev)
       const dbScheduledPosts = posts.filter(p => 
+        p.approval_status === "approved" && // Must be approved
         p.late_scheduled_for && 
         !p.late_published_at && 
         !p.late_post_id // Not already on Late.dev
