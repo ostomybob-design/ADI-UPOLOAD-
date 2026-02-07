@@ -83,6 +83,8 @@ export function AIEditorSheet({
   const [editedHashtags, setEditedHashtags] = useState(postData.hashtags);
   const [isSaving, setIsSaving] = useState(false);
   const captionTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const [isMouseDown, setIsMouseDown] = useState(false);
+  const [mouseDownPosition, setMouseDownPosition] = useState({ x: 0, y: 0 });
 
   const { toast } = useToast();
 
@@ -553,15 +555,29 @@ export function AIEditorSheet({
                   </Label>
                   <div
                     className="group p-3 border rounded-lg hover:border-purple-300 cursor-pointer transition-all duration-300 ease-in-out overflow-hidden"
-                    onClick={() => {
-                      setEditedCaption(customEditPreview.caption);
-                      onCaptionUpdate(customEditPreview.caption);
-                      toast({
-                        title: "Custom edit applied",
-                        description: customEditPreview.explanation,
-                      });
-                      setCustomEditPreview(null);
-                      setCustomInstruction('');
+                    onMouseDown={(e) => {
+                      setIsMouseDown(true);
+                      setMouseDownPosition({ x: e.clientX, y: e.clientY });
+                    }}
+                    onMouseUp={(e) => {
+                      setIsMouseDown(false);
+                    }}
+                    onClick={(e) => {
+                      // Only apply if this was a click (not a drag/scroll)
+                      const deltaX = Math.abs(e.clientX - mouseDownPosition.x);
+                      const deltaY = Math.abs(e.clientY - mouseDownPosition.y);
+                      const isDrag = deltaX > 5 || deltaY > 5;
+                      
+                      if (!isDrag) {
+                        setEditedCaption(customEditPreview.caption);
+                        onCaptionUpdate(customEditPreview.caption);
+                        toast({
+                          title: "Custom edit applied",
+                          description: customEditPreview.explanation,
+                        });
+                        setCustomEditPreview(null);
+                        setCustomInstruction('');
+                      }
                     }}
                   >
                     <div className="flex items-center justify-between mb-2">
