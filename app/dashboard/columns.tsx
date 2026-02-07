@@ -9,6 +9,7 @@ import { useState } from "react";
 import { SetScheduleModal } from "@/components/set-schedule-modal";
 import { SchedulePostModal } from "@/components/schedule-post-modal";
 import { getProxiedImageUrl } from "@/lib/image-proxy";
+import { draftUtils } from "@/lib/draft-utils";
 
 export type DraftPost = {
   id: string;
@@ -99,8 +100,7 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
     setIsMovingBackward(true);
     try {
       // Create draft object from database post - map DB fields to draft structure
-      const draft: DraftPost = {
-        id: `draft-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      const draftData: Omit<DraftPost, "id" | "created_at" | "updated_at"> = {
         imageVideo: null,
         imagePreview: post.main_image_url || null,
         caption: post.ai_caption || "",
@@ -115,19 +115,15 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
         postOnFacebook: post.late_platforms
           ? (post.late_platforms as any[]).some((p: any) => p.type === "facebook")
           : false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
         additionalImages: post.additional_images as string[] || [],
       };
 
-      // Save to localStorage
-      const existingDrafts = JSON.parse(
-        localStorage.getItem("postDrafts") || "[]"
-      );
-      localStorage.setItem(
-        "postDrafts",
-        JSON.stringify([...existingDrafts, draft])
-      );
+      // Save to localStorage using draft utils
+      const draftId = draftUtils.saveDraft(draftData);
+      
+      if (!draftId) {
+        throw new Error("Failed to save draft to localStorage");
+      }
 
       // Delete from database
       const response = await fetch(`/api/posts/${post.id}`, {
@@ -138,7 +134,9 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
         alert("✅ Post moved to Drafts");
         onRefresh?.();
       } else {
-        alert("Failed to move post. Please try again.");
+        // If deletion failed, remove the draft we just created
+        draftUtils.deleteDraft(draftId);
+        alert("Failed to delete post from database. Please try again.");
       }
     } catch (error) {
       console.error("Move to drafts error:", error);
