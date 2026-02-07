@@ -753,6 +753,14 @@ export function CreatePostModal({
           raw_data: rawData,
         };
 
+        // Add schedule date if set
+        if (schedulePost && scheduledDate) {
+          updates.late_scheduled_for = new Date(scheduledDate);
+        } else {
+          // Clear schedule date if schedule is disabled
+          updates.late_scheduled_for = null;
+        }
+
         console.log("📤 Updating database with:", updates);
 
         // Update the post in database
