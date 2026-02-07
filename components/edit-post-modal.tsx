@@ -401,8 +401,13 @@ export function EditPostModal({ post, open, onOpenChange, onEditComplete }: Edit
         onHashtagsUpdate={(hashtags) => setFormData({ ...formData, ai_hashtags: hashtags })}
         onPlatformToggle={() => { }}
         onSchedule={() => { }}
-        onSave={handleSave}
-        postId={post.id}
+        onSave={() => {
+          // Just close the AI editor - don't save yet
+          // User will click the main Save button to save changes
+          setAiEditorOpen(false);
+        }}
+        // Don't pass postId - we don't want AI editor to save directly
+        // postId={post.id}
         latePostId={(post as any).late_post_id || null}
         isScheduled={!!(post as any).late_scheduled_for && !(post as any).late_published_at}
       />

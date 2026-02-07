@@ -391,13 +391,8 @@ export function AIEditorSheet({
           : "Post saved successfully",
       });
 
-      // Close the sheet
+      // Close the sheet - don't call onSave() as we already saved directly
       onOpenChange(false);
-      
-      // Trigger parent refresh if needed
-      if (onSave) {
-        onSave();
-      }
     } catch (error) {
       console.error('❌ Error saving post:', error);
       toast({
@@ -725,10 +720,15 @@ export function AIEditorSheet({
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 Saving...
               </>
+            ) : postId ? (
+              <>
+                <Save className="h-4 w-4 mr-2" />
+                Save Changes
+              </>
             ) : (
               <>
                 <Save className="h-4 w-4 mr-2" />
-                Save
+                Done
               </>
             )}
           </Button>
