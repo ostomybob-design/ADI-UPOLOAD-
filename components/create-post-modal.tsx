@@ -2163,8 +2163,13 @@ export function CreatePostModal({
           if (platform === 'facebook') setPostOnFacebook(enabled);
         }}
         onSchedule={() => setSchedulePost(true)}
-        onSave={handleSaveDraft}
-        postId={postId}
+        onSave={() => {
+          // Just close the AI editor - don't save yet
+          // User will click Save Draft or Post button to save
+          setAiEditorOpen(false);
+        }}
+        // Don't pass postId - we don't want AI editor to save directly
+        // postId={postId}
         latePostId={latePostId}
         isScheduled={!!lateScheduledFor && !latePostId?.includes('published')}
       />
