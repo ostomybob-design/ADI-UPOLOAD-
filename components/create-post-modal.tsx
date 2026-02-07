@@ -143,6 +143,15 @@ export function CreatePostModal({
   const [backdropBlurAmount, setBackdropBlurAmount] = React.useState(8);
 
   const { toast } = useToast();
+  
+  // Store postId in a ref so it doesn't get lost during re-renders
+  const postIdRef = React.useRef<number | undefined>(postId);
+  
+  // Update ref when postId prop changes
+  React.useEffect(() => {
+    postIdRef.current = postId;
+    console.log('📌 postIdRef updated to:', postId);
+  }, [postId]);
 
   // Fetch connected accounts and profiles on mount
   React.useEffect(() => {
@@ -2187,9 +2196,10 @@ export function CreatePostModal({
         onSchedule={() => setSchedulePost(true)}
         onSave={async () => {
           try {
-            console.log('🔍 onSave called - postId:', postId, 'type:', typeof postId);
+            const currentPostId = postIdRef.current;
+            console.log('🔍 onSave called - postIdRef.current:', currentPostId, 'type:', typeof currentPostId);
             // If editing an existing post, trigger save
-            if (postId) {
+            if (currentPostId) {
               console.log('💾 AI Editor Save clicked - editing post, calling handleSaveDraft');
               setAiEditorOpen(false);
               await handleSaveDraft();
