@@ -24,7 +24,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { draftUtils } from "@/lib/draft-utils";
 import { AIEditorSheet } from "@/components/ai-editor-sheet";
 import { getProxiedImageUrl } from "@/lib/image-proxy";
 import { 
@@ -532,42 +531,11 @@ export function CreatePostModal({
 
   // Load draft data when modal opens with a draft ID
   React.useEffect(() => {
+    // NOTE: Drafts are now stored in database, not localStorage
+    // This effect is kept for backwards compatibility but won't execute
+    // since currentDraftId won't be set for database drafts
     if (open && currentDraftId && !postId) {
-      console.log("📝 Attempting to load draft:", currentDraftId);
-      const draft = draftUtils.getDraft(currentDraftId);
-      if (draft) {
-        console.log("✅ Draft loaded successfully:", draft);
-        setCaption(draft.caption);
-        setHashtags(draft.hashtags);
-        setSchedulePost(draft.schedulePost);
-        setScheduledDate(draft.scheduledDate || "");
-        setPostOnInstagram(draft.postOnInstagram);
-        setPostOnFacebook(draft.postOnFacebook);
-        setImagePreview(draft.imagePreview);
-        setAdditionalImages(draft.additionalImages || []);
-        
-        // Load text overlay settings if they exist
-        if (draft.overlayText) {
-          setOverlayText(draft.overlayText);
-          setTextPosition(draft.textPosition || { x: 50, y: 50 });
-          setFontSize(draft.fontSize || 48);
-          setTextColor(draft.textColor || "#ffffff");
-          setFontFamily(draft.fontFamily || "Arial");
-          setShadowIntensity(draft.shadowIntensity || 4);
-          setTextBgEnabled(draft.textBgEnabled || false);
-          setTextBgColor(draft.textBgColor || "#000000");
-          setTextBgOpacity(draft.textBgOpacity || 0.7);
-          setTextStrokeEnabled(draft.textStrokeEnabled || false);
-          setTextStrokeColor(draft.textStrokeColor || "#000000");
-          setTextStrokeWidth(draft.textStrokeWidth || 2);
-          setBackdropBlurEnabled(draft.backdropBlurEnabled || false);
-          setBackdropBlurAmount(draft.backdropBlurAmount || 10);
-        }
-        // Note: We can't restore the File object, only the preview
-      } else {
-        console.error("❌ Draft not found in localStorage:", currentDraftId);
-        console.log("📋 Available drafts:", draftUtils.getAllDrafts().map(d => d.id));
-      }
+      console.log("⚠️ Attempted to load localStorage draft, but drafts are now in database");
     }
   }, [open, currentDraftId, postId]);
 
@@ -694,74 +662,71 @@ export function CreatePostModal({
         }
       }
       
-      // If editing an existing post (postId exists), update the database
-      if (postId) {
-        console.log("💾 Saving changes to existing post:", postId);
+      // Upload media to Supabase if we have an image
+      let mediaUrl: string | null = null;
+      if (finalImagePreview && finalImagePreview.startsWith('data:')) {
+        try {
+          console.log("📤 Uploading media to Supabase for draft...");
+          const uploadResponse = await fetch("/api/upload", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              file: finalImagePreview,
+              folder: "posts"
+            }),
+          });
 
-        // Upload media to Supabase if there's a new image OR if text overlay was applied
-        let mediaUrl: string | null = null;
-
-        // Always upload if we have a data URL (new upload or text overlay applied)
-        if (finalImagePreview && finalImagePreview.startsWith('data:')) {
-          try {
-            console.log("📤 Uploading media to Supabase for draft...");
-            const uploadResponse = await fetch("/api/upload", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                file: finalImagePreview,
-                folder: "posts"
-              }),
-            });
-
-            if (!uploadResponse.ok) {
-              throw new Error("Failed to upload media");
-            }
-
-            const uploadResult = await uploadResponse.json();
-            mediaUrl = uploadResult.publicUrl;
-            console.log("✅ Media uploaded for draft:", mediaUrl);
-          } catch (uploadError) {
-            console.error("❌ Error uploading media:", uploadError);
-            alert(`Failed to upload media: ${(uploadError as Error).message}`);
-            setIsSavingDraft(false);
-            return;
+          if (!uploadResponse.ok) {
+            throw new Error("Failed to upload media");
           }
-        } else if (finalImagePreview) {
-          // Use existing URL
-          mediaUrl = finalImagePreview;
+
+          const uploadResult = await uploadResponse.json();
+          mediaUrl = uploadResult.publicUrl;
+          console.log("✅ Media uploaded for draft:", mediaUrl);
+        } catch (uploadError) {
+          console.error("❌ Error uploading media:", uploadError);
+          alert(`Failed to upload media: ${(uploadError as Error).message}`);
+          setIsSavingDraft(false);
+          return;
         }
+      } else if (finalImagePreview) {
+        // Use existing URL
+        mediaUrl = finalImagePreview;
+      }
 
-        // Convert hashtags string to array
-        const hashtagsArray = hashtags
-          .split(/\s+/)
-          .filter(tag => tag.startsWith("#"))
-          .map(tag => tag.replace("#", "").trim());
+      // Convert hashtags string to array
+      const hashtagsArray = hashtags
+        .split(/\s+/)
+        .filter(tag => tag.startsWith("#"))
+        .map(tag => tag.replace("#", "").trim());
 
-        // Prepare raw_data with text overlay settings
-        const rawData: any = {};
-        if (overlayText) {
-          rawData.textOverlay = {
-            text: overlayText,
-            position: textPosition,
-            fontSize: fontSize,
-            color: textColor,
-            fontFamily: fontFamily,
-            shadowIntensity: shadowIntensity,
-            bgEnabled: textBgEnabled,
-            bgColor: textBgColor,
-            bgOpacity: textBgOpacity,
-            strokeEnabled: textStrokeEnabled,
-            strokeColor: textStrokeColor,
-            strokeWidth: textStrokeWidth,
-            backdropBlurEnabled: backdropBlurEnabled,
-            backdropBlurAmount: backdropBlurAmount,
-          };
-        }
+      // Prepare raw_data with text overlay settings
+      const rawData: any = {};
+      if (overlayText) {
+        rawData.textOverlay = {
+          text: overlayText,
+          position: textPosition,
+          fontSize: fontSize,
+          color: textColor,
+          fontFamily: fontFamily,
+          shadowIntensity: shadowIntensity,
+          bgEnabled: textBgEnabled,
+          bgColor: textBgColor,
+          bgOpacity: textBgOpacity,
+          strokeEnabled: textStrokeEnabled,
+          strokeColor: textStrokeColor,
+          strokeWidth: textStrokeWidth,
+          backdropBlurEnabled: backdropBlurEnabled,
+          backdropBlurAmount: backdropBlurAmount,
+        };
+      }
 
-        // Prepare updates - use mediaUrl (which is either uploaded or existing)
+      if (postId) {
+        // Update existing post in database
+        console.log("💾 Updating existing post as draft:", postId);
+
         const updates: any = {
           ai_caption: caption,
           ai_hashtags: hashtagsArray,
@@ -770,19 +735,9 @@ export function CreatePostModal({
           posted_on_instagram: postOnInstagram,
           posted_on_facebook: postOnFacebook,
           raw_data: rawData,
+          is_draft: true,
         };
 
-        // Add schedule date if set
-        if (schedulePost && scheduledDate) {
-          updates.late_scheduled_for = new Date(scheduledDate);
-        } else {
-          // Clear schedule date if schedule is disabled
-          updates.late_scheduled_for = null;
-        }
-
-        console.log("📤 Updating database with:", updates);
-
-        // Update the post in database
         const updateResponse = await fetch("/api/posts/edit", {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -795,78 +750,53 @@ export function CreatePostModal({
         if (!updateResponse.ok) {
           const errorText = await updateResponse.text();
           console.error("❌ Database update failed:", errorText);
-          throw new Error("Failed to update post");
+          throw new Error("Failed to update draft");
         }
 
-        const updatedPost = await updateResponse.json();
-        console.log("✅ Post updated in database:", updatedPost);
-
-        alert("Changes saved successfully! 💾");
-
-        // Refresh parent component
-        if (onPostCreated) {
-          onPostCreated();
-        }
-
-        // Close modal
-        onOpenChange(false);
-      } else {
-        // Save as draft to localStorage (for new posts)
-        const draftData = {
-          imageVideo,
-          imagePreview: finalImagePreview, // Use finalImagePreview with text overlay applied
-          caption,
-          hashtags,
-          schedulePost,
-          scheduledDate,
-          postOnInstagram,
-          postOnFacebook,
-          additionalImages,
-          // Save text overlay settings
-          overlayText,
-          textPosition,
-          fontSize,
-          textColor,
-          fontFamily,
-          shadowIntensity,
-          textBgEnabled,
-          textBgColor,
-          textBgOpacity,
-          textStrokeEnabled,
-          textStrokeColor,
-          textStrokeWidth,
-          backdropBlurEnabled,
-          backdropBlurAmount,
-        };
-
-        let savedDraftId: string;
-        if (currentDraftId) {
-          // Update existing draft
-          const success = draftUtils.updateDraft(currentDraftId, draftData);
-          if (success) {
-            savedDraftId = currentDraftId;
-          } else {
-            throw new Error("Failed to update draft");
-          }
-        } else {
-          // Create new draft
-          savedDraftId = draftUtils.saveDraft(draftData);
-          if (!savedDraftId) {
-            throw new Error("Failed to save draft");
-          }
-          setCurrentDraftId(savedDraftId);
-        }
-
+        console.log("✅ Draft updated in database");
         alert("Draft saved successfully! 💾");
+      } else {
+        // Create new draft in database
+        console.log("💾 Creating new draft in database...");
 
-        // Refresh data to show the draft in the table
-        if (onPostCreated) {
-          onPostCreated();
+        const createResponse = await fetch("/api/posts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            imageVideo: mediaUrl,
+            caption: caption,
+            hashtags: hashtags,
+            schedulePost: false,
+            scheduledDate: null,
+            postOnInstagram: postOnInstagram,
+            postOnFacebook: postOnFacebook,
+            additionalImages: additionalImages,
+            rawData: rawData,
+            isDraft: true, // Mark as draft
+          })
+        });
+
+        if (!createResponse.ok) {
+          const errorText = await createResponse.text();
+          console.error("❌ Failed to create draft:", errorText);
+          throw new Error("Failed to save draft");
         }
+
+        const newPost = await createResponse.json();
+        console.log("✅ Draft created in database:", newPost);
+        alert("Draft saved successfully! 💾");
       }
+
+      // Refresh parent component
+      if (onPostCreated) {
+        onPostCreated();
+      }
+
+      // Close modal
+      onOpenChange(false);
     } catch (error) {
-      console.error("Error saving draft:", error);
-      alert("Failed to save. Please try again.");
+      console.error("❌ Error saving draft:", error);
+      alert(`Failed to save draft: ${(error as Error).message}`);
     } finally {
       setIsSavingDraft(false);
     }
@@ -1427,10 +1357,8 @@ export function CreatePostModal({
         // The post is already on Late.dev which is what matters
       }
 
-      // Delete draft if it was published from a draft
-      if (currentDraftId) {
-        draftUtils.deleteDraft(currentDraftId);
-      }
+      // NOTE: Drafts are now in database, no need to delete from localStorage
+      // The database post with is_draft=true will be updated when published
 
       // Call the callback to refresh data
       if (onPostCreated) {

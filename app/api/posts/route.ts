@@ -30,6 +30,7 @@ export async function POST(req: Request) {
       lateStatus,
       rawData,
       approval_status, // Capture if sent by external bot
+      isDraft, // NEW: Handle draft posts
     } = requestBody;
 
     // imageVideo should be a Supabase storage URL (uploaded via /api/upload before calling this endpoint)
@@ -61,6 +62,7 @@ export async function POST(req: Request) {
       posted_on_facebook: postOnFacebook,
       content_processed: true, // Assuming content is processed upon creation
       raw_data: rawData || {},
+      is_draft: isDraft || false, // NEW: Set draft status
     };
     
     // 🛡️ SECURITY: Force all new posts to 'pending' status to prevent auto-approval bypass
