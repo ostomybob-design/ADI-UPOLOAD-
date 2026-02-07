@@ -26,6 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AIEditorSheet } from "@/components/ai-editor-sheet";
 import { getProxiedImageUrl } from "@/lib/image-proxy";
+import { useToast } from "@/hooks/use-toast";
 import { 
   ResizableDialog as Dialog, 
   ResizableDialogContent as DialogContent,
@@ -138,6 +139,8 @@ export function CreatePostModal({
   const [shadowIntensity, setShadowIntensity] = React.useState(4);
   const [backdropBlurEnabled, setBackdropBlurEnabled] = React.useState(false);
   const [backdropBlurAmount, setBackdropBlurAmount] = React.useState(8);
+
+  const { toast } = useToast();
 
   // Fetch connected accounts and profiles on mount
   React.useEffect(() => {
@@ -754,7 +757,10 @@ export function CreatePostModal({
         }
 
         console.log("✅ Draft updated in database");
-        alert("Draft saved successfully! 💾");
+        toast({
+          title: "Success",
+          description: "Post updated successfully! 💾"
+        });
       } else {
         // Create new draft in database
         console.log("💾 Creating new draft in database...");
@@ -784,7 +790,10 @@ export function CreatePostModal({
 
         const newPost = await createResponse.json();
         console.log("✅ Draft created in database:", newPost);
-        alert("Draft saved successfully! 💾");
+        toast({
+          title: "Success",
+          description: "Draft saved successfully! 💾"
+        });
       }
 
       // Refresh parent component
@@ -793,10 +802,15 @@ export function CreatePostModal({
       }
 
       // Close modal
+      console.log("🚪 Closing modal after successful save");
       onOpenChange(false);
     } catch (error) {
       console.error("❌ Error saving draft:", error);
-      alert(`Failed to save draft: ${(error as Error).message}`);
+      toast({
+        title: "Error",
+        description: `Failed to save: ${(error as Error).message}`,
+        variant: "destructive"
+      });
     } finally {
       setIsSavingDraft(false);
     }
