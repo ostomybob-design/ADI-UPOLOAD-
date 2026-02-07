@@ -712,17 +712,14 @@ export default function DashboardPage() {
           open={createModalOpen || !!editingPostId || !!editingDraftId}
           onOpenChange={(open) => {
             console.log('🚪 Modal onOpenChange called - open:', open, 'editingPostId:', editingPostId);
-            if (!open) {
-              // Only clear if modal is actually closing (wait a bit to avoid race condition)
-              setTimeout(() => {
-                console.log('🧹 Clearing modal state');
-                setCreateModalOpen(false);
-                setEditingPostId(null);
-                setEditingDraftId(null);
-              }, 100);
+            // Only clear state if modal is actually closing AND we're not editing
+            if (!open && !editingPostId && !editingDraftId) {
+              console.log('🧹 Clearing modal state (user closed modal)');
+              setCreateModalOpen(false);
             }
           }}
           onPostCreated={() => {
+            console.log('✅ Post created/updated - clearing IDs and refreshing');
             fetchPosts()
             setEditingPostId(null)
             setEditingDraftId(null)
