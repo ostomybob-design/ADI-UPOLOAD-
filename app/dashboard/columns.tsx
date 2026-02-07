@@ -7,6 +7,7 @@ import { RowActions } from "./row-actions";
 import { ColumnHeader } from "./column-header";
 import { useState } from "react";
 import { SchedulePostModal } from "@/components/schedule-post-modal";
+import { SetScheduleModal } from "@/components/set-schedule-modal";
 import { getProxiedImageUrl } from "@/lib/image-proxy";
 
 export type DraftPost = {
@@ -73,6 +74,7 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
   const [isMovingToReadyToPost, setIsMovingToReadyToPost] = useState(false);
   const [isMovingBackward, setIsMovingBackward] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [showSetScheduleModal, setShowSetScheduleModal] = useState(false);
 
   const handleMoveToDrafts = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -431,7 +433,7 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
             variant="ghost"
             onClick={(e) => {
               e.stopPropagation();
-              setShowScheduleModal(true);
+              setShowSetScheduleModal(true);
             }}
             disabled={isMovingBackward || isSendingToPending || isRejecting}
             className="h-7 px-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 disabled:opacity-50"
@@ -457,6 +459,13 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
         <SchedulePostModal
           open={showScheduleModal}
           onOpenChange={setShowScheduleModal}
+          postId={post.id}
+          postTitle={post.title}
+          onScheduled={onRefresh}
+        />
+        <SetScheduleModal
+          open={showSetScheduleModal}
+          onOpenChange={setShowSetScheduleModal}
           postId={post.id}
           postTitle={post.title}
           onScheduled={onRefresh}
