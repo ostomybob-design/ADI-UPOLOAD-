@@ -1562,6 +1562,194 @@ export function CreatePostModal({
                         </Button>
                       </div>
 
+                      {/* Text Overlay Controls */}
+                      {!imageVideo?.type.startsWith('video/') && (
+                        <div className="space-y-3 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                          <Label className="text-sm font-semibold flex items-center gap-2">
+                            <Type className="h-4 w-4" />
+                            Text Overlay (Drag text on image to position)
+                          </Label>
+                          
+                          <div className="space-y-3">
+                            <div>
+                              <Label className="text-xs text-gray-600 mb-1 block">Text</Label>
+                              <Input
+                                value={overlayText}
+                                onChange={(e) => setOverlayText(e.target.value)}
+                                placeholder="Enter text to overlay on image..."
+                                className="bg-white"
+                              />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <Label className="text-xs text-gray-600 mb-1 block">Font Size: {fontSize}px</Label>
+                                <input
+                                  type="range"
+                                  min="16"
+                                  max="72"
+                                  value={fontSize}
+                                  onChange={(e) => setFontSize(Number(e.target.value))}
+                                  className="w-full"
+                                />
+                              </div>
+
+                              <div>
+                                <Label className="text-xs text-gray-600 mb-1 block">Text Color</Label>
+                                <div className="flex gap-2">
+                                  <input
+                                    type="color"
+                                    value={textColor}
+                                    onChange={(e) => setTextColor(e.target.value)}
+                                    className="w-12 h-9 rounded cursor-pointer"
+                                  />
+                                  <Input
+                                    value={textColor}
+                                    onChange={(e) => setTextColor(e.target.value)}
+                                    className="flex-1 bg-white text-xs"
+                                    placeholder="#FFFFFF"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Shadow Intensity */}
+                            <div>
+                              <Label className="text-xs text-gray-600 mb-1 block">Shadow Intensity: {shadowIntensity}px</Label>
+                              <input
+                                type="range"
+                                min="0"
+                                max="12"
+                                value={shadowIntensity}
+                                onChange={(e) => setShadowIntensity(Number(e.target.value))}
+                                className="w-full"
+                              />
+                            </div>
+
+                            {/* Text Background Highlight */}
+                            <div className="space-y-2 p-3 bg-white rounded-lg border border-gray-200">
+                              <div className="flex items-center space-x-2">
+                                <Checkbox
+                                  id="text-bg-enabled"
+                                  checked={textBgEnabled}
+                                  onCheckedChange={(checked) => setTextBgEnabled(checked as boolean)}
+                                />
+                                <Label htmlFor="text-bg-enabled" className="text-xs font-medium cursor-pointer">
+                                  Background Highlight
+                                </Label>
+                              </div>
+                              {textBgEnabled && (
+                                <div className="space-y-2 pl-6">
+                                  <div className="flex gap-2 items-center">
+                                    <Label className="text-xs text-gray-600 w-12">Color</Label>
+                                    <input
+                                      type="color"
+                                      value={textBgColor}
+                                      onChange={(e) => setTextBgColor(e.target.value)}
+                                      className="w-10 h-8 rounded cursor-pointer"
+                                    />
+                                    <Input
+                                      value={textBgColor}
+                                      onChange={(e) => setTextBgColor(e.target.value)}
+                                      className="flex-1 bg-white text-xs h-8"
+                                      placeholder="#000000"
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label className="text-xs text-gray-600 mb-1 block">Opacity: {textBgOpacity}%</Label>
+                                    <input
+                                      type="range"
+                                      min="0"
+                                      max="100"
+                                      value={textBgOpacity}
+                                      onChange={(e) => setTextBgOpacity(Number(e.target.value))}
+                                      className="w-full"
+                                    />
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Backdrop Blur (Fuzzy Effect) */}
+                            <div className="space-y-2 p-3 bg-white rounded-lg border border-gray-200">
+                              <div className="flex items-center space-x-2">
+                                <Checkbox
+                                  id="backdrop-blur-enabled"
+                                  checked={backdropBlurEnabled}
+                                  onCheckedChange={(checked) => setBackdropBlurEnabled(checked as boolean)}
+                                />
+                                <Label htmlFor="backdrop-blur-enabled" className="text-xs font-medium cursor-pointer">
+                                  Fuzzy Background Blur
+                                </Label>
+                              </div>
+                              {backdropBlurEnabled && (
+                                <div className="pl-6">
+                                  <Label className="text-xs text-gray-600 mb-1 block">Blur Amount: {backdropBlurAmount}px</Label>
+                                  <input
+                                    type="range"
+                                    min="2"
+                                    max="20"
+                                    value={backdropBlurAmount}
+                                    onChange={(e) => setBackdropBlurAmount(Number(e.target.value))}
+                                    className="w-full"
+                                  />
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Text Stroke/Outline */}
+                            <div className="space-y-2 p-3 bg-white rounded-lg border border-gray-200">
+                              <div className="flex items-center space-x-2">
+                                <Checkbox
+                                  id="text-stroke-enabled"
+                                  checked={textStrokeEnabled}
+                                  onCheckedChange={(checked) => setTextStrokeEnabled(checked as boolean)}
+                                />
+                                <Label htmlFor="text-stroke-enabled" className="text-xs font-medium cursor-pointer">
+                                  Text Outline/Stroke
+                                </Label>
+                              </div>
+                              {textStrokeEnabled && (
+                                <div className="space-y-2 pl-6">
+                                  <div className="flex gap-2 items-center">
+                                    <Label className="text-xs text-gray-600 w-12">Color</Label>
+                                    <input
+                                      type="color"
+                                      value={textStrokeColor}
+                                      onChange={(e) => setTextStrokeColor(e.target.value)}
+                                      className="w-10 h-8 rounded cursor-pointer"
+                                    />
+                                    <Input
+                                      value={textStrokeColor}
+                                      onChange={(e) => setTextStrokeColor(e.target.value)}
+                                      className="flex-1 bg-white text-xs h-8"
+                                      placeholder="#000000"
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label className="text-xs text-gray-600 mb-1 block">Width: {textStrokeWidth}px</Label>
+                                    <input
+                                      type="range"
+                                      min="1"
+                                      max="8"
+                                      value={textStrokeWidth}
+                                      onChange={(e) => setTextStrokeWidth(Number(e.target.value))}
+                                      className="w-full"
+                                    />
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            {overlayText && (
+                              <p className="text-xs text-blue-600">
+                                💡 Tip: Click and drag the text on the image above to reposition it
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
                       {/* Additional Images */}
                       {additionalImages.length > 0 && (
                         <div>
@@ -1583,194 +1771,6 @@ export function CreatePostModal({
                     </div>
                   )}
                 </div>
-
-                {/* Text Overlay Controls */}
-                {imagePreview && !imageVideo?.type.startsWith('video/') && (
-                  <div className="space-y-3 p-4 bg-blue-50 border border-blue-200 rounded-xl">
-                    <Label className="text-sm font-semibold flex items-center gap-2">
-                      <Type className="h-4 w-4" />
-                      Text Overlay (Drag text on image to position)
-                    </Label>
-                    
-                    <div className="space-y-3">
-                      <div>
-                        <Label className="text-xs text-gray-600 mb-1 block">Text</Label>
-                        <Input
-                          value={overlayText}
-                          onChange={(e) => setOverlayText(e.target.value)}
-                          placeholder="Enter text to overlay on image..."
-                          className="bg-white"
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <Label className="text-xs text-gray-600 mb-1 block">Font Size: {fontSize}px</Label>
-                          <input
-                            type="range"
-                            min="16"
-                            max="72"
-                            value={fontSize}
-                            onChange={(e) => setFontSize(Number(e.target.value))}
-                            className="w-full"
-                          />
-                        </div>
-
-                        <div>
-                          <Label className="text-xs text-gray-600 mb-1 block">Text Color</Label>
-                          <div className="flex gap-2">
-                            <input
-                              type="color"
-                              value={textColor}
-                              onChange={(e) => setTextColor(e.target.value)}
-                              className="w-12 h-9 rounded cursor-pointer"
-                            />
-                            <Input
-                              value={textColor}
-                              onChange={(e) => setTextColor(e.target.value)}
-                              className="flex-1 bg-white text-xs"
-                              placeholder="#FFFFFF"
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Shadow Intensity */}
-                      <div>
-                        <Label className="text-xs text-gray-600 mb-1 block">Shadow Intensity: {shadowIntensity}px</Label>
-                        <input
-                          type="range"
-                          min="0"
-                          max="12"
-                          value={shadowIntensity}
-                          onChange={(e) => setShadowIntensity(Number(e.target.value))}
-                          className="w-full"
-                        />
-                      </div>
-
-                      {/* Text Background Highlight */}
-                      <div className="space-y-2 p-3 bg-white rounded-lg border border-gray-200">
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="text-bg-enabled"
-                            checked={textBgEnabled}
-                            onCheckedChange={(checked) => setTextBgEnabled(checked as boolean)}
-                          />
-                          <Label htmlFor="text-bg-enabled" className="text-xs font-medium cursor-pointer">
-                            Background Highlight
-                          </Label>
-                        </div>
-                        {textBgEnabled && (
-                          <div className="space-y-2 pl-6">
-                            <div className="flex gap-2 items-center">
-                              <Label className="text-xs text-gray-600 w-12">Color</Label>
-                              <input
-                                type="color"
-                                value={textBgColor}
-                                onChange={(e) => setTextBgColor(e.target.value)}
-                                className="w-10 h-8 rounded cursor-pointer"
-                              />
-                              <Input
-                                value={textBgColor}
-                                onChange={(e) => setTextBgColor(e.target.value)}
-                                className="flex-1 bg-white text-xs h-8"
-                                placeholder="#000000"
-                              />
-                            </div>
-                            <div>
-                              <Label className="text-xs text-gray-600 mb-1 block">Opacity: {textBgOpacity}%</Label>
-                              <input
-                                type="range"
-                                min="0"
-                                max="100"
-                                value={textBgOpacity}
-                                onChange={(e) => setTextBgOpacity(Number(e.target.value))}
-                                className="w-full"
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Backdrop Blur (Fuzzy Effect) */}
-                      <div className="space-y-2 p-3 bg-white rounded-lg border border-gray-200">
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="backdrop-blur-enabled"
-                            checked={backdropBlurEnabled}
-                            onCheckedChange={(checked) => setBackdropBlurEnabled(checked as boolean)}
-                          />
-                          <Label htmlFor="backdrop-blur-enabled" className="text-xs font-medium cursor-pointer">
-                            Fuzzy Background Blur
-                          </Label>
-                        </div>
-                        {backdropBlurEnabled && (
-                          <div className="pl-6">
-                            <Label className="text-xs text-gray-600 mb-1 block">Blur Amount: {backdropBlurAmount}px</Label>
-                            <input
-                              type="range"
-                              min="2"
-                              max="20"
-                              value={backdropBlurAmount}
-                              onChange={(e) => setBackdropBlurAmount(Number(e.target.value))}
-                              className="w-full"
-                            />
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Text Stroke/Outline */}
-                      <div className="space-y-2 p-3 bg-white rounded-lg border border-gray-200">
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="text-stroke-enabled"
-                            checked={textStrokeEnabled}
-                            onCheckedChange={(checked) => setTextStrokeEnabled(checked as boolean)}
-                          />
-                          <Label htmlFor="text-stroke-enabled" className="text-xs font-medium cursor-pointer">
-                            Text Outline/Stroke
-                          </Label>
-                        </div>
-                        {textStrokeEnabled && (
-                          <div className="space-y-2 pl-6">
-                            <div className="flex gap-2 items-center">
-                              <Label className="text-xs text-gray-600 w-12">Color</Label>
-                              <input
-                                type="color"
-                                value={textStrokeColor}
-                                onChange={(e) => setTextStrokeColor(e.target.value)}
-                                className="w-10 h-8 rounded cursor-pointer"
-                              />
-                              <Input
-                                value={textStrokeColor}
-                                onChange={(e) => setTextStrokeColor(e.target.value)}
-                                className="flex-1 bg-white text-xs h-8"
-                                placeholder="#000000"
-                              />
-                            </div>
-                            <div>
-                              <Label className="text-xs text-gray-600 mb-1 block">Width: {textStrokeWidth}px</Label>
-                              <input
-                                type="range"
-                                min="1"
-                                max="8"
-                                value={textStrokeWidth}
-                                onChange={(e) => setTextStrokeWidth(Number(e.target.value))}
-                                className="w-full"
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      {overlayText && (
-                        <p className="text-xs text-blue-600">
-                          💡 Tip: Click and drag the text on the image above to reposition it
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                )}
 
                 {/* Body */}
                 <div className="space-y-3">
