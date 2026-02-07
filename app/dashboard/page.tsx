@@ -477,8 +477,8 @@ export default function DashboardPage() {
       totalPosts: posts.length,
       pendingApproval: posts.filter(p => p.approval_status === "pending" && p.content_processed && !p.is_draft).length,
       drafts: posts.filter(p => p.is_draft === true).length,
-      approved: posts.filter(p => p.approval_status === "approved" && !p.late_post_id && !p.is_draft).length,
-      scheduled: lateScheduledPosts.length,
+      approved: posts.filter(p => p.approval_status === "approved" && !p.late_post_id && !p.late_scheduled_for && !p.is_draft).length,
+      scheduled: lateScheduledPosts.length + posts.filter(p => p.approval_status === "approved" && p.late_scheduled_for && !p.late_published_at && !p.late_post_id).length,
       published: latePublishedPosts.length,
       rejected: posts.filter(p => p.approval_status === "rejected").length
     }
