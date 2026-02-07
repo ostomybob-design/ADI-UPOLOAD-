@@ -2141,6 +2141,7 @@ export function CreatePostModal({
                                 backdropFilter: backdropBlurEnabled ? `blur(${backdropBlurAmount}px)` : 'none',
                                 WebkitBackdropFilter: backdropBlurEnabled ? `blur(${backdropBlurAmount}px)` : 'none',
                                 borderRadius: (textBgEnabled || backdropBlurEnabled) ? '8px' : '0',
+                                whiteSpace: 'nowrap',
                               }}
                             >
                               {overlayText}
