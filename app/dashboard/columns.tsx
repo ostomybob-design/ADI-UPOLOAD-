@@ -846,52 +846,38 @@ export const createColumns = (
         const isEdited = row.original.is_edited;
         const isDraft = row.original.is_draft;
 
-        // Determine late status based on actual fields
-        let lateStatus = null;
-        if (latePublishedAt) {
-          lateStatus = "published";
-        } else if (latePostId && lateScheduledFor) {
-          lateStatus = "scheduled";
+        // Determine the primary status to display
+        let displayStatus = "pending";
+        let statusColor = "bg-yellow-100 text-yellow-700 hover:bg-yellow-200";
+        
+        if (isDraft) {
+          displayStatus = "draft";
+          statusColor = "bg-gray-100 text-gray-700 hover:bg-gray-200";
+        } else if (latePublishedAt) {
+          displayStatus = "published";
+          statusColor = "bg-purple-100 text-purple-700 hover:bg-purple-200";
+        } else if (lateScheduledFor || latePostId) {
+          displayStatus = "scheduled";
+          statusColor = "bg-blue-100 text-blue-700 hover:bg-blue-200";
+        } else if (approvalStatus === "approved") {
+          displayStatus = "approved";
+          statusColor = "bg-green-100 text-green-700 hover:bg-green-200";
+        } else if (approvalStatus === "rejected") {
+          displayStatus = "rejected";
+          statusColor = "bg-red-100 text-red-700 hover:bg-red-200";
+        } else if (approvalStatus === "pending") {
+          displayStatus = "pending";
+          statusColor = "bg-yellow-100 text-yellow-700 hover:bg-yellow-200";
         }
 
         return (
           <div className="flex flex-col gap-1">
             <Badge
-              variant={
-                isDraft
-                  ? "secondary"
-                  : approvalStatus === "approved"
-                  ? "default"
-                  : approvalStatus === "rejected"
-                    ? "destructive"
-                    : "secondary"
-              }
-              className={
-                isDraft
-                  ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  : approvalStatus === "approved"
-                  ? "bg-green-100 text-green-700 hover:bg-green-200"
-                  : approvalStatus === "rejected"
-                    ? "bg-red-100 text-red-700 hover:bg-red-200"
-                    : "bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
-              }
+              variant="secondary"
+              className={statusColor}
             >
-              {isDraft ? "Draft" : (approvalStatus || "pending")}
+              {displayStatus}
             </Badge>
-            {lateStatus && (
-              <Badge
-                variant="outline"
-                className={
-                  lateStatus === "published"
-                    ? "text-xs bg-purple-50 text-purple-700 border-purple-200"
-                    : lateStatus === "scheduled"
-                      ? "text-xs bg-blue-50 text-blue-700 border-blue-200"
-                      : "text-xs"
-                }
-              >
-                {lateStatus}
-              </Badge>
-            )}
             {isEdited && (
               <Badge variant="outline" className="text-xs">
                 Edited
