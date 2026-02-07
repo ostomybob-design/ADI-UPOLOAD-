@@ -318,7 +318,7 @@ export function EditPostModal({ post, open, onOpenChange, onEditComplete }: Edit
                 size="sm"
                 onClick={() => {
                   setAiEditorOpen(true);
-                  onOpenChange(false);
+                  // Don't close the edit modal - keep it open in the background
                 }}
                 className="text-purple-600 border-purple-300 hover:bg-purple-50"
               >
