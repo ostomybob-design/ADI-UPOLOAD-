@@ -388,14 +388,16 @@ export function AIEditorSheet({
         title: "Success",
         description: isScheduled
           ? "Post updated successfully on Late.dev and database"
-          : "Post saved successfully to database",
+          : "Post saved successfully",
       });
-
-      // Call the original onSave to refresh the parent
-      onSave();
 
       // Close the sheet
       onOpenChange(false);
+      
+      // Trigger parent refresh if needed
+      if (onSave) {
+        onSave();
+      }
     } catch (error) {
       console.error('❌ Error saving post:', error);
       toast({
@@ -632,16 +634,25 @@ export function AIEditorSheet({
               {previews.length > 0 && (
                 <div className="space-y-3 mt-3">
                   <Label className="text-xs text-muted-foreground">
-                    {previews.length > 1 ? 'Select a variation:' : 'Preview:'}
+                    {previews.length > 1 ? 'Select a variation to use:' : 'Preview:'}
                   </Label>
                   {previews.map((preview, index) => (
                     <div
                       key={index}
-                      className={`group p-3 border-2 rounded-lg transition-all duration-300 ease-in-out overflow-hidden ${
+                      className={`group p-3 border-2 rounded-lg transition-all duration-300 ease-in-out overflow-hidden cursor-pointer ${
                         selectedPreviewIndex === index 
                           ? 'border-purple-500 bg-purple-50' 
                           : 'border-gray-200 hover:border-purple-300'
                       }`}
+                      onClick={() => {
+                        setSelectedPreviewIndex(index);
+                        setEditedCaption(preview.caption);
+                        onCaptionUpdate(preview.caption);
+                        toast({
+                          title: "Variation selected",
+                          description: "Caption updated. Click Save to apply changes.",
+                        });
+                      }}
                     >
                       <div className="flex items-center gap-3 mb-2">
                         <input
@@ -649,10 +660,10 @@ export function AIEditorSheet({
                           id={`preview-${index}`}
                           name="preview-selection"
                           checked={selectedPreviewIndex === index}
-                          onChange={() => setSelectedPreviewIndex(index)}
-                          className="h-4 w-4 text-purple-600 cursor-pointer"
+                          onChange={() => {}}
+                          className="h-4 w-4 text-purple-600 cursor-pointer pointer-events-none"
                         />
-                        <label htmlFor={`preview-${index}`} className="flex-1 cursor-pointer">
+                        <label htmlFor={`preview-${index}`} className="flex-1 cursor-pointer pointer-events-none">
                           <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-300">
                             {preview.tone ? preview.tone.charAt(0).toUpperCase() + preview.tone.slice(1) : 'Custom Edit'}
                           </Badge>
@@ -670,29 +681,6 @@ export function AIEditorSheet({
                       )}
                     </div>
                   ))}
-                  
-                  {/* Apply Selected Preview Button */}
-                  <Button
-                    onClick={() => {
-                      if (selectedPreviewIndex !== null) {
-                        const selectedPreview = previews[selectedPreviewIndex];
-                        setEditedCaption(selectedPreview.caption);
-                        // Immediately update parent without debounce delay
-                        onCaptionUpdate(selectedPreview.caption);
-                        toast({
-                          title: "Variation applied",
-                          description: selectedPreview.explanation || "Caption updated successfully",
-                        });
-                        setPreviews([]);
-                        setSelectedPreviewIndex(null);
-                        setCustomInstruction('');
-                      }
-                    }}
-                    disabled={selectedPreviewIndex === null}
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white"
-                  >
-                    Apply Selected Variation
-                  </Button>
                 </div>
               )}
             </div>
@@ -740,7 +728,7 @@ export function AIEditorSheet({
             ) : (
               <>
                 <Save className="h-4 w-4 mr-2" />
-                Save to Database
+                Save
               </>
             )}
           </Button>
