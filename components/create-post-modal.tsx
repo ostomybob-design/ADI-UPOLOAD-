@@ -2156,8 +2156,14 @@ export function CreatePostModal({
           postOnInstagram,
           postOnFacebook
         }}
-        onCaptionUpdate={setCaption}
-        onHashtagsUpdate={setHashtags}
+        onCaptionUpdate={(caption) => {
+          console.log('📝 AI Editor updating caption (create):', caption.substring(0, 100) + '...');
+          setCaption(caption);
+        }}
+        onHashtagsUpdate={(hashtags) => {
+          console.log('🏷️ AI Editor updating hashtags (create):', hashtags);
+          setHashtags(hashtags);
+        }}
         onPlatformToggle={(platform, enabled) => {
           if (platform === 'instagram') setPostOnInstagram(enabled);
           if (platform === 'facebook') setPostOnFacebook(enabled);
@@ -2166,6 +2172,7 @@ export function CreatePostModal({
         onSave={() => {
           // Just close the AI editor - don't save yet
           // User will click Save Draft or Post button to save
+          console.log('✅ AI Editor closed (create) - caption is now:', caption.substring(0, 100) + '...');
           setAiEditorOpen(false);
         }}
         // Don't pass postId - we don't want AI editor to save directly

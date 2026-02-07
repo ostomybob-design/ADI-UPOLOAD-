@@ -110,6 +110,14 @@ export function AIEditorSheet({
         captionTextareaRef.current?.focus();
       }, 100);
     }
+    
+    // Clear previews when modal opens or closes
+    if (!open) {
+      setPreviews([]);
+      setSelectedPreviewIndex(null);
+      setCustomInstruction('');
+      setSelectedStyles([]);
+    }
   }, [open]);
 
   const getPlatform = (): 'instagram' | 'facebook' | 'both' => {

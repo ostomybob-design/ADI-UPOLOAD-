@@ -397,13 +397,17 @@ export function EditPostModal({ post, open, onOpenChange, onEditComplete }: Edit
           postOnInstagram: false,
           postOnFacebook: false
         }}
-        onCaptionUpdate={(caption) => setFormData({ ...formData, ai_caption: caption })}
-        onHashtagsUpdate={(hashtags) => setFormData({ ...formData, ai_hashtags: hashtags })}
+        onCaptionUpdate={(caption) => {
+          console.log('📝 AI Editor updating caption:', caption.substring(0, 100) + '...');
+          setFormData(prev => ({ ...prev, ai_caption: caption }));
+        }}
+        onHashtagsUpdate={(hashtags) => setFormData(prev => ({ ...prev, ai_hashtags: hashtags }))}
         onPlatformToggle={() => { }}
         onSchedule={() => { }}
         onSave={() => {
           // Just close the AI editor - don't save yet
           // User will click the main Save button to save changes
+          console.log('✅ AI Editor closed - caption is now:', formData.ai_caption.substring(0, 100) + '...');
           setAiEditorOpen(false);
         }}
         // Don't pass postId - we don't want AI editor to save directly
