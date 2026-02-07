@@ -207,6 +207,7 @@ export function AIEditorSheet({
         caption: data.editedCaption,
         explanation: data.explanation || "Caption edited successfully"
       }]);
+      setSelectedPreviewIndex(0); // Auto-select the preview
 
       toast({
         title: "Preview Ready",
@@ -241,6 +242,7 @@ export function AIEditorSheet({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             caption: editedCaption,
+            tones: selectedStyles, // Pass selected tones to API
             context: {
               hashtags: editedHashtags,
               platform: getPlatform()
@@ -258,19 +260,18 @@ export function AIEditorSheet({
           throw new Error(data.error || 'Unknown error occurred');
         }
 
-        // Filter variations to only show selected styles
-        const filteredVariations = data.variations
-          .filter(v => selectedStyles.includes(v.tone))
-          .map(v => ({ 
-            caption: v.caption, 
-            explanation: `${v.tone} variation`,
-            tone: v.tone 
-          }));
+        // Map variations to preview format
+        const previewVariations = data.variations.map(v => ({ 
+          caption: v.caption, 
+          explanation: `${v.tone} variation`,
+          tone: v.tone 
+        }));
 
-        setPreviews(filteredVariations);
+        setPreviews(previewVariations);
+        setSelectedPreviewIndex(0); // Auto-select first preview
         toast({
           title: "Success",
-          description: `Generated ${filteredVariations.length} caption variation${filteredVariations.length > 1 ? 's' : ''}`,
+          description: `Generated ${previewVariations.length} caption variation${previewVariations.length > 1 ? 's' : ''}`,
         });
       } catch (error) {
         toast({
@@ -676,6 +677,7 @@ export function AIEditorSheet({
                       if (selectedPreviewIndex !== null) {
                         const selectedPreview = previews[selectedPreviewIndex];
                         setEditedCaption(selectedPreview.caption);
+                        // Immediately update parent without debounce delay
                         onCaptionUpdate(selectedPreview.caption);
                         toast({
                           title: "Variation applied",

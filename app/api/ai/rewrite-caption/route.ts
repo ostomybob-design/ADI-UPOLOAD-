@@ -7,7 +7,7 @@ import { withTimeout, withRetry } from '@/lib/ai-utils';
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { caption, context } = body;
+    const { caption, context, tones } = body;
 
     if (!caption) {
       return NextResponse.json(
@@ -33,6 +33,15 @@ export async function POST(req: Request) {
       });
 
       const structuredLlm = llm.withStructuredOutput(rewriteSchema);
+
+      // Determine which tones to use
+      const requestedTones = tones && tones.length > 0 
+        ? tones.join(', ') 
+        : 'empathetic, inspirational, or educational';
+      
+      const numberOfVariations = tones && tones.length > 0 
+        ? tones.length 
+        : 2;
 
       const systemMessage = `You are a social media content expert specializing in ostomy care and awareness.
 
@@ -69,7 +78,7 @@ DESIRED OUTPUT CHARACTERISTICS:
 - Maintain a reading level around Grade 6–8 for accessibility
 - Use friendly punctuation (em dashes, exclamation points, parentheses) to humanize the tone
 
-Generate 2 variations with different tones: empathetic, inspirational, or educational.
+Generate ${numberOfVariations} variation${numberOfVariations > 1 ? 's' : ''} with the following tone${numberOfVariations > 1 ? 's' : ''}: ${requestedTones}.
 Each caption should be under 2200 characters and follow the above guidelines.`;
 
       const humanMessage = context?.platform 

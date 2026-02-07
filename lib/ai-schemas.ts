@@ -7,7 +7,7 @@ export const rewriteSchema = z.object({
       caption: z.string().max(2200),
       tone: z.enum(["professional", "casual", "empathetic", "inspirational", "educational"])
     })
-  ).length(2)
+  ).min(1).max(5) // Allow 1-5 variations instead of exactly 2
 });
 
 export const editSchema = z.object({
