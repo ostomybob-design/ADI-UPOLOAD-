@@ -439,6 +439,41 @@ export default function DashboardPage() {
     }
   }
 
+  const handleBulkDelete = async () => {
+    if (selectedPosts.length === 0) return
+
+    if (!confirm(`⚠️ Are you sure you want to delete ${selectedPosts.length} posts?\n\nThis action cannot be undone.`)) {
+      return
+    }
+
+    try {
+      console.log('🗑️ Bulk deleting posts:', selectedPosts)
+      
+      // Delete each post
+      const deletePromises = selectedPosts.map(id =>
+        fetch(`/api/search-results/${id}`, { method: "DELETE" })
+      )
+
+      const results = await Promise.all(deletePromises)
+      
+      // Check for failures
+      const failures = results.filter(r => !r.ok)
+      if (failures.length > 0) {
+        throw new Error(`Failed to delete ${failures.length} out of ${selectedPosts.length} posts`)
+      }
+
+      console.log('✅ Bulk delete successful')
+      alert(`✅ Successfully deleted ${selectedPosts.length} posts!`)
+      
+      // Clear selection and refetch
+      setSelectedPosts([])
+      await fetchPosts()
+    } catch (error) {
+      console.error("Bulk delete error:", error)
+      alert(error instanceof Error ? error.message : "Failed to delete posts. Please try again.")
+    }
+  }
+
   const handleBulkSchedule = async () => {
     if (selectedPosts.length === 0) return
 
@@ -590,7 +625,7 @@ export default function DashboardPage() {
                   (postId) => setEditingPostId(postId),
                   fetchPosts,
                   (post) => setSelectedPost(post),
-                  activeTab === "approved" // Show checkboxes only in approved tab
+                  activeTab === "approved" || activeTab === "draft" // Show checkboxes in approved AND draft tabs
                 )}
                 data={filteredPosts}
                 storageKey={activeTab} // Use activeTab as storage key for per-tab column settings
@@ -626,6 +661,28 @@ export default function DashboardPage() {
                           </>
                         )}
                       </Button>
+                    </>
+                  ) : activeTab === "draft" ? (
+                    <>
+                      {selectedPosts.length > 0 && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelectedPosts([])}
+                          >
+                            Clear Selection
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={handleBulkDelete}
+                            disabled={selectedPosts.length === 0}
+                          >
+                            Delete Selected ({selectedPosts.length})
+                          </Button>
+                        </>
+                      )}
                     </>
                   ) : null
                 }
