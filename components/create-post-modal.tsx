@@ -2000,8 +2000,8 @@ export function CreatePostModal({
                   Cancel
                 </Button>
                 
-                {/* For editing existing posts (drafts/ready to post), show only Save button */}
-                {postId ? (
+                {/* For editing existing posts (database posts or localStorage drafts), show only Save button */}
+                {postId || currentDraftId ? (
                   <Button
                     onClick={handleSaveDraft}
                     disabled={isSavingDraft || (!caption.trim() && !imageVideo)}
@@ -2020,7 +2020,7 @@ export function CreatePostModal({
                     )}
                   </Button>
                 ) : (
-                  /* For new posts, show Save as Draft and Post/Schedule buttons */
+                  /* For brand new posts (no postId and no draftId), show both Save as Draft and Post/Schedule buttons */
                   <>
                     <Button
                       variant="outline"
