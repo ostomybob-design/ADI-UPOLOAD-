@@ -420,11 +420,22 @@ export default function DashboardPage() {
       const response = await fetch(`/api/search-results/${id}`, {
         method: "DELETE",
       })
-      if (response.ok) {
-        setPosts(posts.filter(post => post.id !== id))
+      
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to delete post')
       }
+      
+      // Remove from local state immediately for instant UI feedback
+      setPosts(posts.filter(post => post.id !== id))
+      
+      // Refetch to ensure consistency with database
+      await fetchPosts()
+      
+      console.log('✅ Post deleted successfully:', id)
     } catch (error) {
       console.error("Failed to delete post:", error)
+      alert(error instanceof Error ? error.message : "Failed to delete post. Please try again.")
     }
   }
 
