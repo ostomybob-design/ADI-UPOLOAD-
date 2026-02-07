@@ -1999,48 +1999,73 @@ export function CreatePostModal({
                 >
                   Cancel
                 </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleSaveDraft}
-                  disabled={isSavingDraft || (!caption.trim() && !imageVideo)}
-                  className="rounded-xl border-orange-300 text-orange-700 hover:bg-orange-50"
-                >
-                  {isSavingDraft ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-orange-600 border-t-transparent rounded-full animate-spin" />
-                      Saving...
-                    </div>
-                  ) : (
-                    <>
-                      <Save className="h-4 w-4 mr-2" />
-                      Save as Draft
-                    </>
-                  )}
-                </Button>
-                <Button
-                  onClick={handlePost}
-                  disabled={
-                    isLoading ||
-                    (!caption.trim() && !imagePreview) ||
-                    isOverLimit() ||
-                    (!postOnInstagram && !postOnFacebook) ||
-                    (postOnInstagram && !selectedInstagramAccount) ||
-                    (postOnFacebook && !selectedFacebookAccount)
-                  }
-                  className="rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:opacity-50"
-                >
-                  {isLoading ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      {postId ? "Updating..." : "Posting..."}
-                    </div>
-                  ) : (
-                    <>
-                      <Send className="h-4 w-4 mr-2" />
-                      {postId ? "Update Post" : (schedulePost ? "Schedule Post" : "Post Now")}
-                    </>
-                  )}
-                </Button>
+                
+                {/* For editing existing posts (drafts/ready to post), show only Save button */}
+                {postId ? (
+                  <Button
+                    onClick={handleSaveDraft}
+                    disabled={isSavingDraft || (!caption.trim() && !imageVideo)}
+                    className="rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:opacity-50"
+                  >
+                    {isSavingDraft ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Saving...
+                      </div>
+                    ) : (
+                      <>
+                        <Save className="h-4 w-4 mr-2" />
+                        Save
+                      </>
+                    )}
+                  </Button>
+                ) : (
+                  /* For new posts, show Save as Draft and Post/Schedule buttons */
+                  <>
+                    <Button
+                      variant="outline"
+                      onClick={handleSaveDraft}
+                      disabled={isSavingDraft || (!caption.trim() && !imageVideo)}
+                      className="rounded-xl border-orange-300 text-orange-700 hover:bg-orange-50"
+                    >
+                      {isSavingDraft ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 border-2 border-orange-600 border-t-transparent rounded-full animate-spin" />
+                          Saving...
+                        </div>
+                      ) : (
+                        <>
+                          <Save className="h-4 w-4 mr-2" />
+                          Save as Draft
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      onClick={handlePost}
+                      disabled={
+                        isLoading ||
+                        (!caption.trim() && !imagePreview) ||
+                        isOverLimit() ||
+                        (!postOnInstagram && !postOnFacebook) ||
+                        (postOnInstagram && !selectedInstagramAccount) ||
+                        (postOnFacebook && !selectedFacebookAccount)
+                      }
+                      className="rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:opacity-50"
+                    >
+                      {isLoading ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          Posting...
+                        </div>
+                      ) : (
+                        <>
+                          <Send className="h-4 w-4 mr-2" />
+                          {schedulePost ? "Schedule Post" : "Post Now"}
+                        </>
+                      )}
+                    </Button>
+                  </>
+                )}
               </DialogFooter>
             </div>
           </div>
