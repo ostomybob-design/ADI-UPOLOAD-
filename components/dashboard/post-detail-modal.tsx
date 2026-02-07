@@ -10,6 +10,8 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Label } from "@/components/ui/label"
 import { ExternalLink, Instagram, Facebook, Calendar, Copy, Check, Edit2, CheckCircle2, XCircle, Loader2 } from "lucide-react"
 import { format } from "date-fns"
 import { useState } from "react"
@@ -30,6 +32,7 @@ export function PostDetailModal({ post, open, onOpenChange, onEdit, onApprovalCh
   const [copiedHashtags, setCopiedHashtags] = useState(false)
   const [approving, setApproving] = useState(false)
   const [rejecting, setRejecting] = useState(false)
+  const [showInstagramGrid, setShowInstagramGrid] = useState(false)
 
   if (!post) return null
 
@@ -162,15 +165,44 @@ export function PostDetailModal({ post, open, onOpenChange, onEdit, onApprovalCh
 
         <div className="space-y-4 sm:space-y-6 mt-4">
           {post.main_image_url && (
-            <div className="relative h-48 sm:h-64 w-full rounded-lg overflow-hidden bg-muted">
-              <img
-                src={getProxiedImageUrl(post.main_image_url) || post.main_image_url}
-                alt={post.title}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none'
-                }}
-              />
+            <div className="space-y-3">
+              {/* Instagram Grid Preview Toggle */}
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="instagram-grid"
+                  checked={showInstagramGrid}
+                  onCheckedChange={(checked) => setShowInstagramGrid(checked as boolean)}
+                />
+                <Label
+                  htmlFor="instagram-grid"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                >
+                  Preview as Instagram Profile Grid (1:1)
+                </Label>
+              </div>
+
+              {/* Image Container */}
+              <div
+                className={`relative w-full rounded-lg overflow-hidden bg-muted ${showInstagramGrid ? 'aspect-square max-w-md mx-auto' : 'h-48 sm:h-64'
+                  }`}
+              >
+                <img
+                  src={getProxiedImageUrl(post.main_image_url) || post.main_image_url}
+                  alt={post.title}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none'
+                  }}
+                />
+                {showInstagramGrid && (
+                  <div className="absolute top-2 right-2">
+                    <Badge variant="secondary" className="text-xs">
+                      <Instagram className="h-3 w-3 mr-1" />
+                      Grid View
+                    </Badge>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

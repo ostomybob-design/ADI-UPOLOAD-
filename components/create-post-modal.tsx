@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { draftUtils } from "@/lib/draft-utils";
 import { AIEditorSheet } from "@/components/ai-editor-sheet";
 import { getProxiedImageUrl } from "@/lib/image-proxy";
@@ -125,6 +126,7 @@ export function CreatePostModal({
   const [isDraggingText, setIsDraggingText] = React.useState(false);
   const [dragOffset, setDragOffset] = React.useState({ x: 0, y: 0 });
   const imagePreviewRef = React.useRef<HTMLDivElement>(null);
+  const [showInstagramGrid, setShowInstagramGrid] = React.useState(false);
 
   // Fetch connected accounts and profiles on mount
   React.useEffect(() => {
@@ -1354,18 +1356,41 @@ export function CreatePostModal({
                     </div>
                   ) : (
                     <div className="space-y-3">
+                      {/* Instagram Grid Preview Toggle */}
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="instagram-grid-create"
+                          checked={showInstagramGrid}
+                          onCheckedChange={(checked) => setShowInstagramGrid(checked as boolean)}
+                        />
+                        <Label
+                          htmlFor="instagram-grid-create"
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                        >
+                          Preview as Instagram Profile Grid (1:1)
+                        </Label>
+                      </div>
+
                       {/* Main Image */}
                       <div 
                         ref={imagePreviewRef}
-                        className="relative rounded-xl overflow-hidden bg-gray-100"
+                        className={`relative rounded-xl overflow-hidden bg-gray-100 ${showInstagramGrid ? 'aspect-square max-w-md mx-auto' : ''}`}
                       >
                         <div className="absolute top-2 left-2 z-10">
                           <Badge className="bg-blue-600 text-white">Main Photo</Badge>
                         </div>
+                        {showInstagramGrid && (
+                          <div className="absolute top-2 right-12 z-10">
+                            <Badge variant="secondary" className="text-xs">
+                              <Instagram className="h-3 w-3 mr-1" />
+                              Grid View
+                            </Badge>
+                          </div>
+                        )}
                         {imageVideo?.type.startsWith('video/') ? (
                           <video
                             src={imagePreview}
-                            className="w-full h-48 object-cover"
+                            className={`w-full object-cover ${showInstagramGrid ? 'h-full' : 'h-48'}`}
                             controls
                           />
                         ) : (
@@ -1373,7 +1398,7 @@ export function CreatePostModal({
                             <img
                               src={getProxiedImageUrl(imagePreview) || imagePreview}
                               alt="Main preview"
-                              className="w-full h-48 object-cover"
+                              className={`w-full object-cover ${showInstagramGrid ? 'h-full' : 'h-48'}`}
                             />
                             {/* Draggable Text Overlay */}
                             {overlayText && (

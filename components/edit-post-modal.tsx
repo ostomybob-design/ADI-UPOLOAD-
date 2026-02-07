@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Save, X, Sparkles, Image as ImageIcon } from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Save, X, Sparkles, Image as ImageIcon, Instagram } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { getProxiedImageUrl } from "@/lib/image-proxy"
 import { useToast } from "@/hooks/use-toast"
@@ -35,6 +36,7 @@ export function EditPostModal({ post, open, onOpenChange, onEditComplete }: Edit
   const [aiEditorOpen, setAiEditorOpen] = useState(false)
   const [mainImageUrl, setMainImageUrl] = useState<string | null>(null)
   const [additionalImages, setAdditionalImages] = useState<string[]>([])
+  const [showInstagramGrid, setShowInstagramGrid] = useState(false)
   const [formData, setFormData] = useState({
     title: "",
     ai_caption: "",
@@ -164,15 +166,38 @@ export function EditPostModal({ post, open, onOpenChange, onEditComplete }: Edit
 
               {mainImageUrl && (
                 <div className="space-y-3">
+                  {/* Instagram Grid Preview Toggle */}
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="instagram-grid-edit"
+                      checked={showInstagramGrid}
+                      onCheckedChange={(checked) => setShowInstagramGrid(checked as boolean)}
+                    />
+                    <Label
+                      htmlFor="instagram-grid-edit"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                    >
+                      Preview as Instagram Profile Grid (1:1)
+                    </Label>
+                  </div>
+
                   {/* Main Image */}
-                  <div className="relative rounded-xl overflow-hidden bg-gray-100">
+                  <div className={`relative rounded-xl overflow-hidden bg-gray-100 ${showInstagramGrid ? 'aspect-square max-w-md mx-auto' : ''}`}>
                     <div className="absolute top-2 left-2 z-10">
                       <Badge className="bg-blue-600 text-white">Main Photo</Badge>
                     </div>
+                    {showInstagramGrid && (
+                      <div className="absolute top-2 right-2 z-10">
+                        <Badge variant="secondary" className="text-xs">
+                          <Instagram className="h-3 w-3 mr-1" />
+                          Grid View
+                        </Badge>
+                      </div>
+                    )}
                     <img
                       src={getProxiedImageUrl(mainImageUrl) || mainImageUrl}
                       alt="Main preview"
-                      className="w-full h-48 object-cover"
+                      className={`w-full object-cover ${showInstagramGrid ? 'h-full' : 'h-48'}`}
                     />
                   </div>
 
