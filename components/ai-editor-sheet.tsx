@@ -75,6 +75,7 @@ export function AIEditorSheet({
 }: AIEditorSheetProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [previews, setPreviews] = useState<Array<{ caption: string; explanation: string; tone?: string }>>([]);
+  const [selectedPreviewIndex, setSelectedPreviewIndex] = useState<number | null>(null);
   const [customInstruction, setCustomInstruction] = useState('');
   const [includeCaption, setIncludeCaption] = useState(true);
   const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
@@ -82,8 +83,6 @@ export function AIEditorSheet({
   const [editedHashtags, setEditedHashtags] = useState(postData.hashtags);
   const [isSaving, setIsSaving] = useState(false);
   const captionTextareaRef = useRef<HTMLTextAreaElement>(null);
-  const [isMouseDown, setIsMouseDown] = useState(false);
-  const [mouseDownPosition, setMouseDownPosition] = useState({ x: 0, y: 0 });
 
   const { toast } = useToast();
 
@@ -630,45 +629,35 @@ export function AIEditorSheet({
 
               {/* Previews */}
               {previews.length > 0 && (
-                <div className="space-y-2 mt-3">
+                <div className="space-y-3 mt-3">
                   <Label className="text-xs text-muted-foreground">
                     {previews.length > 1 ? 'Select a variation:' : 'Preview:'}
                   </Label>
                   {previews.map((preview, index) => (
                     <div
                       key={index}
-                      className="group p-3 border rounded-lg hover:border-purple-300 cursor-pointer transition-all duration-300 ease-in-out overflow-hidden"
-                      onMouseDown={(e) => {
-                        setIsMouseDown(true);
-                        setMouseDownPosition({ x: e.clientX, y: e.clientY });
-                      }}
-                      onMouseUp={(e) => {
-                        setIsMouseDown(false);
-                      }}
-                      onClick={(e) => {
-                        // Only apply if this was a click (not a drag/scroll)
-                        const deltaX = Math.abs(e.clientX - mouseDownPosition.x);
-                        const deltaY = Math.abs(e.clientY - mouseDownPosition.y);
-                        const isDrag = deltaX > 5 || deltaY > 5;
-                        
-                        if (!isDrag) {
-                          setEditedCaption(preview.caption);
-                          onCaptionUpdate(preview.caption);
-                          toast({
-                            title: "Variation applied",
-                            description: preview.explanation,
-                          });
-                          setPreviews([]);
-                          setCustomInstruction('');
-                        }
-                      }}
+                      className={`group p-3 border-2 rounded-lg transition-all duration-300 ease-in-out overflow-hidden ${
+                        selectedPreviewIndex === index 
+                          ? 'border-purple-500 bg-purple-50' 
+                          : 'border-gray-200 hover:border-purple-300'
+                      }`}
                     >
-                      <div className="flex items-center justify-between mb-2">
-                        <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-300">
-                          {preview.tone ? preview.tone.charAt(0).toUpperCase() + preview.tone.slice(1) : 'Custom Edit'}
-                        </Badge>
+                      <div className="flex items-center gap-3 mb-2">
+                        <input
+                          type="radio"
+                          id={`preview-${index}`}
+                          name="preview-selection"
+                          checked={selectedPreviewIndex === index}
+                          onChange={() => setSelectedPreviewIndex(index)}
+                          className="h-4 w-4 text-purple-600 cursor-pointer"
+                        />
+                        <label htmlFor={`preview-${index}`} className="flex-1 cursor-pointer">
+                          <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-300">
+                            {preview.tone ? preview.tone.charAt(0).toUpperCase() + preview.tone.slice(1) : 'Custom Edit'}
+                          </Badge>
+                        </label>
                       </div>
-                      <div className="max-h-[4.5rem] group-hover:max-h-[1000px] transition-all duration-500 ease-in-out overflow-hidden">
+                      <div className="max-h-[4.5rem] group-hover:max-h-[1000px] transition-all duration-500 ease-in-out overflow-auto">
                         <div className="text-sm text-gray-700 whitespace-pre-wrap">
                           {renderFormattedText(preview.caption)}
                         </div>
@@ -680,6 +669,28 @@ export function AIEditorSheet({
                       )}
                     </div>
                   ))}
+                  
+                  {/* Apply Selected Preview Button */}
+                  <Button
+                    onClick={() => {
+                      if (selectedPreviewIndex !== null) {
+                        const selectedPreview = previews[selectedPreviewIndex];
+                        setEditedCaption(selectedPreview.caption);
+                        onCaptionUpdate(selectedPreview.caption);
+                        toast({
+                          title: "Variation applied",
+                          description: selectedPreview.explanation || "Caption updated successfully",
+                        });
+                        setPreviews([]);
+                        setSelectedPreviewIndex(null);
+                        setCustomInstruction('');
+                      }
+                    }}
+                    disabled={selectedPreviewIndex === null}
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                  >
+                    Apply Selected Variation
+                  </Button>
                 </div>
               )}
             </div>
