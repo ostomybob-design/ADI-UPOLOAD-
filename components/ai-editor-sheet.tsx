@@ -526,12 +526,12 @@ export function AIEditorSheet({
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="style-professional"
-                    checked={selectedStyles.includes('Professional')}
+                    checked={selectedStyles.includes('professional')}
                     onCheckedChange={(checked) => {
                       if (checked) {
-                        setSelectedStyles([...selectedStyles, 'Professional']);
+                        setSelectedStyles([...selectedStyles, 'professional']);
                       } else {
-                        setSelectedStyles(selectedStyles.filter(s => s !== 'Professional'));
+                        setSelectedStyles(selectedStyles.filter(s => s !== 'professional'));
                       }
                     }}
                   />
@@ -545,12 +545,12 @@ export function AIEditorSheet({
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="style-casual"
-                    checked={selectedStyles.includes('Casual')}
+                    checked={selectedStyles.includes('casual')}
                     onCheckedChange={(checked) => {
                       if (checked) {
-                        setSelectedStyles([...selectedStyles, 'Casual']);
+                        setSelectedStyles([...selectedStyles, 'casual']);
                       } else {
-                        setSelectedStyles(selectedStyles.filter(s => s !== 'Casual'));
+                        setSelectedStyles(selectedStyles.filter(s => s !== 'casual'));
                       }
                     }}
                   />
@@ -564,12 +564,12 @@ export function AIEditorSheet({
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="style-empathetic"
-                    checked={selectedStyles.includes('Empathetic')}
+                    checked={selectedStyles.includes('empathetic')}
                     onCheckedChange={(checked) => {
                       if (checked) {
-                        setSelectedStyles([...selectedStyles, 'Empathetic']);
+                        setSelectedStyles([...selectedStyles, 'empathetic']);
                       } else {
-                        setSelectedStyles(selectedStyles.filter(s => s !== 'Empathetic'));
+                        setSelectedStyles(selectedStyles.filter(s => s !== 'empathetic'));
                       }
                     }}
                   />
@@ -665,7 +665,7 @@ export function AIEditorSheet({
                     >
                       <div className="flex items-center justify-between mb-2">
                         <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-300">
-                          {preview.tone || 'Custom Edit'}
+                          {preview.tone ? preview.tone.charAt(0).toUpperCase() + preview.tone.slice(1) : 'Custom Edit'}
                         </Badge>
                       </div>
                       <div className="max-h-[4.5rem] group-hover:max-h-[1000px] transition-all duration-500 ease-in-out overflow-hidden">
