@@ -1,6 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, XCircle, Calendar, ExternalLink, Loader2, CalendarPlus, ArrowLeft } from "lucide-react";
+import { CheckCircle2, XCircle, Calendar, ExternalLink, Loader2, CalendarPlus, ArrowLeft, ListPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RowActions } from "./row-actions";
@@ -422,22 +422,22 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
             }}
             disabled={isMovingBackward || isSendingToPending || isRejecting}
             className="h-7 px-2 text-purple-600 hover:text-purple-700 hover:bg-purple-50 disabled:opacity-50"
-            title="Schedule to queue"
+            title="Schedule to next available queue slot"
           >
-            <CalendarPlus className="h-4 w-4" />
+            <ListPlus className="h-4 w-4" />
           </Button>
           <Button
             size="sm"
-            variant="outline"
+            variant="ghost"
             onClick={(e) => {
               e.stopPropagation();
               setShowScheduleModal(true);
             }}
             disabled={isMovingBackward || isSendingToPending || isRejecting}
-            className="h-7 px-3 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-300 disabled:opacity-50"
+            className="h-7 px-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 disabled:opacity-50"
             title="Set specific schedule date"
           >
-            Set Schedule
+            <Calendar className="h-4 w-4" />
           </Button>
           <Button
             size="sm"
