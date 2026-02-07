@@ -1,12 +1,11 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, XCircle, Calendar, ExternalLink, Loader2, CalendarPlus, ArrowLeft, ListPlus } from "lucide-react";
+import { CheckCircle2, XCircle, Calendar, ExternalLink, Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RowActions } from "./row-actions";
 import { ColumnHeader } from "./column-header";
 import { useState } from "react";
-import { SchedulePostModal } from "@/components/schedule-post-modal";
 import { SetScheduleModal } from "@/components/set-schedule-modal";
 import { getProxiedImageUrl } from "@/lib/image-proxy";
 
@@ -73,7 +72,6 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
   const [isUnscheduling, setIsUnscheduling] = useState(false);
   const [isMovingToReadyToPost, setIsMovingToReadyToPost] = useState(false);
   const [isMovingBackward, setIsMovingBackward] = useState(false);
-  const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [showSetScheduleModal, setShowSetScheduleModal] = useState(false);
 
   const handleMoveToDrafts = async (e: React.MouseEvent) => {
@@ -396,7 +394,7 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
     );
   }
 
-  // Approved tab: Show back arrow, schedule to queue, set schedule, send to pending and reject buttons
+  // Approved tab: Show back arrow, set schedule, send to pending and reject buttons
   if (post.approval_status === "approved" && !post.late_post_id) {
     return (
       <>
@@ -420,24 +418,11 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
             variant="ghost"
             onClick={(e) => {
               e.stopPropagation();
-              setShowScheduleModal(true);
-            }}
-            disabled={isMovingBackward || isSendingToPending || isRejecting}
-            className="h-7 px-2 text-purple-600 hover:text-purple-700 hover:bg-purple-50 disabled:opacity-50"
-            title="Schedule to next available queue slot"
-          >
-            <ListPlus className="h-4 w-4" />
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={(e) => {
-              e.stopPropagation();
               setShowSetScheduleModal(true);
             }}
             disabled={isMovingBackward || isSendingToPending || isRejecting}
             className="h-7 px-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 disabled:opacity-50"
-            title="Set specific schedule date"
+            title="Set schedule date"
           >
             <Calendar className="h-4 w-4" />
           </Button>
@@ -456,13 +441,6 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
             )}
           </Button>
         </div>
-        <SchedulePostModal
-          open={showScheduleModal}
-          onOpenChange={setShowScheduleModal}
-          postId={post.id}
-          postTitle={post.title}
-          onScheduled={onRefresh}
-        />
         <SetScheduleModal
           open={showSetScheduleModal}
           onOpenChange={setShowSetScheduleModal}

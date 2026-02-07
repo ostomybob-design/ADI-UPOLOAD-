@@ -50,32 +50,23 @@ export function SetScheduleModal({
     setError(null)
 
     try {
-      // Get the profile ID from config
-      const configResponse = await fetch("/api/late/config")
-      if (!configResponse.ok) {
-        throw new Error("Failed to fetch Late.dev configuration. Please set up your Late.dev profile.")
-      }
-      const config = await configResponse.json()
-      const profileId = config.profileId
-
-      if (!profileId) {
-        throw new Error("No profile ID configured. Please set up your Late.dev profile.")
-      }
-
-      // Schedule the post using the schedule API
-      const response = await fetch("/api/posts/schedule", {
-        method: "POST",
+      // Simply update the post with the scheduled date in the database
+      // This will move it to the "Scheduled" section without requiring Late.dev
+      const response = await fetch("/api/posts/edit", {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           postId,
-          scheduledFor: selectedDateTime.toISOString(),
-          profileId
+          updates: {
+            late_scheduled_for: selectedDateTime,
+            late_status: "scheduled"
+          }
         })
       })
 
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.error || "Failed to schedule post")
+        throw new Error(data.error || "Failed to set schedule")
       }
 
       alert(`✅ Post scheduled for ${selectedDateTime.toLocaleString()}`)
