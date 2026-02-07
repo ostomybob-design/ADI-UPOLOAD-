@@ -544,6 +544,25 @@ export function CreatePostModal({
         setPostOnInstagram(draft.postOnInstagram);
         setPostOnFacebook(draft.postOnFacebook);
         setImagePreview(draft.imagePreview);
+        setAdditionalImages(draft.additionalImages || []);
+        
+        // Load text overlay settings if they exist
+        if (draft.overlayText) {
+          setOverlayText(draft.overlayText);
+          setTextPosition(draft.textPosition || { x: 50, y: 50 });
+          setFontSize(draft.fontSize || 48);
+          setTextColor(draft.textColor || "#ffffff");
+          setFontFamily(draft.fontFamily || "Arial");
+          setShadowIntensity(draft.shadowIntensity || 4);
+          setTextBgEnabled(draft.textBgEnabled || false);
+          setTextBgColor(draft.textBgColor || "#000000");
+          setTextBgOpacity(draft.textBgOpacity || 0.7);
+          setTextStrokeEnabled(draft.textStrokeEnabled || false);
+          setTextStrokeColor(draft.textStrokeColor || "#000000");
+          setTextStrokeWidth(draft.textStrokeWidth || 2);
+          setBackdropBlurEnabled(draft.backdropBlurEnabled || false);
+          setBackdropBlurAmount(draft.backdropBlurAmount || 10);
+        }
         // Note: We can't restore the File object, only the preview
       } else {
         console.error("❌ Draft not found in localStorage:", currentDraftId);
@@ -795,13 +814,29 @@ export function CreatePostModal({
         // Save as draft to localStorage (for new posts)
         const draftData = {
           imageVideo,
-          imagePreview,
+          imagePreview: finalImagePreview, // Use finalImagePreview with text overlay applied
           caption,
           hashtags,
           schedulePost,
           scheduledDate,
           postOnInstagram,
           postOnFacebook,
+          additionalImages,
+          // Save text overlay settings
+          overlayText,
+          textPosition,
+          fontSize,
+          textColor,
+          fontFamily,
+          shadowIntensity,
+          textBgEnabled,
+          textBgColor,
+          textBgOpacity,
+          textStrokeEnabled,
+          textStrokeColor,
+          textStrokeWidth,
+          backdropBlurEnabled,
+          backdropBlurAmount,
         };
 
         let savedDraftId: string;

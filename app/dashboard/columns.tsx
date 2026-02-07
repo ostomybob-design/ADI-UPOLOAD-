@@ -22,6 +22,22 @@ export type DraftPost = {
   postOnFacebook: boolean;
   created_at: string;
   updated_at: string;
+  additionalImages?: string[];
+  // Text overlay settings
+  overlayText?: string;
+  textPosition?: { x: number; y: number };
+  fontSize?: number;
+  textColor?: string;
+  fontFamily?: string;
+  shadowIntensity?: number;
+  textBgEnabled?: boolean;
+  textBgColor?: string;
+  textBgOpacity?: number;
+  textStrokeEnabled?: boolean;
+  textStrokeColor?: string;
+  textStrokeWidth?: number;
+  backdropBlurEnabled?: boolean;
+  backdropBlurAmount?: number;
 };
 
 export type SearchResult = {
