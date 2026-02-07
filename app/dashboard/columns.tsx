@@ -98,16 +98,40 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
 
     setIsMovingBackward(true);
     try {
-      const response = await fetch("/api/posts/edit", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          postId: post.id,
-          updates: {
-            is_draft: true,
-            approval_status: "pending"
-          }
-        })
+      // Create draft object from database post - map DB fields to draft structure
+      const draft: DraftPost = {
+        id: `draft-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        imageVideo: null,
+        imagePreview: post.main_image_url || null,
+        caption: post.ai_caption || "",
+        hashtags: Array.isArray(post.ai_hashtags) 
+          ? post.ai_hashtags.join(" ") 
+          : (post.ai_hashtags || ""),
+        schedulePost: false,
+        scheduledDate: null,
+        postOnInstagram: post.late_platforms 
+          ? (post.late_platforms as any[]).some((p: any) => p.type === "instagram")
+          : false,
+        postOnFacebook: post.late_platforms
+          ? (post.late_platforms as any[]).some((p: any) => p.type === "facebook")
+          : false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        additionalImages: post.additional_images as string[] || [],
+      };
+
+      // Save to localStorage
+      const existingDrafts = JSON.parse(
+        localStorage.getItem("postDrafts") || "[]"
+      );
+      localStorage.setItem(
+        "postDrafts",
+        JSON.stringify([...existingDrafts, draft])
+      );
+
+      // Delete from database
+      const response = await fetch(`/api/posts/${post.id}`, {
+        method: "DELETE",
       });
 
       if (response.ok) {
