@@ -582,6 +582,7 @@ export default function DashboardPage() {
                   activeTab === "approved" // Show checkboxes only in approved tab
                 )}
                 data={filteredPosts}
+                storageKey={activeTab} // Use activeTab as storage key for per-tab column settings
                 onRowSelectionChange={handleRowSelectionChange}
                 headerActions={
                   activeTab === "approved" ? (

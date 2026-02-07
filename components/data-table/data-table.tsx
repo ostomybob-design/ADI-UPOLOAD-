@@ -35,6 +35,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   onRowSelectionChange?: (selectedRows: Record<string, boolean>) => void;
   headerActions?: React.ReactNode;
+  storageKey?: string; // NEW: Allow custom storage key per tab
 }
 
 export function DataTable<TData, TValue>({
@@ -42,10 +43,11 @@ export function DataTable<TData, TValue>({
   data,
   onRowSelectionChange,
   headerActions,
+  storageKey = 'default', // NEW: Default storage key
 }: DataTableProps<TData, TValue>) {
-  const STORAGE_KEY_ORDER = 'dataTable_columnOrder';
-  const STORAGE_KEY_SIZING = 'dataTable_columnSizing';
-  const STORAGE_KEY_VISIBILITY = 'dataTable_columnVisibility';
+  const STORAGE_KEY_ORDER = `dataTable_columnOrder_${storageKey}`;
+  const STORAGE_KEY_SIZING = `dataTable_columnSizing_${storageKey}`;
+  const STORAGE_KEY_VISIBILITY = `dataTable_columnVisibility_${storageKey}`;
 
   // Load saved state from localStorage
   const [sorting, setSorting] = useState<SortingState>([]);
