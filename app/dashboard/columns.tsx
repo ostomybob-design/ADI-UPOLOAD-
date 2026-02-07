@@ -474,8 +474,8 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
     );
   }
 
-  // Scheduled tab: Show back arrow to unschedule (including for Late.dev-only posts)
-  if ((post.late_post_id || post.id === -1) && post.late_scheduled_for && !post.late_published_at) {
+  // Scheduled tab: Show back arrow to unschedule (for both Late.dev and database-only scheduled posts)
+  if (post.late_scheduled_for && !post.late_published_at) {
     return (
       <div className="flex gap-1">
         <Button
