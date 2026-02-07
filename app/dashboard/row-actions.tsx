@@ -34,21 +34,38 @@ export function RowActions({ row, onEditDraft, onEditPost, onRefresh, onViewPost
 
     setIsDeleting(true);
     try {
-      const response = await fetch(
-        `/api/search-results/${row.original.id}`,
-        {
-          method: "DELETE",
+      // Handle draft deletion (localStorage)
+      if (isDraft && draftId) {
+        const { draftUtils } = await import("@/lib/draft-utils");
+        const success = draftUtils.deleteDraft(draftId);
+        if (success) {
+          alert("✅ Draft deleted successfully");
+          if (onRefresh) {
+            onRefresh();
+          } else {
+            window.location.reload();
+          }
+        } else {
+          throw new Error("Failed to delete draft from localStorage");
         }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to delete post");
-      }
-
-      if (onRefresh) {
-        onRefresh();
       } else {
-        window.location.reload();
+        // Handle database post deletion
+        const response = await fetch(
+          `/api/search-results/${row.original.id}`,
+          {
+            method: "DELETE",
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to delete post");
+        }
+
+        if (onRefresh) {
+          onRefresh();
+        } else {
+          window.location.reload();
+        }
       }
     } catch (error) {
       console.error("Error deleting post:", error);
