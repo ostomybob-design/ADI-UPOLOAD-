@@ -1,12 +1,13 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, XCircle, Calendar, ExternalLink, Loader2, ArrowLeft } from "lucide-react";
+import { CheckCircle2, XCircle, Calendar, ExternalLink, Loader2, ArrowLeft, ListPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RowActions } from "./row-actions";
 import { ColumnHeader } from "./column-header";
 import { useState } from "react";
 import { SetScheduleModal } from "@/components/set-schedule-modal";
+import { SchedulePostModal } from "@/components/schedule-post-modal";
 import { getProxiedImageUrl } from "@/lib/image-proxy";
 
 export type DraftPost = {
@@ -73,6 +74,7 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
   const [isMovingToReadyToPost, setIsMovingToReadyToPost] = useState(false);
   const [isMovingBackward, setIsMovingBackward] = useState(false);
   const [showSetScheduleModal, setShowSetScheduleModal] = useState(false);
+  const [showSchedulePostModal, setShowSchedulePostModal] = useState(false);
 
   const handleMoveToDrafts = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -429,6 +431,19 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
           <Button
             size="sm"
             variant="ghost"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowSchedulePostModal(true);
+            }}
+            disabled={isMovingBackward || isSendingToPending || isRejecting}
+            className="h-7 px-2 text-purple-600 hover:text-purple-700 hover:bg-purple-50 disabled:opacity-50"
+            title="Schedule to queue"
+          >
+            <ListPlus className="h-4 w-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
             onClick={handleReject}
             disabled={isMovingBackward || isSendingToPending || isRejecting}
             className="h-7 px-2 text-red-600 hover:text-red-700 hover:bg-red-50 disabled:opacity-50"
@@ -444,6 +459,13 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
         <SetScheduleModal
           open={showSetScheduleModal}
           onOpenChange={setShowSetScheduleModal}
+          postId={post.id}
+          postTitle={post.title}
+          onScheduled={onRefresh}
+        />
+        <SchedulePostModal
+          open={showSchedulePostModal}
+          onOpenChange={setShowSchedulePostModal}
           postId={post.id}
           postTitle={post.title}
           onScheduled={onRefresh}

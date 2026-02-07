@@ -209,7 +209,8 @@ export default function DashboardPage() {
       // Exclude posts that have been scheduled to Late.dev
       filtered = filtered.filter(post => 
         post.approval_status === "approved" && 
-        !post.late_post_id // Exclude if it has a Late.dev post ID (it's scheduled)
+        !post.late_post_id && // Exclude if it has a Late.dev post ID (it's scheduled)
+        !post.late_scheduled_for // Exclude if it has a scheduled date
       )
       console.log("✅ Approved posts found:", filtered.length)
     } else if (activeTab === "draft") {
@@ -217,11 +218,19 @@ export default function DashboardPage() {
       filtered = filtered.filter(post => post.is_draft === true)
       console.log("📝 Draft posts found:", filtered.length)
     } else if (activeTab === "scheduled") {
-      console.log("📅 Filtering for scheduled posts from Late.dev...")
+      console.log("📅 Filtering for scheduled posts from Late.dev and database...")
       console.log("📊 Late scheduled posts count:", lateScheduledPosts.length)
 
+      // Get database posts with schedule dates (not yet on Late.dev)
+      const dbScheduledPosts = posts.filter(p => 
+        p.late_scheduled_for && 
+        !p.late_published_at && 
+        !p.late_post_id // Not already on Late.dev
+      );
+      console.log("📊 Database scheduled posts count:", dbScheduledPosts.length)
+
       // Map Late.dev scheduled posts and find corresponding database records
-      filtered = lateScheduledPosts
+      const lateScheduledMapped = lateScheduledPosts
         .map((latePost: any): Post => {
           const latePostId = latePost.id || latePost._id;
           // Find the corresponding database record by late_post_id
@@ -293,7 +302,18 @@ export default function DashboardPage() {
             late_status: latePost.status,
           };
         })
-        .filter((post): post is Post => post !== null)
+        .filter((post): post is Post => post !== null);
+
+      // Combine Late.dev posts and database-only scheduled posts
+      filtered = [...lateScheduledMapped, ...dbScheduledPosts];
+
+      // Sort by scheduled date (earliest first)
+      filtered.sort((a, b) => {
+        const dateA = a.late_scheduled_for ? new Date(a.late_scheduled_for).getTime() : 0;
+        const dateB = b.late_scheduled_for ? new Date(b.late_scheduled_for).getTime() : 0;
+        return dateA - dateB;
+      });
+
       console.log("📅 Scheduled posts displayed:", filtered.length)
     } else if (activeTab === "published") {
       console.log("🎉 Filtering for published posts from Late.dev...")
