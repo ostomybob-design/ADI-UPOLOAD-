@@ -2185,6 +2185,7 @@ export function CreatePostModal({
         onSchedule={() => setSchedulePost(true)}
         onSave={async () => {
           try {
+            console.log('🔍 onSave called - postId:', postId, 'type:', typeof postId);
             // If editing an existing post, trigger save
             if (postId) {
               console.log('💾 AI Editor Save clicked - editing post, calling handleSaveDraft');
