@@ -327,34 +327,103 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
     const isDraft = post.url?.startsWith("draft://");
     const draftId = isDraft ? post.url.replace("draft://", "") : null;
 
-    if (isDraft && draftId) {
-      // For localStorage drafts, just delete them
-      if (!confirm("Delete this draft? This action cannot be undone.")) return;
-      
-      setIsRejecting(true);
-      try {
-        const { draftUtils } = await import("@/lib/draft-utils");
-        const success = draftUtils.deleteDraft(draftId);
-        
-        if (success) {
-          alert("✅ Draft deleted");
-          onRefresh?.();
-        } else {
-          alert("Failed to delete draft. Please try again.");
-        }
-      } catch (error) {
-        console.error("Draft deletion error:", error);
-        alert("Failed to delete draft. Please try again.");
-      } finally {
-        setIsRejecting(false);
-      }
-    } else {
-      // For database posts, use the reject API
-      const reason = prompt("Rejection reason (optional):");
-      if (reason === null) return;
+    const reason = prompt("Rejection reason (optional):");
+    if (reason === null) return;
 
-      setIsRejecting(true);
-      try {
+    setIsRejecting(true);
+    try {
+      if (isDraft && draftId) {
+        // For localStorage drafts, convert to database post with rejected status
+        const { draftUtils } = await import("@/lib/draft-utils");
+        const draft = draftUtils.getDraft(draftId);
+        
+        if (!draft) {
+          alert("Draft not found. Please refresh the page.");
+          return;
+        }
+
+        // Upload the image to Supabase first
+        let mainImageUrl = draft.imagePreview;
+        if (draft.imagePreview && draft.imagePreview.startsWith('data:')) {
+          const uploadResponse = await fetch("/api/upload", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              file: draft.imagePreview,
+              folder: "posts"
+            }),
+          });
+
+          if (!uploadResponse.ok) {
+            throw new Error("Failed to upload image");
+          }
+
+          const uploadResult = await uploadResponse.json();
+          mainImageUrl = uploadResult.publicUrl;
+        }
+
+        // Create database post with rejected status
+        const createResponse = await fetch("/api/posts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            imageVideo: mainImageUrl,
+            caption: draft.caption,
+            hashtags: draft.hashtags,
+            schedulePost: draft.schedulePost || false,
+            scheduledDate: draft.scheduledDate || null,
+            postOnInstagram: draft.postOnInstagram || false,
+            postOnFacebook: draft.postOnFacebook || false,
+            rawData: draft.overlayText ? {
+              textOverlay: {
+                text: draft.overlayText,
+                position: draft.textPosition,
+                fontSize: draft.fontSize,
+                color: draft.textColor,
+                fontFamily: draft.fontFamily,
+                shadowIntensity: draft.shadowIntensity,
+                bgEnabled: draft.textBgEnabled,
+                bgColor: draft.textBgColor,
+                bgOpacity: draft.textBgOpacity,
+                strokeEnabled: draft.textStrokeEnabled,
+                strokeColor: draft.textStrokeColor,
+                strokeWidth: draft.textStrokeWidth,
+                backdropBlurEnabled: draft.backdropBlurEnabled,
+                backdropBlurAmount: draft.backdropBlurAmount,
+              }
+            } : {}
+          })
+        });
+
+        if (!createResponse.ok) {
+          const errorText = await createResponse.text();
+          console.error("Failed to create post:", errorText);
+          throw new Error("Failed to create post");
+        }
+
+        const newPost = await createResponse.json();
+
+        // Now reject the newly created post
+        const rejectResponse = await fetch("/api/posts/reject", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            postId: newPost.id,
+            reason: reason || "Rejected from drafts"
+          })
+        });
+
+        if (!rejectResponse.ok) {
+          throw new Error("Failed to reject post");
+        }
+
+        // Delete the draft from localStorage
+        draftUtils.deleteDraft(draftId);
+        
+        alert("✅ Draft rejected and moved to Rejected tab");
+        onRefresh?.();
+      } else {
+        // For database posts, use the reject API
         const response = await fetch("/api/posts/reject", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -365,16 +434,17 @@ const ApprovalActions = ({ row, onRefresh }: { row: any; onRefresh?: () => void 
         });
 
         if (response.ok) {
+          alert("✅ Post rejected");
           onRefresh?.();
         } else {
           alert("Failed to reject post. Please try again.");
         }
-      } catch (error) {
-        console.error("Rejection error:", error);
-        alert("Failed to reject post. Please try again.");
-      } finally {
-        setIsRejecting(false);
       }
+    } catch (error) {
+      console.error("Rejection error:", error);
+      alert("Failed to reject post. Please try again.");
+    } finally {
+      setIsRejecting(false);
     }
   };
 
