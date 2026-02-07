@@ -294,10 +294,14 @@ export function AIEditorSheet({
   };
 
   const handleSaveToDatabase = async () => {
+    console.log('🔍 handleSaveToDatabase called', { postId, hasOnSave: !!onSave });
+    
     if (!postId) {
-      console.log('⚠️ No postId provided, falling back to draft save');
-      // If no postId, fall back to the original onSave (draft save)
-      onSave();
+      console.log('⚠️ No postId provided - calling onSave callback');
+      // If no postId, just call onSave (which in edit-post-modal just closes the sheet)
+      if (onSave) {
+        onSave();
+      }
       return;
     }
 
@@ -640,12 +644,14 @@ export function AIEditorSheet({
                           : 'border-gray-200 hover:border-purple-300'
                       }`}
                       onClick={() => {
+                        console.log('📝 Preview clicked:', { index, caption: preview.caption.substring(0, 50) + '...' });
                         setSelectedPreviewIndex(index);
                         setEditedCaption(preview.caption);
                         onCaptionUpdate(preview.caption);
+                        console.log('✅ Caption updated via onCaptionUpdate');
                         toast({
                           title: "Variation selected",
-                          description: "Caption updated. Click Save to apply changes.",
+                          description: "Caption updated. Click Done to close, then Save Changes.",
                         });
                       }}
                     >
