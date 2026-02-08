@@ -181,7 +181,6 @@ export function BotSettingsModal({ open, onOpenChange }: BotSettingsModalProps) 
                 </AlertDescription>
               </Alert>
             </div>
-          </div>
 
           {/* Maximum Total Posts */}
           <div className="space-y-2">
