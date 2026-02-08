@@ -10,6 +10,7 @@ export async function GET() {
     // In the future, these could be stored in database or GitHub variables
     const settings = {
       maxPostsPerQuery: 5,
+      maxTotalPosts: 5,
       scheduleTimes: ["09:00", "17:00"],
       enabled: true,
       useSerper: true,
@@ -50,12 +51,19 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { maxPostsPerQuery, scheduleTimes, enabled, useSerper, searchQueries } = body
+    const { maxPostsPerQuery, maxTotalPosts, scheduleTimes, enabled, useSerper, searchQueries } = body
 
     // Validate inputs
     if (maxPostsPerQuery < 1 || maxPostsPerQuery > 20) {
       return NextResponse.json(
         { error: "maxPostsPerQuery must be between 1 and 20" },
+        { status: 400 }
+      )
+    }
+
+    if (maxTotalPosts < 0 || maxTotalPosts > 200) {
+      return NextResponse.json(
+        { error: "maxTotalPosts must be between 0 and 200 (0 = unlimited)" },
         { status: 400 }
       )
     }
@@ -88,6 +96,7 @@ export async function POST(request: NextRequest) {
 
     console.log("Bot settings updated:", {
       maxPostsPerQuery,
+      maxTotalPosts,
       scheduleTimes,
       enabled,
       useSerper,

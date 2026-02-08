@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { toast } from "@/hooks/use-toast"
-import { Bot, Clock, Hash, Zap, Save, ExternalLink, AlertCircle, Play, Search, Plus, X } from "lucide-react"
+import { Bot, Clock, Hash, Zap, Save, ExternalLink, AlertCircle, Play, Search, Plus, X, Target } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Textarea } from "@/components/ui/textarea"
 
@@ -18,6 +18,7 @@ interface BotSettingsModalProps {
 
 interface BotSettings {
   maxPostsPerQuery: number
+  maxTotalPosts: number
   scheduleTimes: string[]
   enabled: boolean
   useSerper: boolean
@@ -27,6 +28,7 @@ interface BotSettings {
 export function BotSettingsModal({ open, onOpenChange }: BotSettingsModalProps) {
   const [settings, setSettings] = useState<BotSettings>({
     maxPostsPerQuery: 5,
+    maxTotalPosts: 5,
     scheduleTimes: ["09:00", "17:00"],
     enabled: true,
     useSerper: true,
@@ -177,8 +179,27 @@ export function BotSettingsModal({ open, onOpenChange }: BotSettingsModalProps) 
                     (20 queries × {settings.maxPostsPerQuery} URLs = {totalAttempts} attempts → ~50% pass filters)
                   </span>
                 </AlertDescription>
-              </Alert>
             </div>
+          </div>
+
+          {/* Maximum Total Posts */}
+          <div className="space-y-2">
+            <Label htmlFor="maxTotalPosts" className="flex items-center gap-2">
+              <Target className="h-4 w-4" />
+              Maximum Total Posts
+            </Label>
+            <Input
+              id="maxTotalPosts"
+              type="number"
+              min={0}
+              max={200}
+              value={settings.maxTotalPosts}
+              onChange={(e) => setSettings({ ...settings, maxTotalPosts: parseInt(e.target.value) || 0 })}
+            />
+            <p className="text-sm text-muted-foreground">
+              Stop after finding this many valid posts (0 = unlimited). For testing, try 5-10. For production, use 0 or 50+.
+            </p>
+          </div>
 
             {/* Schedule Times */}
             <div className="space-y-2">
