@@ -179,6 +179,7 @@ export function BotSettingsModal({ open, onOpenChange }: BotSettingsModalProps) 
                     (20 queries × {settings.maxPostsPerQuery} URLs = {totalAttempts} attempts → ~50% pass filters)
                   </span>
                 </AlertDescription>
+              </Alert>
             </div>
           </div>
 
@@ -201,179 +202,180 @@ export function BotSettingsModal({ open, onOpenChange }: BotSettingsModalProps) 
             </p>
           </div>
 
-            {/* Schedule Times */}
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                Schedule Times (UTC)
-              </Label>
-              <div className="grid grid-cols-2 gap-2">
-                {settings.scheduleTimes.map((time, index) => (
+          {/* Schedule Times */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              Schedule Times (UTC)
+            </Label>
+            <div className="grid grid-cols-2 gap-2">
+              {settings.scheduleTimes.map((time, index) => (
+                <Input
+                  key={index}
+                  type="time"
+                  value={time}
+                  onChange={(e) => {
+                    const newTimes = [...settings.scheduleTimes]
+                    newTimes[index] = e.target.value
+                    setSettings({ ...settings, scheduleTimes: newTimes })
+                  }}
+                />
+              ))}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Currently runs at {settings.scheduleTimes[0]} UTC and {settings.scheduleTimes[1]} UTC
+              <br />
+              <span className="text-xs">
+                (9:00 = 4 AM EST / 1 AM PST, 17:00 = 12 PM EST / 9 AM PST)
+              </span>
+            </p>
+          </div>
+
+          {/* Search Queries */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 justify-between">
+              <span className="flex items-center gap-2">
+                <Search className="h-4 w-4" />
+                Search Queries ({settings.searchQueries.length})
+              </span>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setSettings({ ...settings, searchQueries: [...settings.searchQueries, ""] })}
+                className="h-7"
+              >
+                <Plus className="h-3 w-3 mr-1" />
+                Add Query
+              </Button>
+            </Label>
+            <div className="max-h-60 overflow-y-auto space-y-2 border rounded-lg p-3 bg-muted/30">
+              {settings.searchQueries.map((query, index) => (
+                <div key={index} className="flex gap-2">
                   <Input
-                    key={index}
-                    type="time"
-                    value={time}
+                    value={query}
                     onChange={(e) => {
-                      const newTimes = [...settings.scheduleTimes]
-                      newTimes[index] = e.target.value
-                      setSettings({ ...settings, scheduleTimes: newTimes })
+                      const newQueries = [...settings.searchQueries]
+                      newQueries[index] = e.target.value
+                      setSettings({ ...settings, searchQueries: newQueries })
                     }}
+                    placeholder={`Search query ${index + 1}`}
+                    className="flex-1"
                   />
-                ))}
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Currently runs at {settings.scheduleTimes[0]} UTC and {settings.scheduleTimes[1]} UTC
-                <br />
-                <span className="text-xs">
-                  (9:00 = 4 AM EST / 1 AM PST, 17:00 = 12 PM EST / 9 AM PST)
-                </span>
-              </p>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      const newQueries = settings.searchQueries.filter((_, i) => i !== index)
+                      setSettings({ ...settings, searchQueries: newQueries })
+                    }}
+                    className="shrink-0 h-10 w-10"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
             </div>
+            <p className="text-sm text-muted-foreground">
+              The bot will search Google for each of these queries to find content
+            </p>
+          </div>
 
-            {/* Search Queries */}
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2 justify-between">
-                <span className="flex items-center gap-2">
-                  <Search className="h-4 w-4" />
-                  Search Queries ({settings.searchQueries.length})
-                </span>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSettings({ ...settings, searchQueries: [...settings.searchQueries, ""] })}
-                  className="h-7"
-                >
-                  <Plus className="h-3 w-3 mr-1" />
-                  Add Query
-                </Button>
+          {/* API Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="useSerper" className="flex items-center gap-2">
+              <Zap className="h-4 w-4" />
+              Search API
+            </Label>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="useSerper"
+                checked={settings.useSerper}
+                onCheckedChange={(checked) => setSettings({ ...settings, useSerper: checked })}
+              />
+              <Label htmlFor="useSerper" className="font-normal">
+                Use Serper API {settings.useSerper ? "(Selected)" : "(Using Bright Data)"}
               </Label>
-              <div className="max-h-60 overflow-y-auto space-y-2 border rounded-lg p-3 bg-muted/30">
-                {settings.searchQueries.map((query, index) => (
-                  <div key={index} className="flex gap-2">
-                    <Input
-                      value={query}
-                      onChange={(e) => {
-                        const newQueries = [...settings.searchQueries]
-                        newQueries[index] = e.target.value
-                        setSettings({ ...settings, searchQueries: newQueries })
-                      }}
-                      placeholder={`Search query ${index + 1}`}
-                      className="flex-1"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        const newQueries = settings.searchQueries.filter((_, i) => i !== index)
-                        setSettings({ ...settings, searchQueries: newQueries })
-                      }}
-                      className="shrink-0 h-10 w-10"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-              <p className="text-sm text-muted-foreground">
-                The bot will search Google for each of these queries to find content
-              </p>
             </div>
+            <p className="text-sm text-muted-foreground">
+              {settings.useSerper 
+                ? "Serper API: Free tier available, good for testing"
+                : "Bright Data: Better anti-blocking, recommended for production"
+              }
+            </p>
+          </div>
 
-            {/* API Selection */}
-            <div className="space-y-2">
-              <Label htmlFor="useSerper" className="flex items-center gap-2">
-                <Zap className="h-4 w-4" />
-                Search API
+          {/* Enabled Toggle */}
+          <div className="space-y-2">
+            <Label htmlFor="enabled" className="flex items-center gap-2">
+              <Bot className="h-4 w-4" />
+              Bot Status
+            </Label>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="enabled"
+                checked={settings.enabled}
+                onCheckedChange={(checked) => setSettings({ ...settings, enabled: checked })}
+              />
+              <Label htmlFor="enabled" className="font-normal">
+                {settings.enabled ? "Enabled - Bot will run on schedule" : "Disabled - Bot will not run automatically"}
               </Label>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="useSerper"
-                  checked={settings.useSerper}
-                  onCheckedChange={(checked) => setSettings({ ...settings, useSerper: checked })}
-                />
-                <Label htmlFor="useSerper" className="font-normal">
-                  Use Serper API {settings.useSerper ? "(Selected)" : "(Using Bright Data)"}
-                </Label>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {settings.useSerper 
-                  ? "Serper API: Free tier available, good for testing"
-                  : "Bright Data: Better anti-blocking, recommended for production"
-                }
-              </p>
             </div>
+          </div>
 
-            {/* Enabled Toggle */}
-            <div className="space-y-2">
-              <Label htmlFor="enabled" className="flex items-center gap-2">
-                <Bot className="h-4 w-4" />
-                Bot Status
-              </Label>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="enabled"
-                  checked={settings.enabled}
-                  onCheckedChange={(checked) => setSettings({ ...settings, enabled: checked })}
-                />
-                <Label htmlFor="enabled" className="font-normal">
-                  {settings.enabled ? "Enabled - Bot will run on schedule" : "Disabled - Bot will not run automatically"}
-                </Label>
-              </div>
-            </div>
-
-            {/* Quick Links */}
-            <div className="space-y-2 pt-4 border-t">
-              <Label className="text-sm font-semibold">Quick Actions</Label>
-              <div className="grid grid-cols-3 gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={runBotNow}
-                  className="justify-start bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 border-0"
-                >
-                  <Play className="h-4 w-4 mr-2" />
-                  Run Now
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={openGitHubActions}
-                  className="justify-start"
-                >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  View Runs
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={openGitHubSecrets}
-                  className="justify-start"
-                >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  API Keys
-                </Button>
-              </div>
-            </div>
-
-            {/* Save Button */}
-            <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
+          {/* Quick Links */}
+          <div className="space-y-2 pt-4 border-t">
+            <Label className="text-sm font-semibold">Quick Actions</Label>
+            <div className="grid grid-cols-3 gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={runBotNow}
+                className="justify-start bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 border-0"
+              >
+                <Play className="h-4 w-4 mr-2" />
+                Run Now
               </Button>
               <Button
-                onClick={handleSave}
-                disabled={saving}
-                className="bg-gradient-to-r from-blue-500 to-purple-600"
+                variant="outline"
+                size="sm"
+                onClick={openGitHubActions}
+                className="justify-start"
               >
-                <Save className="h-4 w-4 mr-2" />
-                {saving ? "Saving..." : "Save Settings"}
+                <ExternalLink className="h-4 w-4 mr-2" />
+                View Runs
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={openGitHubSecrets}
+                className="justify-start"
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                API Keys
               </Button>
             </div>
           </div>
+
+          {/* Save Button */}
+          <div className="flex justify-end gap-2 pt-4">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+              disabled={saving}
+              className="bg-gradient-to-r from-blue-500 to-purple-600"
+            >
+              <Save className="h-4 w-4 mr-2" />
+              {saving ? "Saving..." : "Save Settings"}
+            </Button>
+          </div>
+        </div>
         )}
       </DialogContent>
     </Dialog>
   )
 }
+
