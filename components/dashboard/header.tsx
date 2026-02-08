@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Calendar, LayoutDashboard, LayoutGrid, Table as TableIcon, RefreshCw, Plus, Plane } from "lucide-react"
+import { Calendar, LayoutDashboard, LayoutGrid, Table as TableIcon, RefreshCw, Plus, Plane, Bot } from "lucide-react"
 import { useRouter, usePathname } from "next/navigation"
 import { AwayModeModal } from "@/components/away-mode-modal"
+import { BotSettingsModal } from "@/components/bot-settings-modal"
 
 interface DashboardHeaderProps {
   viewMode?: "card" | "table"
@@ -25,6 +26,7 @@ export function DashboardHeader({
   const pathname = usePathname()
   const isDashboard = pathname === "/dashboard"
   const [awayModeOpen, setAwayModeOpen] = useState(false)
+  const [botSettingsOpen, setBotSettingsOpen] = useState(false)
   const [awayDaysCount, setAwayDaysCount] = useState(0)
   const [insufficientPosts, setInsufficientPosts] = useState(false)
 
@@ -113,6 +115,16 @@ export function DashboardHeader({
                 </span>
               )}
             </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setBotSettingsOpen(true)}
+              className="border border-purple-500/50 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+              title="Configure bot settings"
+            >
+              <Bot className="h-4 w-4 sm:mr-2 text-purple-500" />
+              <span className="hidden sm:inline">Bot</span>
+            </Button>
           </nav>
 
           {/* Right: Dashboard controls (only on dashboard page) */}
@@ -165,6 +177,12 @@ export function DashboardHeader({
         open={awayModeOpen} 
         onOpenChange={setAwayModeOpen}
         onAwayDaysUpdated={fetchAwayModeStatus}
+      />
+
+      {/* Bot Settings Modal */}
+      <BotSettingsModal
+        open={botSettingsOpen}
+        onOpenChange={setBotSettingsOpen}
       />
     </header>
   )
