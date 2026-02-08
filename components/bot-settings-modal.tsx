@@ -22,6 +22,7 @@ interface BotSettings {
   scheduleTimes: string[]
   enabled: boolean
   useSerper: boolean
+  debugMode: boolean
   searchQueries: string[]
 }
 
@@ -32,6 +33,7 @@ export function BotSettingsModal({ open, onOpenChange }: BotSettingsModalProps) 
     scheduleTimes: ["09:00", "17:00"],
     enabled: true,
     useSerper: true,
+    debugMode: true,  // Fast testing mode - only 1 query
     searchQueries: [
       "ostomy care tips and advice",
       "living with ostomy daily life",
@@ -321,6 +323,31 @@ export function BotSettingsModal({ open, onOpenChange }: BotSettingsModalProps) 
                 {settings.enabled ? "Enabled - Bot will run on schedule" : "Disabled - Bot will not run automatically"}
               </Label>
             </div>
+          </div>
+
+          {/* Debug Mode Toggle */}
+          <div className="space-y-2">
+            <Label htmlFor="debugMode" className="flex items-center gap-2">
+              <Zap className="h-4 w-4" />
+              Testing Mode
+            </Label>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="debugMode"
+                checked={settings.debugMode}
+                onCheckedChange={(checked) => setSettings({ ...settings, debugMode: checked })}
+              />
+              <Label htmlFor="debugMode" className="font-normal">
+                {settings.debugMode 
+                  ? "⚡ Fast Testing - Only 1 query (~2-3 min)" 
+                  : "🐌 Full Run - All 20 queries (~18 min)"}
+              </Label>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {settings.debugMode
+                ? "Testing mode runs only the first search query. Perfect for quick tests with images fix!"
+                : "Production mode runs all 20 queries. Use this when you're ready for full content discovery."}
+            </p>
           </div>
 
           {/* Quick Links */}

@@ -11,6 +11,7 @@ export async function GET() {
     const settings = {
       maxPostsPerQuery: 5,
       maxTotalPosts: 5,
+      debugMode: true,  // Fast testing mode enabled
       scheduleTimes: ["09:00", "17:00"],
       enabled: true,
       useSerper: true,
@@ -51,7 +52,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { maxPostsPerQuery, maxTotalPosts, scheduleTimes, enabled, useSerper, searchQueries } = body
+    const { maxPostsPerQuery, maxTotalPosts, debugMode, scheduleTimes, enabled, useSerper, searchQueries } = body
 
     // Validate inputs
     if (maxPostsPerQuery < 1 || maxPostsPerQuery > 20) {
@@ -97,6 +98,7 @@ export async function POST(request: NextRequest) {
     console.log("Bot settings updated:", {
       maxPostsPerQuery,
       maxTotalPosts,
+      debugMode,
       scheduleTimes,
       enabled,
       useSerper,
