@@ -216,6 +216,11 @@ export function AIEditorSheet({
         explanation: data.explanation || "Caption edited successfully"
       }]);
       setSelectedPreviewIndex(0); // Auto-select the preview
+      
+      // Auto-apply the edited caption
+      setEditedCaption(data.editedCaption);
+      onCaptionUpdate(data.editedCaption);
+      console.log('✅ Auto-applied custom edit caption');
 
       toast({
         title: "Preview Ready",
@@ -277,6 +282,14 @@ export function AIEditorSheet({
 
         setPreviews(previewVariations);
         setSelectedPreviewIndex(0); // Auto-select first preview
+        
+        // Auto-apply the first preview's caption
+        if (previewVariations.length > 0) {
+          setEditedCaption(previewVariations[0].caption);
+          onCaptionUpdate(previewVariations[0].caption);
+          console.log('✅ Auto-selected first preview variation');
+        }
+        
         toast({
           title: "Success",
           description: `Generated ${previewVariations.length} caption variation${previewVariations.length > 1 ? 's' : ''}`,
