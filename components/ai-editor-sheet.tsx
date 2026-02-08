@@ -28,7 +28,7 @@ interface AIEditorSheetProps {
   onHashtagsUpdate: (hashtags: string) => void;
   onPlatformToggle: (platform: 'instagram' | 'facebook', enabled: boolean) => void;
   onSchedule: () => void;
-  onSave: () => void;
+  onSave: (caption?: string) => void;
   postId?: number;
   latePostId?: string | null;
   isScheduled?: boolean;
@@ -302,14 +302,15 @@ export function AIEditorSheet({
   };
 
   const handleSaveToDatabase = async () => {
-    console.log('🔍 handleSaveToDatabase called', { postId, hasOnSave: !!onSave });
+    console.log('🔍 handleSaveToDatabase called', { postId, hasOnSave: !!onSave, editedCaption: editedCaption?.substring(0, 50) });
     
     if (!postId) {
-      console.log('⚠️ No postId provided - calling onSave callback');
+      console.log('⚠️ No postId provided - calling onSave callback with caption');
       setIsSaving(true);
       try {
         if (onSave) {
-          await onSave();
+          // Pass the current edited caption to the parent
+          await onSave(editedCaption);
         }
       } catch (error) {
         console.error('❌ Error in onSave:', error);

@@ -657,11 +657,15 @@ export function CreatePostModal({
     fetchPost();
   }, [open, postId]);
 
-  const handleSaveDraft = async () => {
+  const handleSaveDraft = async (captionOverride?: string) => {
     setIsSavingDraft(true);
     
     // Defer heavy processing to allow UI to update first
     await new Promise(resolve => setTimeout(resolve, 0));
+    
+    // Use caption override if provided (from AI editor), otherwise use state
+    const finalCaption = captionOverride ?? caption;
+    console.log('💾 handleSaveDraft - using caption:', finalCaption.substring(0, 50) + '...');
     
     try {
       // Apply text overlay to image if needed (same as handlePost)
@@ -739,10 +743,10 @@ export function CreatePostModal({
 
       if (postId) {
         // Update existing post in database (preserve draft status - don't force to draft)
-        console.log("💾 Updating existing post:", postId);
+        console.log("💾 Updating existing post:", postId, "with caption:", finalCaption.substring(0, 50));
 
         const updates: any = {
-          ai_caption: caption,
+          ai_caption: finalCaption,
           ai_hashtags: hashtagsArray,
           main_image_url: mediaUrl,
           additional_images: additionalImages,
@@ -774,14 +778,14 @@ export function CreatePostModal({
         });
       } else {
         // Create new draft in database
-        console.log("💾 Creating new draft in database...");
+        console.log("💾 Creating new draft in database with caption:", finalCaption.substring(0, 50));
 
         const createResponse = await fetch("/api/posts", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             imageVideo: mediaUrl,
-            caption: caption,
+            caption: finalCaption,
             hashtags: hashtags,
             schedulePost: false,
             scheduledDate: null,
@@ -1935,7 +1939,7 @@ export function CreatePostModal({
                 {/* For editing existing posts (database posts or localStorage drafts), show only Save button */}
                 {postId || currentDraftId ? (
                   <Button
-                    onClick={handleSaveDraft}
+                    onClick={() => handleSaveDraft()}
                     disabled={isSavingDraft || (!caption.trim() && !imageVideo)}
                     className="rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:opacity-50"
                   >
@@ -1956,7 +1960,7 @@ export function CreatePostModal({
                   <>
                     <Button
                       variant="outline"
-                      onClick={handleSaveDraft}
+                      onClick={() => handleSaveDraft()}
                       disabled={isSavingDraft || (!caption.trim() && !imageVideo)}
                       className="rounded-xl border-orange-300 text-orange-700 hover:bg-orange-50"
                     >
@@ -2194,15 +2198,16 @@ export function CreatePostModal({
           if (platform === 'facebook') setPostOnFacebook(enabled);
         }}
         onSchedule={() => setSchedulePost(true)}
-        onSave={async () => {
+        onSave={async (aiCaption) => {
           try {
             const currentPostId = postIdRef.current;
-            console.log('🔍 onSave called - postIdRef.current:', currentPostId, 'type:', typeof currentPostId);
+            console.log('🔍 onSave called - postIdRef.current:', currentPostId, 'aiCaption:', aiCaption?.substring(0, 50));
             // If editing an existing post, trigger save
             if (currentPostId) {
-              console.log('💾 AI Editor Save clicked - editing post, calling handleSaveDraft');
+              console.log('💾 AI Editor Save clicked - editing post, calling handleSaveDraft with AI caption');
               setAiEditorOpen(false);
-              await handleSaveDraft();
+              // Pass the AI caption directly to avoid async setState issues
+              await handleSaveDraft(aiCaption);
             } else {
               // Just close the AI editor - user will click Save Draft or Post button
               console.log('✅ AI Editor closed (create) - caption is now:', caption.substring(0, 100) + '...');
