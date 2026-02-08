@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { toast } from "@/hooks/use-toast"
-import { Bot, Clock, Hash, Zap, Save, ExternalLink, AlertCircle, Play } from "lucide-react"
+import { Bot, Clock, Hash, Zap, Save, ExternalLink, AlertCircle, Play, Search, Plus, X } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Textarea } from "@/components/ui/textarea"
 
 interface BotSettingsModalProps {
   open: boolean
@@ -20,6 +21,7 @@ interface BotSettings {
   scheduleTimes: string[]
   enabled: boolean
   useSerper: boolean
+  searchQueries: string[]
 }
 
 export function BotSettingsModal({ open, onOpenChange }: BotSettingsModalProps) {
@@ -28,6 +30,28 @@ export function BotSettingsModal({ open, onOpenChange }: BotSettingsModalProps) 
     scheduleTimes: ["09:00", "17:00"],
     enabled: true,
     useSerper: true,
+    searchQueries: [
+      "ostomy care tips and advice",
+      "living with ostomy daily life",
+      "ostomy patient success stories",
+      "colostomy lifestyle and wellness",
+      "ileostomy diet and nutrition tips",
+      "urostomy care guide",
+      "ostomy bag management tips",
+      "ostomy surgery recovery journey",
+      "ostomy awareness and support",
+      "life after ostomy surgery experiences",
+      "ostomy clothing and fashion tips",
+      "ostomy travel tips and advice",
+      "ostomy exercise and fitness",
+      "ostomy skin care and protection",
+      "ostomy emotional support and mental health",
+      "ostomy relationships and intimacy",
+      "ostomy children and pediatric care",
+      "ostomy reversal surgery information",
+      "ostomy supplies and products review",
+      "ostomy community stories and inspiration"
+    ]
   })
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -182,6 +206,57 @@ export function BotSettingsModal({ open, onOpenChange }: BotSettingsModalProps) 
                 <span className="text-xs">
                   (9:00 = 4 AM EST / 1 AM PST, 17:00 = 12 PM EST / 9 AM PST)
                 </span>
+              </p>
+            </div>
+
+            {/* Search Queries */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2 justify-between">
+                <span className="flex items-center gap-2">
+                  <Search className="h-4 w-4" />
+                  Search Queries ({settings.searchQueries.length})
+                </span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSettings({ ...settings, searchQueries: [...settings.searchQueries, ""] })}
+                  className="h-7"
+                >
+                  <Plus className="h-3 w-3 mr-1" />
+                  Add Query
+                </Button>
+              </Label>
+              <div className="max-h-60 overflow-y-auto space-y-2 border rounded-lg p-3 bg-muted/30">
+                {settings.searchQueries.map((query, index) => (
+                  <div key={index} className="flex gap-2">
+                    <Input
+                      value={query}
+                      onChange={(e) => {
+                        const newQueries = [...settings.searchQueries]
+                        newQueries[index] = e.target.value
+                        setSettings({ ...settings, searchQueries: newQueries })
+                      }}
+                      placeholder={`Search query ${index + 1}`}
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        const newQueries = settings.searchQueries.filter((_, i) => i !== index)
+                        setSettings({ ...settings, searchQueries: newQueries })
+                      }}
+                      className="shrink-0 h-10 w-10"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              <p className="text-sm text-muted-foreground">
+                The bot will search Google for each of these queries to find content
               </p>
             </div>
 
