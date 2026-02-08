@@ -772,6 +772,12 @@ export function CreatePostModal({
         }
 
         console.log("✅ Draft updated in database");
+        
+        // Update local state with the new caption so it shows correctly on reopen
+        if (captionOverride) {
+          setCaption(captionOverride);
+        }
+        
         toast({
           title: "Success",
           description: "Post updated successfully! 💾"
